@@ -1,0 +1,9 @@
+# Stimmmodelle werden nicht eingecheckt / voice models are not committed
+voices/*.onnx
+voices/*.onnx.json
+voices/*.MODEL_CARD.txt
+voices/*.part
+# Test-Artefakte / test artefacts
+tests/out/
+__pycache__/
+*.pyc

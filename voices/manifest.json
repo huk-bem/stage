@@ -1,0 +1,37 @@
+{
+  "_comment": "Stimmen-Auswahl mit geprüftem Lizenzstatus (Stand der Modellkarten, siehe docs/VOICES.md). Keine Rechtsberatung. / Voice shortlist with licence status taken from the model cards (see docs/VOICES.md). Not legal advice.",
+  "source": "https://huggingface.co/rhasspy/piper-voices",
+  "voices": [
+    {
+      "id": "de_DE-thorsten-medium",
+      "lang": "de",
+      "path": "de/de_DE/thorsten/medium",
+      "dataset_license": "CC0",
+      "training": "fine-tuned from rdh (nl_BE, CC0)",
+      "attribution_required": false,
+      "note": "Empfohlen für Deutsch / recommended for German. Modellkarte: 'Finetuned from the rdh base model (… CC0)'."
+    },
+    {
+      "id": "en_US-ljspeech-high",
+      "lang": "en",
+      "path": "en/en_US/ljspeech/high",
+      "dataset_license": "public domain",
+      "training": "trained from scratch (LJ Speech)",
+      "attribution_required": false,
+      "note": "Empfohlen für Englisch (eine weibliche Stimme) / recommended for English (one female voice)."
+    },
+    {
+      "id": "en_US-libritts-high",
+      "lang": "en",
+      "path": "en/en_US/libritts/high",
+      "dataset_license": "CC BY 4.0",
+      "training": "trained from scratch (train-clean-360)",
+      "attribution_required": true,
+      "note": "Viele Sprecher (auch männlich), Sprecher-Nr. im Feld 'Stimmenname'; Namensnennung nötig / many speakers incl. male, speaker number goes into the 'voice name' field; attribution required."
+    }
+  ],
+  "avoid_for_commercial_use_until_checked": [
+    {"id": "de_DE-thorsten-high", "reason": "Modellkarte: 'Finetuned from U.S. English lessac voice' – Lessac-Lizenz (Blizzard 2013) gilt dann mit / fine-tuned from Lessac, so the Lessac (Blizzard 2013) licence terms may apply"},
+    {"id": "en_US-lessac-*", "reason": "Daten unter der Blizzard-2013-Lizenz (eigene Bedingungen) / data under the Blizzard 2013 licence (custom terms)"}
+  ]
+}
