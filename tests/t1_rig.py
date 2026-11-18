@@ -48,7 +48,7 @@ with App(path) as a:
         if r['p']=='walk': ok=active(r['legM']) and active(r['legO']) and active(r['armM'])
         elif r['p'] in('point',): ok=active(r['armM'])
         elif r['p'] in('wave','cheer','explain'): ok=active(r['armM'])
-        else: ok=not active(r['legM']) and not active(r['armM'])
+        else: ok=not active(r['legM']) and r['armM']['an'] in ('none','armIdleA')   # Ruhe: nur dezentes Mitschwingen der Arme
         if not ok: fails.append('pose '+str(r)); print('FAIL pose',r['f'],r['p'],r['armM'],r['legM'])
     print('PASS Posen-Matrix 4 Ansichten x 6 Posen' if not [f for f in fails if f.startswith('pose')] else 'FAIL Posen-Matrix')
     # 4. Stimmungen wirken auf Kopf
