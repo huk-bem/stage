@@ -14,7 +14,7 @@ with App(path,lang='de') as a:
     fm=a.ev("Exporter.formats().map(f=>f[0])")
     check('mp4' in fm and any(x.startswith('webm') for x in fm),f'Formate: MP4 und WebM verfügbar {fm}')
     opts=a.ev("[...document.querySelectorAll('.dyn-dlg select')].map(s=>[...s.options].map(o=>o.value))")
-    check(len(opts)==5 and 'hi' in opts[4] and 'tiny' in opts[4] and '1920x1080' in opts[2],'Auswahl: Umfang, Format, Auflösung, Bildrate, Qualität')
+    check(len(opts)==6 and 'hi' in opts[4] and 'tiny' in opts[4] and '1920x1080' in opts[2] and 'sel' in opts[0] and 'audio' in opts[5],'Auswahl: Umfang (inkl. Auswahl), Format, Auflösung, Bildrate, Qualität, Zusatzformat')
     t0=a.ev("document.querySelector('.exp-info').textContent")
     pg.select_option('.dyn-dlg select >> nth=4','tiny'); t1=a.ev("document.querySelector('.exp-info').textContent")
     import re
@@ -41,7 +41,7 @@ if os.environ.get('DISPLAY'):
         a.ev("(()=>{ const s=scenesTimeline[0]; s.duration=3; s.characters[1].script=''; s.characters[0].script='Hallo Welt.'; s.characters[0].speechStart=0.3; s.characters[0].clips=[]; renderSpeakerTracks(); renderObjectTimeline(); })()")
         pg.click('#exportBtn')
         pg.select_option('.dyn-dlg select >> nth=1','mp4'); pg.select_option('.dyn-dlg select >> nth=2','960x540'); pg.select_option('.dyn-dlg select >> nth=3','24'); pg.select_option('.dyn-dlg select >> nth=4','low')
-        pg.uncheck('.exp-tabaudio')
+        pg.uncheck('.exp-tabaudio'); pg.select_option('.dyn-dlg select >> nth=5',[x for x in fm if x.startswith('webm')][0])
         pg.click('.exp-go')
         pg.wait_for_selector('.exp-save',timeout=120000)
         st=a.ev("document.querySelector('.exp-status').textContent"); print('STATUS',st)
@@ -60,6 +60,13 @@ if os.environ.get('DISPLAY'):
             fr=os.path.join(OUT:=os.path.join(os.path.dirname(os.path.abspath(__file__)),'out'),'export_frame.png'); subprocess.run(['ffmpeg','-y','-v','error','-ss','1.5','-i',vf,'-frames:v','1',fr])
             check(os.path.exists(fr),'Frame aus dem Video extrahiert (out/export_frame.png)')
         else: print('ffprobe nicht vorhanden – Containerprüfung übersprungen')
+        check(pg.locator('.exp-save-extra').count()==1,'Zusatzformat (WebM) im selben Durchlauf erzeugt')
+        with pg.expect_download() as dl: pg.click('.exp-save-extra')
+        wf=os.path.join(tempfile.mkdtemp(),'v.webm'); dl.value.save_as(wf)
+        check(os.path.getsize(wf)>3000,f'WebM gespeichert ({os.path.getsize(wf)/1024:.0f} KB)')
+        if shutil.which('ffprobe'):
+            pr=json.loads(subprocess.run(['ffprobe','-v','error','-show_streams','-of','json',wf],capture_output=True,text=True).stdout or '{}')
+            check(any(x['codec_type']=='video' and x['codec_name'] in ('vp8','vp9') for x in pr.get('streams',[])),'ffprobe: Zusatzdatei ist WebM mit VP8/VP9')
         check(a.ev("Exporter.last.cues.length")>=1 and a.ev("Exporter.last.cues[0].text")=='Hallo Welt.','echte Untertitel-Zeiten mitgeschrieben')
         check(not a.ev("document.body.classList.contains('exporting')"),'Oberfläche nach Export wiederhergestellt')
         # Abbruch mit Esc

@@ -454,6 +454,11 @@ body.exporting .obj-toolbar,body.exporting .obj-handle{display:none !important;}
 .fs-del:hover:not(:disabled){border-color:var(--accent-pink);color:var(--accent-pink);}
 .fs-btn:disabled{opacity:.35;cursor:not-allowed;}
 .filmstrip-card{height:auto;}
+.fs-sel,.fs-play{position:absolute;top:3px;z-index:2;background:rgba(16,18,24,.72);border:1px solid rgba(255,255,255,.25);border-radius:6px;color:#fff;cursor:pointer;line-height:1;}
+.fs-sel{left:3px;padding:2px 3px;display:flex;align-items:center;} .fs-sel input{margin:0;width:13px;height:13px;cursor:pointer;accent-color:var(--accent-violet);}
+.fs-play{right:3px;font-size:10px;padding:3px 5px;} .fs-play:hover{background:var(--accent-violet);}
+.filmstrip-card.sel{box-shadow:0 0 0 1.5px var(--accent-teal) inset;}
+#playSelBtn:disabled{opacity:.4;cursor:default;}
 #undoBtn:disabled,#redoBtn:disabled{opacity:.35;cursor:default;}
 .filmstrip-del{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:11px;padding:0;flex-shrink:0;}
 .filmstrip-del:hover{color:var(--accent-pink);}
@@ -653,6 +658,7 @@ select.speaker-lang,select.speaker-look{background:var(--panel);border:1px solid
         <div class="master-col">
           <div class="master-controls">
             <button class="ctrl-btn ctrl-btn-sm primary" id="playAllBtn" data-en="▶ Play all">▶ Alles abspielen</button>
+            <button class="ctrl-btn ctrl-btn-sm" id="playSelBtn" data-en="▶ Selection" title="Spielt nur die angehakten Szenen (Häkchen oben links an der Szene im Filmstreifen)" data-en-title="Plays only the ticked scenes (checkbox at the top left of the scene in the film strip)" disabled>▶ Auswahl</button>
             <button class="ctrl-btn ctrl-btn-sm" id="pauseBtn" data-en="⏸ Pause" title="Pause / ab dieser Stelle weiter. Tipp: Ins Lineal klicken = ab dort abspielen" data-en-title="Pause / continue from here. Tip: click the ruler = play from there">⏸ Pause</button>
             <button class="ctrl-btn ctrl-btn-sm" id="stopAllBtn" data-en="■ Stop">■ Stopp</button>
             <span class="mini-time" id="masterTimeCode">00:00.0 / 00:00.0</span>
@@ -736,7 +742,7 @@ const EN_DICT={
   'Versicherungsbüro':'Insurance office','Arztpraxis':'Doctor\u2019s office','Einzelhandelsgeschäft':'Retail store','Autowerkstatt':'Car workshop','Messehalle':'Exhibition hall','Messe-Freigelände':'Fairgrounds',
   'Stuhl':'Chair','Tisch':'Table','Tafel':'Blackboard','Schreibtisch':'Desk','Computer':'Computer','Pflanze':'Plant','Tür':'Door','Fenster':'Window','Uhr':'Clock','Lampe':'Lamp',
   'Schalter/Tresen':'Counter','Tresor':'Safe','Aktenschrank':'Filing cabinet','Behandlungsliege':'Exam table','Klemmbrett':'Clipboard','Regal':'Shelf','Kasse':'Cash register','Einkaufswagen':'Shopping cart',
-  'Alle':'All','Allgemein':'General','Versicherung':'Insurance','Einzelhandel':'Retail',
+  'Alle':'All','Allgemein':'General','Bildschirm':'Screen','Bildschirm: Werbekonto':'Screen: ad account','Bildschirm: Ziel & Zielgruppe':'Screen: goal & audience','Bildschirm: Budget & Laufzeit':'Screen: budget & duration','Bildschirm: Prüfen & buchen':'Screen: review & book','Bildschirm: Veranstaltungen':'Screen: events','Bildschirm: Sitzplan':'Screen: seat map','Bildschirm: Kasse':'Screen: checkout','Bildschirm: E-Ticket':'Screen: e-ticket','Mauszeiger':'Mouse pointer','Klick-Markierung':'Click marker','Versicherung':'Insurance','Einzelhandel':'Retail',
   'Beraterin':'Advisor','Bankberater':'Bank advisor','Ärztin':'Doctor','Kunde':'Customer','Rentner':'Retiree','Studentin':'Student','Mechaniker':'Mechanic','Verkäuferin':'Sales assistant','Verkäufer':'Sales assistant',
   'Azubi':'Apprentice','Messehost':'Trade fair host','Empfang':'Reception','Seniorin':'Senior','Designerin':'Designer','Handwerker':'Tradesman','Bankangestellte':'Bank clerk',
   'Herr Klein':'Mr. Klein','Bild':'Image','Objekt':'Object','Hintergrund':'Background','Musik':'Music'
@@ -1485,6 +1491,58 @@ const iconLibrary = [
   {id:'cart', name:'Einkaufswagen', category:'einzelhandel', svg:`<svg viewBox="0 0 100 100"><path d="M14 20 H24 L34 62 H78 L86 30 H30" fill="none" stroke="#4A5568" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="42" cy="78" r="7" fill="#2C2E38"/><circle cx="72" cy="78" r="7" fill="#2C2E38"/><line x1="40" y1="34" x2="46" y2="58" stroke="#4A5568" stroke-width="4"/><line x1="58" y1="34" x2="60" y2="58" stroke="#4A5568" stroke-width="4"/><line x1="76" y1="34" x2="74" y2="58" stroke="#4A5568" stroke-width="4"/></svg>`},
 ];
 
+/* ---- Bildschirm-Mockups für Software-Erklärungen (Texte folgen der Oberfläche; frei erfunden, ohne Marken) ---- */
+(function(){
+  const INK='#2A2F45', MUTE='#8A92AD', ACC='#5B6CFF', OK='#2DBE84', LINE='#DDE1EE', SOFT='#EEF0FF';
+  const tx=(x,y,s,t,o)=>{ o=o||{}; return `<text x="${x}" y="${y}" font-size="${s}" fill="${o.f||INK}" font-weight="${o.w||400}"${o.a?` text-anchor="${o.a}"`:''}>${t}</text>`; };
+  const win=(url,inner)=>`<svg viewBox="0 0 160 100" font-family="Inter,Arial,Helvetica,sans-serif"><rect x="1" y="1" width="158" height="98" rx="6" fill="#fff" stroke="#B8BFD6" stroke-width="1.5"/><path d="M1 7a6 6 0 0 1 6-6h146a6 6 0 0 1 6 6v9H1z" fill="#E8EBF5"/><circle cx="9" cy="9" r="2" fill="#FF6B6B"/><circle cx="16" cy="9" r="2" fill="#FFC145"/><circle cx="23" cy="9" r="2" fill="#4CD6A0"/><rect x="32" y="4.5" width="92" height="9" rx="4.5" fill="#fff"/>${tx(38,11,4.6,url,{f:MUTE})}${inner}</svg>`;
+  const btn=(x,y,w,h,t,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${h/2}" fill="${c||ACC}"/>${tx(x+w/2,y+h/2+1.8,5,t,{f:'#fff',w:700,a:'middle'})}`;
+  const step=(n)=>{ let o=''; for(let i=1;i<=3;i++){ const x=8+(i-1)*11; o+=`<circle cx="${x+3}" cy="25" r="3" fill="${i<=n?ACC:LINE}"/>`; } return o; };
+  const L=(de,en)=>$t(de,en);
+  const D=[
+   ['ui-ad-dash','Bildschirm: Werbekonto',()=>win('werbestart.example/konto',
+     `<rect x="1" y="17" width="28" height="82" fill="${INK}"/><rect x="6" y="24" width="18" height="3" rx="1.5" fill="#fff" opacity=".9"/><rect x="6" y="32" width="14" height="3" rx="1.5" fill="#fff" opacity=".45"/><rect x="6" y="40" width="16" height="3" rx="1.5" fill="#fff" opacity=".45"/><rect x="6" y="48" width="12" height="3" rx="1.5" fill="#fff" opacity=".45"/>`+
+     tx(36,27,6.5,L('Übersicht','Overview'),{w:700})+btn(100,20,54,10,L('+ Neue Kampagne','+ New campaign'))+
+     [[36,'12.480',L('Aufrufe','Views')],[76,'384',L('Klicks','Clicks')],[116,'2,9 %',L('Klickrate','Click rate')]].map(([x,v,l])=>`<rect x="${x}" y="35" width="36" height="22" rx="3" fill="${SOFT}"/>${tx(x+4,46,8,v,{w:700,f:ACC})}${tx(x+4,53,4.4,l,{f:MUTE})}`).join('')+
+     [0,1,2,3,4,5,6,7,8,9].map(i=>{ const h=[10,16,12,22,18,26,20,30,24,34][i]; return `<rect x="${38+i*11}" y="${94-h}" width="7" height="${h}" rx="1.5" fill="${i>6?ACC:'#B9C0FF'}"/>`; }).join(''))],
+   ['ui-ad-goal','Bildschirm: Ziel & Zielgruppe',()=>win('werbestart.example/neu/ziel',
+     step(1)+tx(40,27.5,5.4,L('Ziel & Zielgruppe','Goal & audience'),{w:700})+
+     [[8,L('Mehr Besucher','More visitors'),1],[58,L('Mehr Anfragen','More inquiries'),0],[108,L('Mehr Verkäufe','More sales'),0]].map(([x,t,s])=>`<rect x="${x}" y="31" width="46" height="26" rx="4" fill="${s?SOFT:'#fff'}" stroke="${s?ACC:LINE}" stroke-width="${s?1.6:1}"/><circle cx="${x+23}" cy="40" r="5" fill="${s?ACC:LINE}"/>${s?`<path d="M${x+20.5} 40l2 2 3.5-4" fill="none" stroke="#fff" stroke-width="1.4"/>`:''}${tx(x+23,52,4.4,t,{a:'middle',w:s?700:400})}`).join('')+
+     tx(8,67,4.8,L('Alter','Age'),{w:700,f:MUTE})+`<rect x="30" y="64.5" width="100" height="3" rx="1.5" fill="${LINE}"/><rect x="50" y="64.5" width="58" height="3" rx="1.5" fill="${ACC}"/><circle cx="50" cy="66" r="3.4" fill="#fff" stroke="${ACC}" stroke-width="1.4"/><circle cx="108" cy="66" r="3.4" fill="#fff" stroke="${ACC}" stroke-width="1.4"/>`+tx(136,67.5,4.6,'25–54',{w:700})+
+     tx(8,80,4.8,L('Region','Region'),{w:700,f:MUTE})+[[30,L('Hannover','Hanover')],[62,L('Umkreis 50 km','50 km radius')],[104,L('Mode & Style','Fashion')]].map(([x,t],i)=>`<rect x="${x}" y="75" width="${i==1?38:i==2?32:28}" height="8" rx="4" fill="${i==2?'#fff':SOFT}" stroke="${i==2?LINE:ACC}" stroke-width=".8"/>${tx(x+(i==1?19:i==2?16:14),80.6,4,t,{a:'middle'})}`).join('')+btn(120,88,34,8,L('Weiter','Next')))],
+   ['ui-ad-budget','Bildschirm: Budget & Laufzeit',()=>win('werbestart.example/neu/budget',
+     step(2)+tx(40,27.5,5.4,L('Budget & Laufzeit','Budget & duration'),{w:700})+
+     tx(8,40,4.8,L('Tagesbudget','Daily budget'),{w:700,f:MUTE})+tx(8,53,12,L('25 € / Tag','€25 / day'),{w:700,f:ACC})+`<rect x="8" y="60" width="92" height="3.4" rx="1.7" fill="${LINE}"/><rect x="8" y="60" width="56" height="3.4" rx="1.7" fill="${ACC}"/><circle cx="64" cy="61.7" r="4.4" fill="#fff" stroke="${ACC}" stroke-width="1.8"/>`+
+     `<rect x="108" y="31" width="46" height="40" rx="4" fill="#fff" stroke="${LINE}"/>`+tx(131,38,4.6,L('Juni','June'),{w:700,a:'middle'})+Array.from({length:21},(_,i)=>{ const c=i%7,r=Math.floor(i/7); const inR=i>=5&&i<=18; return `<rect x="${111+c*6}" y="${42+r*8}" width="5.2" height="6.4" rx="1.4" fill="${inR?ACC:'#F1F3FA'}"/>`; }).join('')+
+     `<rect x="8" y="76" width="146" height="18" rx="4" fill="${SOFT}"/>`+tx(14,84,4.6,L('Geschätzte Reichweite','Estimated reach'),{f:MUTE})+tx(14,91,6.6,L('ca. 12.000 Aufrufe','about 12,000 views'),{w:700,f:ACC})+`<rect x="100" y="84" width="48" height="4" rx="2" fill="#D3D8FF"/><rect x="100" y="84" width="34" height="4" rx="2" fill="${ACC}"/>`)],
+   ['ui-ad-checkout','Bildschirm: Prüfen & buchen',()=>win('werbestart.example/neu/pruefen',
+     step(3)+tx(40,27.5,5.4,L('Prüfen & buchen','Review & book'),{w:700})+
+     `<rect x="8" y="31" width="92" height="62" rx="4" fill="#FAFBFE" stroke="${LINE}"/>`+[[L('Ziel','Goal'),L('Mehr Besucher','More visitors')],[L('Zielgruppe','Audience'),L('25–54 · Hannover','25–54 · Hanover')],[L('Laufzeit','Duration'),L('14 Tage','14 days')],[L('Budget','Budget'),L('25 € / Tag','€25 / day')]].map(([k,v],i)=>tx(13,41+i*9,4.6,k,{f:MUTE})+tx(46,41+i*9,4.8,v,{w:700})).join('')+`<line x1="13" y1="78" x2="95" y2="78" stroke="${LINE}"/>`+tx(13,87,5.4,L('Gesamt','Total'),{w:700})+tx(95,87,8,'350 €',{w:700,f:ACC,a:'end'})+
+     `<circle cx="130" cy="42" r="11" fill="#E3F8EE"/><circle cx="130" cy="42" r="7.5" fill="${OK}"/><path d="M126 42.2l3 3 5.4-6" fill="none" stroke="#fff" stroke-width="2"/>`+tx(130,62,4.4,L('Bereit zum Start','Ready to launch'),{a:'middle',f:MUTE})+btn(106,68,48,13,L('Jetzt buchen','Book now'),OK)+tx(130,90,3.8,L('Start nach kurzer Prüfung','Starts after a quick review'),{a:'middle',f:MUTE}))],
+   ['ui-events','Bildschirm: Veranstaltungen',()=>win('ticketbox.example/events',
+     tx(8,27,6.5,L('Veranstaltungen','Events'),{w:700})+`<rect x="84" y="20.5" width="68" height="8" rx="4" fill="#F1F3FA"/>`+tx(90,26,4.2,L('Suchen …','Search …'),{f:MUTE})+
+     [[L('Sommerkonzert','Summer concert'),L('Stadtpark','City park'),'14','JUN'],[L('Comedy-Abend','Comedy night'),L('Theaterhaus','Theatre'),'21','JUN'],[L('Open-Air-Kino','Open-air cinema'),L('Messegelände','Fairground'),'28','JUN']].map(([t,v,d,m],i)=>{ const y=33+i*21; return `<rect x="8" y="${y}" width="144" height="18" rx="4" fill="${i==0?SOFT:'#fff'}" stroke="${i==0?ACC:LINE}"/><rect x="12" y="${y+3}" width="12" height="12" rx="3" fill="${ACC}"/>${tx(18,y+9,5.4,d,{f:'#fff',w:700,a:'middle'})}${tx(18,y+13.4,3.2,m,{f:'#fff',a:'middle'})}${tx(29,y+8,5.2,t,{w:700})}${tx(29,y+14,4.2,v,{f:MUTE})}${btn(114,y+4.5,34,9,'Tickets',i==0?ACC:'#9AA3D9')}`; }).join(''))],
+   ['ui-seatmap','Bildschirm: Sitzplan',()=>win('ticketbox.example/sitzplan',
+     tx(8,26,5.6,L('Sitzplan · Sommerkonzert','Seat map · Summer concert'),{w:700})+`<rect x="16" y="31" width="80" height="5" rx="2.5" fill="${INK}"/>`+tx(56,35,3.4,L('BÜHNE','STAGE'),{f:'#fff',a:'middle'})+
+     Array.from({length:50},(_,i)=>{ const c=i%10,r=Math.floor(i/10); const taken=((c*7+r*13)%9)<3 && !(r===3&&(c===5||c===6)); const sel=(r===3&&(c===5||c===6)); return `<circle cx="${20+c*8}" cy="${44+r*9}" r="3.1" fill="${sel?ACC:taken?'#C9CEDD':'#BFEBD8'}" stroke="${sel?'#3A49D8':'none'}" stroke-width="1"/>`; }).join('')+
+     `<rect x="104" y="31" width="48" height="50" rx="4" fill="${SOFT}"/>`+tx(108,40,4.6,L('Deine Auswahl','Your choice'),{f:MUTE})+tx(108,49,5.4,L('2 Plätze','2 seats'),{w:700})+tx(108,56,4.4,L('Reihe 4 · 12–13','Row 4 · 12–13')) +tx(108,70,7,'98 €',{w:700,f:ACC})+btn(108,73,40,7,L('Weiter','Next'))+
+     `<circle cx="20" cy="92" r="2.4" fill="#BFEBD8"/>${tx(25,93.4,3.8,L('frei','free'),{f:MUTE})}<circle cx="44" cy="92" r="2.4" fill="#C9CEDD"/>${tx(49,93.4,3.8,L('vergeben','taken'),{f:MUTE})}<circle cx="76" cy="92" r="2.4" fill="${ACC}"/>${tx(81,93.4,3.8,L('deine Plätze','yours'),{f:MUTE})}`)],
+   ['ui-payment','Bildschirm: Kasse',()=>win('ticketbox.example/kasse',
+     tx(8,26,5.6,L('Daten & Bezahlung','Details & payment'),{w:700})+
+     [[L('Name','Name'),'Maria Beispiel'],[L('E-Mail','Email'),'maria@beispiel.example']].map(([k,v],i)=>`<rect x="8" y="${31+i*13}" width="88" height="10" rx="3" fill="#fff" stroke="${LINE}"/>${tx(11,37.4+i*13,4,k+':',{f:MUTE})}${tx(27,37.4+i*13,4.2,v)}`).join('')+
+     tx(8,66,4.6,L('Zahlungsart','Payment method'),{w:700,f:MUTE})+[[L('Karte','Card'),1],['PayPal',0],[L('Rechnung','Invoice'),0]].map(([t,s],i)=>`<circle cx="12" cy="${72+i*8}" r="2.6" fill="#fff" stroke="${s?ACC:MUTE}" stroke-width="1"/>${s?`<circle cx="12" cy="${72+i*8}" r="1.4" fill="${ACC}"/>`:''}${tx(18,73.5+i*8,4.6,t,{w:s?700:400})}`).join('')+
+     `<rect x="104" y="31" width="48" height="62" rx="4" fill="${SOFT}"/>`+tx(108,41,4.4,L('2 × Ticket','2 × ticket'),{f:MUTE})+tx(148,41,4.4,'96 €',{a:'end'})+tx(108,49,4.4,L('Gebühr','Fee'),{f:MUTE})+tx(148,49,4.4,'2 €',{a:'end'})+`<line x1="108" y1="54" x2="148" y2="54" stroke="#C7CDF5"/>`+tx(108,64,5,L('Gesamt','Total'),{w:700})+tx(148,64,8,'98 €',{w:700,f:ACC,a:'end'})+btn(108,76,40,11,L('Bezahlen','Pay'),OK))],
+   ['ui-eticket','Bildschirm: E-Ticket',()=>{ let q=''; let s=7; for(let r=0;r<9;r++)for(let c=0;c<9;c++){ s=(s*73+19)%101; const fin=(r<3&&c<3)||(r<3&&c>5)||(r>5&&c<3); if(fin||s%2) q+=`<rect x="${112+c*4}" y="${34+r*4}" width="3.4" height="3.4" fill="${INK}"/>`; }
+     return win('ticketbox.example/mein-ticket',`<rect x="8" y="24" width="144" height="68" rx="5" fill="#fff" stroke="${LINE}" stroke-width="1.4"/><path d="M8 29a5 5 0 0 1 5-5h28v68H13a5 5 0 0 1-5-5z" fill="${ACC}"/>`+tx(24.5,52,4,'E-TICKET',{f:'#fff',w:700,a:'middle'})+`<circle cx="24.5" cy="64" r="8" fill="#fff" opacity=".22"/><path d="M20.5 64l3 3 5.5-6" fill="none" stroke="#fff" stroke-width="2"/>`+
+     tx(48,38,5.8,L('SOMMERKONZERT','SUMMER CONCERT'),{w:700})+tx(48,48,5,L('Sa, 14. Juni · 20:00 Uhr','Sat, 14 June · 8:00 pm'))+tx(48,56,4.6,L('Stadtpark Hannover','City park, Hanover'),{f:MUTE})+`<line x1="48" y1="62" x2="104" y2="62" stroke="${LINE}"/>`+tx(48,71,4.6,L('Block B · Reihe 4','Block B · Row 4'),{w:700})+tx(48,78,4.6,L('Plätze 12 und 13','Seats 12 and 13'),{w:700})+tx(48,87,3.8,L('Bestellnr. 48213','Order no. 48213'),{f:MUTE})+
+     `<line x1="107" y1="26" x2="107" y2="90" stroke="${LINE}" stroke-dasharray="2 2"/><rect x="109" y="31" width="40" height="40" rx="3" fill="#fff"/>`+q+tx(129,80,4,L('Am Eingang zeigen','Show at entrance'),{f:MUTE,a:'middle'})); }],
+  ];
+  D.forEach(([id,name,fn])=>iconLibrary.push({id,name,category:'bildschirm',get svg(){ return fn(); }}));
+  const cursor=()=>`<svg viewBox="0 0 100 100"><path d="M24 12 L24 80 L41 64 L52 90 L63 85 L52 60 L76 60 Z" fill="#fff" stroke="#20222C" stroke-width="6" stroke-linejoin="round"/></svg>`;
+  const click=()=>`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#5B6CFF" opacity=".18"/><circle cx="50" cy="50" r="28" fill="none" stroke="#5B6CFF" stroke-width="5" opacity=".7"/><circle cx="50" cy="50" r="12" fill="#5B6CFF"/></svg>`;
+  iconLibrary.push({id:'ui-cursor',name:'Mauszeiger',category:'bildschirm',get svg(){ return cursor(); }},{id:'ui-click',name:'Klick-Markierung',category:'bildschirm',get svg(){ return click(); }});
+})();
+
 /* ================= State ================= */
 let sceneCounter=1, charInstCounter=1, objCounter=1;
 function makeScene(overrides){
@@ -1691,7 +1749,7 @@ function renderObjTab(container){
   container.appendChild(uploadBtn); container.appendChild(uploadInput);
 
   const chips=document.createElement('div'); chips.className='filter-chips';
-  const cats=[['alle','Alle'],['allgemein','Allgemein'],['bank','Bank'],['versicherung','Versicherung'],['arztpraxis','Arztpraxis'],['einzelhandel','Einzelhandel']].map(([k,l])=>[k,$d(l)]);
+  const cats=[['alle','Alle'],['allgemein','Allgemein'],['bank','Bank'],['versicherung','Versicherung'],['arztpraxis','Arztpraxis'],['einzelhandel','Einzelhandel'],['bildschirm','Bildschirm']].map(([k,l])=>[k,$d(l)]);
   cats.forEach(([key,label])=>{
     const chip=document.createElement('button');
     chip.className='chip'+(currentObjFilter===key?' active':''); chip.textContent=label;
@@ -2122,10 +2180,13 @@ function makeTransitionConnector(idx){
   wrap.appendChild(sel);
   return wrap;
 }
+function selectedSceneIdx(){ return scenesTimeline.map((s,i)=>s.sel?i:-1).filter(i=>i>=0); }
+function updateSelBtn(){ const b=document.getElementById('playSelBtn'); if(!b) return; const n=selectedSceneIdx().length; b.disabled=n===0; b.textContent=$t('▶ Auswahl','▶ Selection')+(n?' ('+n+')':''); }
 function renderSceneTrack(){
   const host=document.getElementById('sceneTrackScroll');
   host.innerHTML='';
   let dragIdx=null;
+  updateSelBtn();
   scenesTimeline.forEach((scene,idx)=>{
     const card=document.createElement('div');
     card.className='filmstrip-card'+(idx===currentSceneIndex?' active':'');
@@ -2134,6 +2195,12 @@ function renderSceneTrack(){
     if(scene.bgType==='image' && scene.bgImage){ thumb.style.background='#101218 center/cover no-repeat url("'+scene.bgImage.url+'")'; }
     else if(scene.bgType==='scene'){ const sc=scenes.find(s=>s.id===scene.bgId); thumb.innerHTML=sc?sc.svg:''; }
     else { const bg=plainBackgrounds.find(b=>b.id===scene.bgId)||plainBackgrounds[0]; thumb.style.background=bg.css; }
+    const sl=document.createElement('label'); sl.className='fs-sel'; sl.title=$t('In die Auswahl aufnehmen (für „Auswahl abspielen“ und den Export)','Include in the selection (for “Play selection” and the export)');
+    const sc_=document.createElement('input'); sc_.type='checkbox'; sc_.checked=!!scene.sel; sc_.draggable=false;
+    sc_.addEventListener('change',()=>{ scene.sel=sc_.checked; card.classList.toggle('sel',scene.sel); updateSelBtn(); }); sl.addEventListener('click',e=>e.stopPropagation()); sl.appendChild(sc_); thumb.appendChild(sl);
+    const pb=document.createElement('button'); pb.type='button'; pb.className='fs-play'; pb.textContent='▶'; pb.draggable=false; pb.title=$t('Nur diese Szene abspielen','Play only this scene');
+    pb.addEventListener('click',e=>{ e.stopPropagation(); if(Player.running&&Player.kind==='scene'&&Player.order[0]===idx){ Player.stop(); return; } if(idx!==currentSceneIndex) selectScene(idx); Player.start('scene',{sceneIdx:idx}); }); thumb.appendChild(pb);
+    if(scene.sel) card.classList.add('sel');
     card.appendChild(thumb);
     const label=document.createElement('div'); label.className='filmstrip-label';
     const span=document.createElement('span'); span.textContent=(idx+1)+'. '+$d(scene.label);
@@ -2821,6 +2888,7 @@ function renderSpeakerTracks(){
   const ts=document.createElement('span'); ts.id='trStatus'; ts.className='tr-status '+Translate.msgCls; ts.textContent=Translate.msg; bar.appendChild(ts);
   if(!scene.narrator){ const nb=document.createElement('button'); nb.type='button'; nb.className='ctrl-btn ctrl-btn-sm add-narrator'; nb.textContent='🎙 '+$t('＋ Erzähler (Off-Sprecher)','＋ Narrator (voice-over)'); nb.title=$t('Zusätzliche Sprecherspur ohne Figur: eigene Stimme, optional als Untertitel-Balken','Extra speaker track without a figure: own voice, optionally shown as a subtitle bar'); nb.addEventListener('click',addNarrator); bar.appendChild(nb); }
   [['⏱ '+$t('Zeiten automatisch','Auto timing'),false,$t('Setzt die Startzeiten der Sprecher dieser Szene nacheinander (aus der Sprechdauer) und passt die Szenenlänge an','Sets the speakers’ start times one after another (from speech duration) and fits the scene length'),'auto-time'],['⏱ '+$t('alle Szenen','all scenes'),true,$t('Dasselbe für alle Szenen','The same for all scenes'),'auto-time-all']].forEach(([t,all,ti,cls])=>{ const b=document.createElement('button'); b.type='button'; b.className='ctrl-btn ctrl-btn-sm '+cls; b.textContent=t; b.title=ti; b.addEventListener('click',()=>autoTimeAll(all)); bar.appendChild(b); });
+  { const tb=document.createElement('button'); tb.type='button'; tb.className='ctrl-btn ctrl-btn-sm tight-btn'; tb.textContent='✂ '+$t('Leerraum entfernen','Remove dead air'); tb.title=$t('Kürzt lange Pausen und Stille – Analyse und Vorschau, wie viel Zeit gespart wird','Shortens long pauses and silence – analysis and preview of how much time is saved'); tb.addEventListener('click',tightenDialog); bar.appendChild(tb); }
   host.appendChild(bar);
   if(scene.characters.length===0 && !scene.narrator){
     const hint=document.createElement('div'); hint.className='speaker-empty-hint';
@@ -3668,7 +3736,8 @@ const Player={
     this.running=true; this.kind=kind; rt={}; this.origIdx=(opts.origIdx!=null)?opts.origIdx:currentSceneIndex;
     document.body.classList.add('playing');
     selectedEntity=null;
-    this.order=(kind==='all')?scenesTimeline.map((s,i)=>i):[(kind==='scene'&&opts.sceneIdx!=null)?opts.sceneIdx:currentSceneIndex];
+    if(kind==='sel'){ const o=(opts.order||selectedSceneIdx()).filter(i=>scenesTimeline[i]); if(o.length) opts.order=o; else kind=this.kind='all'; }
+    this.order=(kind==='all')?scenesTimeline.map((s,i)=>i):(kind==='sel')?opts.order.slice():[(kind==='scene'&&opts.sceneIdx!=null)?opts.sceneIdx:currentSceneIndex];
     this.totalNominal=this.order.reduce((s,i)=>s+scenesTimeline[i].duration,0);
     const p0=Math.max(0,this.order.indexOf((opts.sceneIdx!=null)?opts.sceneIdx:this.order[0]));
     this.nominalBefore=this.order.slice(0,p0).reduce((s,i)=>s+scenesTimeline[i].duration,0);
@@ -3715,10 +3784,10 @@ const Player={
   },
   pause(){
     if(!this.running||this.kind==='line') return false;
-    const idx=this.order[this.pos], t=Math.max(0,(performance.now()-this.sceneT0)/1000), kind=this.kind, orig=this.origIdx;
-    this.stop(false); this.paused={kind,idx,t,orig}; updatePauseBtn(); return true;
+    const idx=this.order[this.pos], t=Math.max(0,(performance.now()-this.sceneT0)/1000), kind=this.kind, orig=this.origIdx, order=this.order.slice();
+    this.stop(false); this.paused={kind,idx,t,orig,order:order}; updatePauseBtn(); return true;
   },
-  resume(){ const p=this.paused; if(!p) return false; this.start(p.kind,{sceneIdx:p.idx,offset:p.t,origIdx:p.orig}); return true; },
+  resume(){ const p=this.paused; if(!p) return false; this.start(p.kind,{sceneIdx:p.idx,offset:p.t,origIdx:p.orig,order:p.order}); return true; },
   exec(ev,t){
     const inst=ev.id&&(ev.type==='pose'||ev.type==='mood'||ev.type==='speak')?findInst(ev.id):null;
     switch(ev.type){
@@ -3749,9 +3818,10 @@ const Player={
     const D=this.scene.duration, pct=Math.min(1,t/D);
     updateCursors(pct*100);
     ph.style.left=(pct*100)+'%'; tc.textContent=fmt(Math.min(t,D))+' / '+fmt(D);
-    const el=this.nominalBefore+Math.min(t,D);
-    document.getElementById('masterPlayhead').style.left=Math.min(100,el/this.totalNominal*100)+'%';
-    document.getElementById('masterTimeCode').textContent=fmt(el)+' / '+fmt(this.totalNominal);
+    const sel=this.kind==='sel', base=sel?scenesTimeline.slice(0,this.order[this.pos]).reduce((s,x)=>s+x.duration,0):this.nominalBefore, tot=sel?totalNominal():this.totalNominal;
+    const el=base+Math.min(t,D);
+    document.getElementById('masterPlayhead').style.left=Math.min(100,el/tot*100)+'%';
+    document.getElementById('masterTimeCode').textContent=sel?fmt(el)+' / '+fmt(tot)+' ('+fmt(this.totalNominal)+')':fmt(el)+' / '+fmt(tot);
     if(t>=D && this.ei>=this.events.length && !Speech.busy() && now-Speech.lastEnd>350) this.next();
   },
   next(){
@@ -3786,7 +3856,7 @@ const Player={
     document.body.classList.remove('playing'); rt={}; clearCursors(); if(restore!==false) resetCamera(); setTimeout(updatePauseBtn,0);
     document.getElementById('playhead').style.left='0%'; document.getElementById('timeCode').textContent='00:00.0 / 00:00.0';
     if(restore!==false){
-      if(this.kind==='all' && currentSceneIndex!==this.origIdx) selectScene(this.origIdx);
+      if((this.kind==='all'||this.kind==='sel') && currentSceneIndex!==this.origIdx) selectScene(this.origIdx);
       else { renderCharacters(); renderObjects(); renderStageMarkers(); }
       resetMasterUI();
       if(Speech.calibDirty){ Speech.calibDirty=false; renderObjectTimeline(); }
@@ -3842,6 +3912,7 @@ document.getElementById('sceneDurationInput').addEventListener('input', e=>{
   renderObjectTimeline(); renderMasterTimeline();
 });
 document.getElementById('playAllBtn').addEventListener('click', ()=>Player.start('all'));
+document.getElementById('playSelBtn').addEventListener('click', ()=>{ if(selectedSceneIdx().length) Player.start('sel'); });
 document.getElementById('stopAllBtn').addEventListener('click', ()=>Player.stop());
 document.getElementById('previewSceneBtn').addEventListener('click', ()=>Player.start('scene'));
 document.getElementById('stopSceneBtn').addEventListener('click', ()=>Player.stop());
@@ -4085,7 +4156,8 @@ const Exporter={
   RES:[['1920x1080','Full HD 1920 × 1080'],['1280x720','HD 1280 × 720'],['960x540','960 × 540'],['854x480','480p 854 × 480']],
   QUAL:[['hi','Hoch (große Datei)',1],['mid','Mittel (empfohlen)',0.5],['low','Klein',0.25],['tiny','Sehr klein',0.12]],
   bitrate(res,fps,q){ const [w,h]=res.split('x').map(Number); const base=w*h*fps*0.11; const f=(this.QUAL.find(x=>x[0]===q)||[0,0,0.5])[2]; return Math.round(Math.max(250e3,base*f*0.6)); },
-  sceneList(scope){ return scope==='scene'?[getCurrentScene()]:scenesTimeline; },
+  sceneList(scope){ if(scope==='scene') return [getCurrentScene()]; if(scope==='sel'){ const i=selectedSceneIdx(); if(i.length) return i.map(k=>scenesTimeline[k]); } return scenesTimeline; },
+  playKind(scope){ return scope==='scene'?'scene':(scope==='sel'&&selectedSceneIdx().length?'sel':'all'); },
   /* Hinweise: welche Sprecher nutzen Browserstimmen (nicht direkt aufnehmbar)? */
   browserVoiceLines(scope){
     const out=[]; this.sceneList(scope).forEach(sc=>sc.characters.concat(sc.narrator?[sc.narrator]:[]).forEach(i=>{ if((i.script||'').trim() && i.audio!==false && !i.clip && !(i.voiceName==='__remote'&&Remote.on())) out.push(i); }));
@@ -4144,28 +4216,42 @@ const Exporter={
     const mr=new MediaRecorder(out,{mimeType:fmt[2],videoBitsPerSecond:this.bitrate(o.res,fps,o.quality),audioBitsPerSecond:128000});
     const chunks=[]; mr.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
     const done=new Promise(res=>{ mr.onstop=res; });
+    /* Zusatzformat: ein zweiter Recorder auf demselben Bildstrom (oder nur der Ton) – ein Durchlauf, zwei Dateien */
+    let mr2=null, ch2=[], x2=null, done2=Promise.resolve();
+    if(o.extra && o.extra!==o.format){
+      try{
+        const okT=t=>{ try{ return MediaRecorder.isTypeSupported(t); }catch(_){ return false; } };
+        if(o.extra==='audio'){
+          const at=out.getAudioTracks(); const mime=['audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/webm;codecs=opus','audio/webm'].find(okT);
+          if(at.length&&mime){ mr2=new MediaRecorder(new MediaStream(at),{mimeType:mime,audioBitsPerSecond:128000}); x2={ext:/mp4/.test(mime)?'m4a':'webm',mime:mime.split(';')[0],label:$t('Nur Ton','Audio only'),name:'Ton'}; }
+        } else { const f2=this.formats().find(f=>f[0]===o.extra); if(f2){ mr2=new MediaRecorder(out,{mimeType:f2[2],videoBitsPerSecond:this.bitrate(o.res,fps,o.quality),audioBitsPerSecond:128000}); x2={ext:f2[3],mime:f2[2].split(';')[0],label:f2[1].split(' –')[0],name:'Video-'+f2[3]}; } }
+      }catch(_){ mr2=null; }
+      if(mr2){ mr2.ondataavailable=e=>{ if(e.data&&e.data.size) ch2.push(e.data); }; done2=new Promise(res=>{ mr2.onstop=res; }); }
+    }
     const total=this.totalDur(o.scope);
     this.rec={t0:performance.now(),cues:[],open:null,mr,cancel:false};
     vt.addEventListener('ended',()=>{ if(this.rec) this.rec.cancel=true; Player.stop(true); });
-    mr.start(1000);
+    mr.start(1000); if(mr2){ try{ mr2.start(1000); }catch(_){ mr2=null; } }
     ui&&ui.status&&ui.status($t('Aufnahme läuft …','Recording …'));
-    Player.start(o.scope==='scene'?'scene':'all');
+    Player.start(this.playKind(o.scope));
     const tick=setInterval(()=>{ if(this.rec&&ui&&ui.progress) ui.progress((performance.now()-this.rec.t0)/1000,total); },300);
     await new Promise(res=>{ const iv=setInterval(()=>{ if(!Player.running){ clearInterval(iv); res(); } },150); });
     await new Promise(r=>setTimeout(r,600));
     clearInterval(tick); stopped=true; cancelAnimationFrame(raf);
     const rec=this.rec; this.rec=null;
     try{ if(mr.state!=='inactive') mr.stop(); }catch(_){}
-    await done; dm.getTracks().forEach(t=>t.stop());
+    try{ if(mr2&&mr2.state!=='inactive') mr2.stop(); }catch(_){}
+    await done; await done2; dm.getTracks().forEach(t=>t.stop());
     document.body.classList.remove('exporting'); fitStage(); renderObjects(); renderCharacters(); renderStageMarkers();
     const blob=new Blob(chunks,{type:(fmt[2].split(';')[0])});
-    this.last={blob,ext:fmt[3],cues:rec.cues,audio:audioSrc,cropped,cancel:rec.cancel,size:[W,H],dur:(performance.now()-rec.t0)/1000};
+    const extras=(mr2&&x2&&ch2.length)?[{blob:new Blob(ch2,{type:x2.mime}),ext:x2.ext,label:x2.label,name:x2.name}]:[];
+    this.last={blob,extras,ext:fmt[3],cues:rec.cues,audio:audioSrc,cropped,cancel:rec.cancel,size:[W,H],dur:(performance.now()-rec.t0)/1000};
     return this.last;
   },
   /* Vollbild-Ansicht ohne Aufnahme (z. B. um mit der Bildschirmaufnahme des iPhones aufzunehmen) */
   async fullscreenPlay(scope){
     document.body.classList.add('exporting','exporting-play'); fitStage(); Pop.close(); selectedEntity=null; renderObjects(); renderCharacters();
-    Player.start(scope==='scene'?'scene':'all');
+    Player.start(this.playKind(scope));
     await new Promise(res=>{ const iv=setInterval(()=>{ if(!Player.running){ clearInterval(iv); res(); } },150); });
     document.body.classList.remove('exporting','exporting-play'); fitStage(); renderObjects(); renderCharacters();
   }
@@ -4181,11 +4267,13 @@ window.openExportDlg=function(){
     const fm=Exporter.formats();
     const mp4ok=fm.some(f=>f[0]==='mp4');
     const sel={};
-    sel.scope=dlgSelect(card,$t('Umfang','Scope'),[['all',$t('Gesamte Animation (alle Szenen)','Whole animation (all scenes)')],['scene',$t('Nur aktuelle Szene','Current scene only')]],'all');
+    sel.scope=dlgSelect(card,$t('Umfang','Scope'),[['all',$t('Gesamte Animation (alle Szenen)','Whole animation (all scenes)')],['scene',$t('Nur aktuelle Szene','Current scene only')],['sel',$t('Auswahl (angehakte Szenen)','Selection (ticked scenes)')+' ('+selectedSceneIdx().length+')']],selectedSceneIdx().length?'sel':'all');
     sel.format=dlgSelect(card,$t('Dateiformat','File format'),fm.length?fm.map(f=>[f[0],f[1]]):[['none',$t('nicht verfügbar','not available')]],fm.length?fm[0][0]:'none');
     sel.res=dlgSelect(card,$t('Auflösung','Resolution'),Exporter.RES,'1280x720');
     sel.fps=dlgSelect(card,$t('Bildrate','Frame rate'),[['24','24 fps'],['30','30 fps'],['60','60 fps']],'30');
     sel.quality=dlgSelect(card,$t('Qualität / Kompression','Quality / compression'),Exporter.QUAL.map(q=>[q[0],$t(q[1],{hi:'High (large file)',mid:'Medium (recommended)',low:'Small',tiny:'Very small'}[q[0]])]),'mid');
+    sel.extra=dlgSelect(card,$t('Zusätzlich speichern als (im selben Durchlauf)','Also save as (same run)'),[['',$t('– nichts –','– nothing –')]].concat(fm.map(f=>[f[0],f[1]])).concat([['audio',$t('Nur Ton (M4A / WebM)','Audio only (M4A / WebM)')]]),'');
+    sel.extra.classList.add('exp-extra');
     const info=document.createElement('div'); info.className='anim-hint exp-info'; info.style.marginTop='8px'; card.appendChild(info);
     // Ton
     const bl=Exporter.browserVoiceLines('all');
@@ -4207,7 +4295,7 @@ window.openExportDlg=function(){
     const r1=dlgRow(card);
     if(Exporter.gdm()&&fm.length){
       r1.appendChild(dlgBtn('⏺ '+$t('Video exportieren','Export video'),async()=>{
-        const o={scope:sel.scope.value,format:sel.format.value,res:sel.res.value,fps:+sel.fps.value,quality:sel.quality.value,tabAudio:tc.checked};
+        const o={scope:sel.scope.value,format:sel.format.value,res:sel.res.value,fps:+sel.fps.value,quality:sel.quality.value,tabAudio:tc.checked,extra:sel.extra.value};
         status.textContent=$t('Wähle im Browser-Fenster „Diesen Tab“ aus …','Choose “This tab” in the browser window …'); result.innerHTML='';
         const m=document.querySelector('.dyn-dlg'); 
         try{
@@ -4233,6 +4321,7 @@ window.openExportDlg=function(){
     const v=document.createElement('video'); v.controls=true; v.className='exp-video'; v.style.cssText='width:100%;margin-top:8px;border-radius:8px;background:#000;'; v.src=URL.createObjectURL(r.blob); box.appendChild(v);
     const row=document.createElement('div'); row.className='modal-row'; box.appendChild(row);
     row.appendChild(dlgBtn('⬇ '+$t('Datei speichern','Save file')+' (.'+r.ext+')',()=>Exporter.download('Stagehand-Video.'+r.ext,r.blob),'primary exp-save'));
+    (r.extras||[]).forEach(x=>row.appendChild(dlgBtn('⬇ '+x.label+' (.'+x.ext+')',()=>Exporter.download('Stagehand-'+x.name+'.'+x.ext,x.blob),'exp-save-extra')));
     ProjLangs.forEach(L=>{ if(!r.cues.length) return; const cs=r.cues.filter(c=>c.lang===L); if(cs.length) row.appendChild(dlgBtn($t('SRT ','SRT ')+L.toUpperCase()+' ('+$t('echte Zeiten','real times')+')',()=>Exporter.download('Untertitel-'+L.toUpperCase()+'.srt',Exporter.toSubs(cs,'srt')),'exp-srt-real')); });
   }
 };
@@ -4256,6 +4345,62 @@ function autoTimeScene(sc,opts){
   if(lines.length){ const lastEnd=cur-gap; sc.duration=Math.max(4,Math.min(60,Math.ceil(lastEnd+1))); }
   return lines.length;
 }
+
+/* ================= Leerraum entfernen („Straffen“) =================
+   Kürzt Pausen zwischen den Sprechern und am Anfang/Ende der Szene und verschiebt dabei alles mit, was an der Zeitachse hängt
+   (Posen-/Geh-Clips, Kamera, Objekte, Sprechstarts). Überlappende Sprecher bleiben überlappend. */
+const TIGHT_DEF={gap:0.6, lead:0.4, tail:0.8, silent:true, silentMax:4};
+function speechIntervals(sc){
+  const iv=[]; sc.characters.concat(sc.narrator?[sc.narrator]:[]).forEach(i=>{ if((i.script||'').trim()){ const s0=i.speechStart||0; iv.push([s0,s0+estimateSpeechDuration(i)]); } });
+  iv.sort((a,b)=>a[0]-b[0]); const m=[]; iv.forEach(x=>{ const l=m[m.length-1]; if(l&&x[0]<=l[1]) l[1]=Math.max(l[1],x[1]); else m.push(x.slice()); }); return m;
+}
+function sceneIdleInfo(sc){ const m=speechIntervals(sc), sp=m.reduce((t,x)=>t+(x[1]-x[0]),0); return {speech:sp, idle:Math.max(0,sc.duration-sp), hasSpeech:m.length>0}; }
+function tightenScene(sc,o){
+  o=Object.assign({},TIGHT_DEF,o||{}); const D0=sc.duration, iv=speechIntervals(sc), r1=v=>Math.round(v*10)/10;
+  if(!iv.length){ if(o.silent && D0>o.silentMax){ sc.duration=o.silentMax; } return D0-sc.duration; }
+  const gaps=[]; if(iv[0][0]>o.lead+0.05) gaps.push({a:0,b:iv[0][0],keep:o.lead,rem:iv[0][0]-o.lead});
+  for(let k=0;k<iv.length-1;k++){ const a=iv[k][1], b=iv[k+1][0]; if(b-a>o.gap+0.05) gaps.push({a,b,keep:o.gap,rem:b-a-o.gap}); }
+  const mapT=t=>{ let cum=0; for(const g of gaps){ if(t>=g.b){ cum+=g.rem; continue; } if(t>g.a+g.keep) return g.a+g.keep-cum; break; } return t-cum; };
+  const lastEnd=iv[iv.length-1][1];
+  sc.characters.concat(sc.narrator?[sc.narrator]:[]).forEach(i=>{
+    i.speechStart=Math.max(0,r1(mapT(i.speechStart||0)));
+    (i.clips||[]).forEach(c=>{ const s0=mapT(c.start), e0=mapT(c.start+c.dur); c.start=Math.max(0,r1(s0)); c.dur=Math.max(0.3,r1(e0-s0)); });
+  });
+  (sc.camera||[]).forEach(c=>{ const s0=mapT(c.start), e0=mapT(c.start+c.dur); c.start=Math.max(0,r1(s0)); c.dur=Math.max(0.3,r1(e0-s0)); });
+  (sc.objects||[]).forEach(ob=>{ const st=ob.timelineStart||0, s0=mapT(st); if(typeof ob.timelineDuration==='number'&&ob.timelineDuration>0){ const e0=mapT(st+ob.timelineDuration); ob.timelineDuration=Math.max(0.3,r1(e0-s0)); } ob.timelineStart=Math.max(0,r1(s0)); });
+  let need=mapT(lastEnd)+o.tail;
+  sc.characters.forEach(c=>(c.clips||[]).forEach(cl=>{ need=Math.max(need,cl.start+cl.dur); }));
+  (sc.camera||[]).forEach(c=>{ need=Math.max(need,c.start+c.dur); });
+  (sc.objects||[]).forEach(ob=>{ need=Math.max(need,(ob.timelineStart||0)+0.8); if(typeof ob.timelineDuration==='number') need=Math.max(need,ob.timelineStart+ob.timelineDuration); });
+  sc.duration=Math.min(D0,Math.max(3,Math.ceil(need*2)/2));
+  return D0-sc.duration;
+}
+function tightenPreview(list,o){ let saved=0, total=0; list.forEach(sc=>{ const c=JSON.parse(JSON.stringify(sc)); total+=sc.duration; saved+=tightenScene(c,o); }); return {saved,total}; }
+function tightenDialog(){
+  openDlg($t('Leerraum entfernen','Remove dead air'),(card,close)=>{
+    const info=document.createElement('p'); info.className='anim-hint'; info.textContent=$t('Kürzt zu lange Pausen zwischen den Sprechern, die Stille am Anfang/Ende und Szenen ohne Sprache. Posen, Gehwege, Kamera und Objekte werden mit verschoben. Mit Strg+Z lässt sich alles zurücknehmen.','Shortens overly long pauses between speakers, the silence at the start/end and scenes without speech. Poses, walks, camera and objects move along. Ctrl+Z undoes it all.'); card.appendChild(info);
+    // Analyse je Szene
+    const tbl=document.createElement('div'); tbl.className='tight-table'; tbl.style.cssText='font-size:12px;margin:6px 0;display:grid;grid-template-columns:1fr auto auto auto;gap:2px 10px;';
+    const head=[$t('Szene','Scene'),$t('Länge','Length'),$t('Sprechzeit','Speech'),$t('Leerlauf','Idle')]; head.forEach(h=>{ const d=document.createElement('b'); d.textContent=h; tbl.appendChild(d); });
+    scenesTimeline.forEach((sc,i)=>{ const f=sceneIdleInfo(sc), pct=Math.round(f.idle/Math.max(.1,sc.duration)*100); [(i+1)+'. '+$d(sc.label),fmt(sc.duration),f.hasSpeech?fmt(f.speech):$t('– keine –','– none –'),pct+' %'].forEach((t,k)=>{ const d=document.createElement('span'); d.textContent=t; if(k===3&&pct>=40) d.style.color='#ffb020'; tbl.appendChild(d); }); });
+    card.appendChild(tbl);
+    const num=(lab,key,min,max,step)=>{ const r=dlgRow(card); const l=document.createElement('label'); l.textContent=lab; l.style.cssText='flex:1;font-size:12px;'; const e=document.createElement('input'); e.type='number'; e.min=min; e.max=max; e.step=step; e.value=TIGHT_DEF[key]; e.className='tight-'+key; e.style.width='70px'; r.appendChild(l); r.appendChild(e); return e; };
+    const eGap=num($t('Längste Pause zwischen Sprechern (s)','Longest pause between speakers (s)'),'gap',0,5,0.1);
+    const eLead=num($t('Pause am Anfang (s)','Pause at the start (s)'),'lead',0,5,0.1);
+    const eTail=num($t('Pause am Ende (s)','Pause at the end (s)'),'tail',0,5,0.1);
+    const rs=dlgRow(card); const cs=document.createElement('input'); cs.type='checkbox'; cs.checked=true; cs.className='tight-silent'; const ls=document.createElement('label'); ls.style.cssText='font-size:12px;flex:1;'; ls.appendChild(cs); ls.appendChild(document.createTextNode(' '+$t('Szenen ohne Sprache kürzen auf höchstens (s)','Shorten scenes without speech to at most (s)'))); const eSil=document.createElement('input'); eSil.type='number'; eSil.min=1; eSil.max=30; eSil.step=0.5; eSil.value=TIGHT_DEF.silentMax; eSil.className='tight-silentMax'; eSil.style.width='70px'; rs.appendChild(ls); rs.appendChild(eSil);
+    const rsc=dlgRow(card); const ssel=document.createElement('select'); ssel.className='tight-scope'; [['scene',$t('Nur aktuelle Szene','Current scene only')],['all',$t('Alle Szenen','All scenes')],['sel',$t('Ausgewählte Szenen (angehakt)','Selected scenes (ticked)')]].forEach(([v,l])=>{ const o=document.createElement('option'); o.value=v; o.textContent=l; ssel.appendChild(o); }); ssel.value='all'; rsc.appendChild(ssel);
+    const out=document.createElement('div'); out.className='tight-out'; out.style.cssText='font-weight:600;margin:6px 0;'; card.appendChild(out);
+    const opts=()=>({gap:+eGap.value||0, lead:+eLead.value||0, tail:+eTail.value||0, silent:cs.checked, silentMax:+eSil.value||4});
+    const list=()=>ssel.value==='scene'?[getCurrentScene()]:(ssel.value==='sel'?selectedSceneIdx().map(i=>scenesTimeline[i]):scenesTimeline);
+    const upd=()=>{ const p=tightenPreview(list(),opts()); out.textContent=p.saved>0.05?$t('Spart ca. ','Saves about ')+p.saved.toFixed(1)+' s '+$t('von ','of ')+p.total.toFixed(1)+' s':$t('Hier gibt es nichts mehr zu kürzen.','Nothing left to shorten here.'); };
+    [eGap,eLead,eTail,cs,eSil,ssel].forEach(e=>{ e.addEventListener('input',upd); e.addEventListener('change',upd); }); upd();
+    const row=dlgRow(card);
+    row.appendChild(dlgBtn('✂ '+$t('Jetzt kürzen','Shorten now'),()=>{ const L=list(); L.forEach(sc=>tightenScene(sc,opts())); selectScene(currentSceneIndex); renderSpeakerTracks(); renderObjectTimeline(); renderMasterTimeline(); renderSceneTrack(); History.commit(); close(); },'primary tight-go'));
+    row.appendChild(dlgBtn($t('Abbrechen','Cancel'),close));
+  });
+}
+
 function autoTimeAll(allScenes){
   const list=allScenes?scenesTimeline:[getCurrentScene()]; let n=0; list.forEach(sc=>{ n+=autoTimeScene(sc); });
   renderSpeakerTracks(); renderObjectTimeline(); renderMasterTimeline(); if(currentTab==='animation') renderPanel(); return n;
@@ -4297,15 +4442,74 @@ const TEMPLATES=[
      {title:['So funktioniert es','How it works'],bg:'studio-light',char:'markus',pose:'wave',mood:'joy',line:['Hallo! In drei einfachen Schritten zeige ich dir, wie es geht.','Hello! In three simple steps I will show you how it works.'],icon:null},
      {title:['Schritt 1','Step 1'],bg:'studio-light',char:'lena',pose:'point',mood:'none',line:['Zuerst legst du dein Projekt an.','First, you create your project.'],icon:'desk'},
      {title:['Schritt 2','Step 2'],bg:'studio-light',char:'markus',pose:'point',mood:'none',line:['Dann trägst du deine Daten ein.','Then you enter your data.'],icon:'clipboard'},
-     {title:['Schritt 3','Step 3'],bg:'studio-light',char:'lena',pose:'cheer',mood:'joy',line:['Fertig! Schon bist du startklar.','Done! You are ready to go.'],icon:'safe'}]}
+     {title:['Schritt 3','Step 3'],bg:'studio-light',char:'lena',pose:'cheer',mood:'joy',line:['Fertig! Schon bist du startklar.','Done! You are ready to go.'],icon:'safe'}]},
+  {id:'ads',name:['Software erklärt: Online-Werbung bestellen','Software explained: ordering online ads'],desc:['4 Szenen am Bildschirm: Übersicht, Ziel & Zielgruppe, Budget & Laufzeit, Prüfen & buchen – mit Beraterin, Kunde, Mauszeiger und Klick-Markierungen','4 on-screen scenes: overview, goal & audience, budget & duration, review & book – with an advisor, a customer, mouse pointer and click markers'],
+   scenes:[
+    {title:['Online-Werbung bestellen','Ordering online ads'],bg:'studio-light',screen:'ui-ad-dash',
+     chars:[{char:'lena',pose:'wave',mood:'joy',line:['Hallo! Ich zeige dir, wie du in wenigen Minuten Online-Werbung für dein Geschäft bestellst. Alles startet hier in der Übersicht.','Hello! I will show you how to order online advertising for your business in just a few minutes. It all starts here in the overview.']},
+            {char:'markus',pose:'nod',mood:'none',line:['Und dafür brauche ich keine Agentur?','And I do not need an agency for that?']}],
+     marks:[{icon:'ui-cursor',rx:.62,ry:.4,tf:.55},{icon:'ui-click',rx:.79,ry:.25,tf:.85}]},
+    {title:['Schritt 1: Ziel & Zielgruppe','Step 1: goal & audience'],bg:'studio-light',screen:'ui-ad-goal',
+     chars:[{char:'lena',pose:'point',mood:'none',line:['Zuerst wählst du dein Ziel – zum Beispiel mehr Besucher auf deiner Webseite. Dann legst du fest, wen du erreichen willst: Alter, Region und Interessen.','First you choose your goal – for example more visitors to your website. Then you decide who you want to reach: age, region and interests.']},
+            {char:'markus',pose:'shrug',mood:'none',line:['Das klingt machbar, auch ohne Vorkenntnisse.','That sounds doable, even without experience.']}],
+     marks:[{icon:'ui-cursor',rx:.3,ry:.5,tf:.3},{icon:'ui-click',rx:.19,ry:.45,tf:.5},{icon:'ui-click',rx:.86,ry:.92,tf:.85}]},
+    {title:['Schritt 2: Budget & Laufzeit','Step 2: budget & duration'],bg:'studio-light',screen:'ui-ad-budget',
+     chars:[{char:'lena',pose:'point',mood:'none',line:['Dann bestimmst du dein Tagesbudget und den Zeitraum. Die Vorschau zeigt dir sofort, wie viele Menschen du ungefähr erreichst.','Then you set your daily budget and the time period. The preview immediately shows roughly how many people you will reach.']},
+            {char:'markus',pose:'nod',mood:'none',line:['Ich sehe also vorher, was mich das kostet.','So I see in advance what it will cost me.']}],
+     marks:[{icon:'ui-cursor',rx:.28,ry:.58,tf:.3},{icon:'ui-click',rx:.4,ry:.62,tf:.55},{icon:'ui-click',rx:.82,ry:.5,tf:.8}]},
+    {title:['Schritt 3: Prüfen & buchen','Step 3: review & book'],bg:'studio-light',screen:'ui-ad-checkout',
+     chars:[{char:'lena',pose:'point',mood:'joy',line:['Zum Schluss prüfst du die Zusammenfassung und klickst auf „Jetzt buchen“. Nach einer kurzen Freigabe laufen deine Anzeigen.','Finally you check the summary and click “Book now”. After a short review your ads go live.']},
+            {char:'markus',pose:'cheer',mood:'joy',line:['Das war einfacher, als ich dachte!','That was easier than I thought!']}],
+     marks:[{icon:'ui-cursor',rx:.7,ry:.8,tf:.55},{icon:'ui-click',rx:.81,ry:.75,tf:.8}]}]},
+  {id:'tickets',name:['Tickets für eine Veranstaltung bestellen','Ordering tickets for an event'],desc:['4 Szenen am Bildschirm: Veranstaltung finden, Plätze wählen, bezahlen, E-Ticket erhalten','4 on-screen scenes: find the event, choose seats, pay, receive the e-ticket'],
+   scenes:[
+    {title:['Tickets in vier Schritten','Tickets in four steps'],bg:'gradient-violet',screen:'ui-events',
+     chars:[{char:'lena',pose:'wave',mood:'joy',line:['Willkommen! So kommst du in vier Schritten zu deinen Konzerttickets. Such dir zuerst deine Veranstaltung aus.','Welcome! This is how you get your concert tickets in four steps. First pick your event.']},
+            {char:'markus',pose:'point',mood:'joy',line:['Ich möchte zum Sommerkonzert am 14. Juni!','I want to go to the summer concert on 14 June!']}],
+     marks:[{icon:'ui-cursor',rx:.55,ry:.3,tf:.5},{icon:'ui-click',rx:.84,ry:.42,tf:.85}]},
+    {title:['Schritt 2: Plätze wählen','Step 2: choose seats'],bg:'gradient-violet',screen:'ui-seatmap',
+     chars:[{char:'lena',pose:'point',mood:'none',line:['Im Sitzplan siehst du alle freien Plätze. Tippe auf die Plätze, die dir gefallen – graue sind schon vergeben.','In the seat map you see all free seats. Tap the seats you like – grey ones are already taken.']},
+            {char:'markus',pose:'nod',mood:'joy',line:['Zwei nebeneinander in Reihe vier – perfekt.','Two next to each other in row four – perfect.']}],
+     marks:[{icon:'ui-cursor',rx:.3,ry:.55,tf:.4},{icon:'ui-click',rx:.4,ry:.67,tf:.7},{icon:'ui-click',rx:.7,ry:.78,tf:.95}]},
+    {title:['Schritt 3: Bezahlen','Step 3: pay'],bg:'gradient-violet',screen:'ui-payment',
+     chars:[{char:'lena',pose:'point',mood:'none',line:['Jetzt trägst du deine Daten ein und wählst, wie du bezahlen möchtest – zum Beispiel bequem per Karte.','Now you enter your details and choose how to pay – for example conveniently by card.']},
+            {char:'markus',pose:'shrug',mood:'none',line:['Und die Gesamtsumme steht schon dabei, gut.','And the total is already shown, good.']}],
+     marks:[{icon:'ui-cursor',rx:.2,ry:.66,tf:.45},{icon:'ui-click',rx:.08,ry:.72,tf:.7},{icon:'ui-click',rx:.81,ry:.84,tf:.95}]},
+    {title:['Schritt 4: Dein E-Ticket','Step 4: your e-ticket'],bg:'gradient-violet',screen:'ui-eticket',
+     chars:[{char:'lena',pose:'point',mood:'joy',line:['Fertig! Dein E-Ticket kommt sofort per E-Mail. Am Eingang zeigst du nur den QR-Code auf dem Handy.','Done! Your e-ticket arrives by email right away. At the entrance you only show the QR code on your phone.']},
+            {char:'markus',pose:'cheer',mood:'joy',line:['Dann kann das Konzert kommen!','Then the concert can begin!']}],
+     marks:[{icon:'ui-cursor',rx:.8,ry:.5,tf:.6}]}]}
 ];
+
+/* Szene mit Bildschirm-Mockup, zwei Figuren (Dialog), Mauszeiger und Klick-Markierungen */
+function buildScreenScene(sc,def,dark,iL,iO,O){
+  const SX=400, SY=96, SW=540, SH=Math.round(540/1.6);
+  addObjectToStage({type:'text',content:def.title[iL],fontSize:30,bold:true,color:dark?'#F4F1EA':'#20222C',w:340,h:96,x:34,y:26,timelineStart:0});
+  addObjectToStage({type:'icon',iconId:def.screen,w:SW,h:SH,x:SX,y:SY,timelineStart:0.2,effect:'rise-up'});
+  const screenObj=sc.objects[sc.objects.length-1];
+  const insts=def.chars.map((cd,k)=>{
+    const c=addCharacterToStage(cd.char); c.w=150; c.h=255; c.x=k===0?220:30; c.y=STAGE_H-c.h-8; c.facing='threeq'; c.flipped=true; c.reaction=cd.mood; c.script=cd.line[iL]; c.lang=LANG; c.tx={[O]:{script:cd.line[iO],voiceName:'',clip:null}}; c.todo={}; c.clips=[]; return c;
+  });
+  let cur=0.9; insts.forEach(c=>{ c.speechStart=Math.round(cur*10)/10; cur+=estimateSpeechDuration(c)+0.5; });
+  insts.forEach((c,k)=>{ const cd=def.chars[k], dur=estimateSpeechDuration(c);
+    const cl={id:'cl'+(clipCounter++),start:Math.max(0.2,Math.round((k===0&&cd.pose!=='wave'?c.speechStart+0.4:(cd.pose==='wave'?0.3:c.speechStart))*10)/10),dur:cd.pose==='point'?Math.min(3,Math.max(1.5,dur-0.6)):2,pose:cd.pose};
+    if(cd.pose==='point') cl.at={kind:'obj',id:screenObj.id};
+    c.clips=[cl];
+  });
+  const lead=insts[0], ld=estimateSpeechDuration(lead);
+  (def.marks||[]).forEach(m=>{ const w=m.icon==='ui-click'?54:40, t=Math.round((lead.speechStart+m.tf*ld)*10)/10;
+    addObjectToStage({type:'icon',iconId:m.icon,w,h:w,x:Math.round(SX+m.rx*SW-w/2+(m.icon==='ui-cursor'?w*0.2:0)),y:Math.round(SY+m.ry*SH-w/2+(m.icon==='ui-cursor'?w*0.25:0)),timelineStart:t,timelineDuration:m.icon==='ui-click'?1.4:null,effect:'pop'}); });
+  sc.duration=Math.max(8,Math.min(40,Math.ceil(cur+0.8)));
+}
 function applyTemplate(id){
   const T=TEMPLATES.find(t=>t.id===id); if(!T) return 0; Player.stop(false);
   const O=LANG==='de'?'en':'de', iL=LANG==='de'?0:1, iO=LANG==='de'?1:0;
   T.scenes.forEach((def,n)=>{
     const sc=makeScene({label:def.title[iL],bgType:'plain',bgId:def.bg,duration:8});
     scenesTimeline.push(sc); currentSceneIndex=scenesTimeline.length-1;
-    const dark=(def.bg==='studio-dark'||def.bg==='gradient-violet'||def.bg==='sunset'); const objs=[{type:'text',content:def.title[iL],fontSize:40,bold:true,color:dark?'#F4F1EA':'#20222C',w:420,h:70,x:60,y:36,timelineStart:0}];
+    const dark=(def.bg==='studio-dark'||def.bg==='gradient-violet'||def.bg==='sunset');
+    if(def.chars){ buildScreenScene(sc,def,dark,iL,iO,O); return; }
+    const objs=[{type:'text',content:def.title[iL],fontSize:40,bold:true,color:dark?'#F4F1EA':'#20222C',w:420,h:70,x:60,y:36,timelineStart:0}];
     if(def.icon) objs.push({type:'icon',iconId:def.icon,w:150,h:150,x:690,y:120,timelineStart:0.6,effect:'pop'});
     objs.forEach(o=>addObjectToStage(o));
     const c=addCharacterToStage(def.char); c.x=def.icon?260:420; c.facing='threeq'; c.reaction=def.mood; c.script=def.line[iL]; c.lang=LANG; c.tx={[O]:{script:def.line[iO],voiceName:'',clip:null}}; c.todo={};
