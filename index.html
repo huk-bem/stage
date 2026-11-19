@@ -252,12 +252,56 @@ body{margin:0;height:100vh;background:var(--bg-app);color:var(--text-primary);fo
 
 /* Sprechblasen */
 #stageBubbles{position:absolute;inset:0;pointer-events:none;z-index:30;}
-.bubble{position:absolute;max-width:46%;background:#fff;color:#1a1b22;border-radius:14px;padding:8px 12px;font-family:var(--font-body);font-weight:600;font-size:var(--bfs,17px);line-height:1.3;box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;transform:translateY(6px) scale(.96);transition:opacity .18s,transform .18s;}
+.bubble{position:absolute;max-width:46%;box-sizing:border-box;isolation:isolate;background:var(--bg,#fff);color:var(--fg,#1a1b22);border:var(--bw,0px) var(--bst,solid) var(--bd,transparent);border-radius:14px;padding:8px 12px;font-family:var(--bff,var(--font-body));font-weight:600;font-size:var(--bfs,17px);line-height:1.3;text-align:var(--bal,left);box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;transform:translateY(8px) scale(.9);transition:opacity .18s,transform .28s cubic-bezier(.3,1.5,.5,1);}
 .bubble.on{opacity:1;transform:none;}
-.bubble::after{content:'';position:absolute;bottom:-7px;left:var(--tail,50%);width:14px;height:14px;background:#fff;transform:translateX(-50%) rotate(45deg);border-radius:3px;}
+.bubble.b-bold{font-weight:800;}
+.bubble.b-ital{font-style:italic;}
+.bubble::after{content:'';position:absolute;bottom:-8px;left:var(--tail,50%);width:14px;height:14px;box-sizing:border-box;background:var(--bg,#fff);border-right:var(--bw,0px) var(--bst,solid) var(--bd,transparent);border-bottom:var(--bw,0px) var(--bst,solid) var(--bd,transparent);transform:translateX(-50%) rotate(45deg);border-radius:0 0 4px 0;}
+.bubble.tl-none::after,.bubble.tl-none::before{display:none;}
+.bubble.tl-dots::after{width:13px;height:13px;border:var(--bw,2px) var(--bst,solid) var(--bd,#333);border-radius:50%;transform:translateX(-50%);bottom:-24px;}
+.bubble.tl-dots::before{content:'';position:absolute;bottom:-38px;left:calc(var(--tail,50%) - 9px);width:8px;height:8px;box-sizing:border-box;border-radius:50%;background:var(--bg,#fff);border:var(--bw,2px) var(--bst,solid) var(--bd,#333);}
+.bubble.bs-round{border-radius:28px;padding:10px 20px;}
+.bubble.bs-oval{border-radius:50%/62%;padding:16px 30px;}
+.bubble.bs-square{border-radius:2px;}
+.bubble.bs-caption{border-radius:2px;box-shadow:4px 4px 0 rgba(0,0,0,.85);}
+.bubble.bs-note{border-radius:2px;rotate:-1.6deg;box-shadow:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.32));clip-path:polygon(0 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%);padding:12px 16px 16px;}
+.bubble.bs-bar{border-radius:8px;max-width:86%;text-align:center;padding:8px 18px;box-shadow:none;}
+.bubble.bs-sketch{border-radius:16px;filter:url(#bbWobble);}
+.bubble.bs-cloud,.bubble.bs-burst{background:none;border:none;box-shadow:none;}
+.bubble.bs-cloud{padding:20px 34px;}
+.bubble.bs-burst{padding:24px 38px;}
+.bubble .bb-bg{position:absolute;left:-9%;top:-14%;width:118%;height:128%;z-index:-1;overflow:visible;pointer-events:none;}
+.bubble .bb-bg path{fill:var(--bg);stroke:var(--bd);stroke-width:var(--bw);stroke-dasharray:var(--bdash,none);vector-effect:non-scaling-stroke;stroke-linejoin:round;}
+.bubble.bs-cloud::after,.bubble.bs-burst::after{bottom:-16px;}
+.bubble .bb-name{display:block;font-size:.66em;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin-bottom:2px;}
+.bubble.bs-bar .bb-name{display:inline;margin:0 8px 0 0;}
 .bubble .w{opacity:.42;transition:opacity .12s;}
 .bubble .w.done{opacity:1;}
-.bubble .w.cur{opacity:1;background:#ffe27a;border-radius:4px;}
+.bubble .w.cur{opacity:1;background:#ffe27a;color:#1a1b22;border-radius:4px;}
+.bubble.rv-type .w{visibility:hidden;}
+.bubble.rv-type .w.done,.bubble.rv-type .w.cur{visibility:visible;background:none;color:inherit;}
+.bubble.rv-type .w.cur::after{content:'▌';opacity:.8;animation:bbCaret .6s steps(1) infinite;}
+.bubble.rv-all .w{opacity:1;}
+.bubble.rv-all .w.cur{background:none;color:inherit;}
+.bubble.static{position:relative;opacity:1;transform:none;transition:none;display:inline-block;max-width:100%;}
+.bubble.static .w{opacity:1;visibility:visible;}
+@keyframes bbCaret{50%{opacity:0;}}
+.bb-card{width:min(720px,100%);max-height:92vh;overflow-y:auto;}
+.bb-card .modal-row{position:sticky;bottom:-20px;background:var(--panel);padding:10px 0 20px;margin:10px 0 -20px;flex-wrap:wrap;border-top:1px solid var(--panel-border);}
+.bb-prev{display:flex;justify-content:center;align-items:center;min-height:120px;padding:20px 20px 44px;margin:8px 0 4px;border-radius:12px;background:linear-gradient(135deg,#dfe7f2,#f4efe3);}
+.bb-presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;margin-top:6px;}
+.bb-chip{background:var(--panel-elevated);border:1px solid var(--panel-border);border-radius:10px;padding:8px 6px 6px;cursor:pointer;color:var(--text-primary);text-align:center;font-size:11px;}
+.bb-chip.sel{border-color:var(--accent-violet);box-shadow:0 0 0 2px rgba(124,111,255,.4);}
+.bb-chip .bb-mini{display:flex;justify-content:center;align-items:center;height:64px;padding-bottom:16px;overflow:hidden;}
+.bb-chip .bubble{font-size:11px !important;padding:5px 9px;max-width:100%;}
+.bb-chip .bubble.bs-oval{padding:8px 14px;} .bb-chip .bubble.bs-cloud{padding:10px 16px;} .bb-chip .bubble.bs-burst{padding:12px 18px;}
+.bb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:4px 14px;}
+.bb-grid label{margin:8px 0 3px;}
+.bb-grid select,.bb-grid input[type=range]{width:100%;}
+.bb-grid input[type=color]{width:100%;height:30px;padding:0;border:1px solid var(--panel-border);border-radius:6px;background:none;}
+.bb-checks{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;}
+.bb-checks label{display:flex;align-items:center;gap:5px;margin:0;text-transform:none;letter-spacing:0;font-size:12px;color:var(--text-primary);}
+.bb-hint{font-size:11px;color:var(--text-muted);margin-top:8px;}
 body.playing .stage-character,body.playing .stage-object{pointer-events:none;cursor:default;}
 body.playing .stage-character.selected,body.playing .stage-object.selected{outline:none;}
 
@@ -534,6 +578,7 @@ select.speaker-lang{background:var(--panel);border:1px solid var(--panel-border)
   </div>
 </div>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="bbWobble" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".022 .03" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2"/></filter></svg>
 <div class="modal" id="voiceDlg" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="voiceDlgTitle">
     <h3 id="voiceDlgTitle" data-en="Voice sources">Stimmquellen</h3>
@@ -958,21 +1003,21 @@ function headFB(ch, uid, view, mode){
   g+=`<path d="${hp}" fill="${skin}"/>`;
   g+=`<g clip-path="url(#${cid})"><ellipse cx="${three?96:118}" cy="66" rx="${three?18:20}" ry="30" fill="${skinD}" opacity="${three?.18:.24}"/><ellipse cx="86" cy="36" rx="14" ry="9" fill="${skinL}" opacity=".3"/></g>`;
   if(view==='front'){
-    g+= three ? `<g transform="translate(6.5 0)">`+faceFront(ch,'threeq')+`</g>` : faceFront(ch,'front');
+    g+= three ? `<g transform="translate(6.5 0)"><!--F-->`+faceFront(ch,'threeq')+`<!--/F--></g>` : `<!--F-->`+faceFront(ch,'front')+`<!--/F-->`;
   }
   g+=H.front;
   g+= three ? `</g>` : '';
   g+=`</g>`;
-  return g;
+  return headScale(g);
 }
 function svgFB(ch, uid, view){
-  return bodyFB(ch,view)+headFB(ch,uid,view,'front');
+  return bodyScale(bodyFB(ch,view))+headFB(ch,uid,view,'front');
 }
 function svgThreeQ(ch, uid){
   // 3/4-Ansicht: Körper leicht gestaucht und verschoben, Gesichtszüge Richtung Blickrichtung (rechts) verschoben
   const b=BUILD[ch.build||'reg'];
   const body=bodyFB(ch,'front');
-  return `<g transform="translate(104 0) scale(.88 1) translate(-100 0)">${body}</g>`+`<g transform="translate(2 0)">${headFB(ch,uid,'front','threeq')}</g>`;
+  return bodyScale(`<g transform="translate(104 0) scale(.88 1) translate(-100 0)">${body}</g>`)+`<g transform="translate(2 0)">${headFB(ch,uid,'front','threeq')}</g>`;
 }
 /* ---------- Profil-Ansicht (blickt nach rechts) ---------- */
 function svgSide(ch, uid){
@@ -1024,25 +1069,52 @@ function svgSide(ch, uid){
   s+=armS(102,'arm-main',false);
   s+=`</g>`;
   // Kopf
+  const hs0=s; s='';
   const H=hairSide(ch.hairStyle,ch.hair), hp=headPathSide(ch.jaw), cid='hs_'+uid;
   s+=`<g class="head-group" style="transform-box:view-box;transform-origin:100px 88px">`;
   s+=H.behind;
   s+=`<defs><clipPath id="${cid}"><path d="${hp}"/></clipPath></defs><path d="${hp}" fill="${skin}"/>`;
   s+=`<g clip-path="url(#${cid})"><ellipse cx="82" cy="62" rx="20" ry="32" fill="${skinD}" opacity=".22"/><ellipse cx="112" cy="34" rx="14" ry="8" fill="${skinL}" opacity=".3"/></g>`;
-  s+=faceSide(ch);
+  s+='<!--F-->'+faceSide(ch)+'<!--/F-->';
   s+=H.front;
   s+=`</g>`;
-  return s;
+  return headWrap(s,hs0);
 }
 
+/* ---------- Figurenstil: Standard · Kontur · Cartoon (Kontur + größerer Kopf) · Chibi (großer Kopf) ---------- */
+const LOOKS={ std:{ink:0,s:1,b:1}, ink:{ink:1,s:1,b:1}, toon:{ink:1,s:1.18,b:1}, chibi:{ink:1,s:1.4,b:.9} };
+const LOOK_LABELS=[['std','Standard','Standard'],['ink','Kontur','Outlined'],['toon','Cartoon','Cartoon'],['chibi','Chibi (Riesenkopf)','Chibi (big head)']];
+let LOOK='std';
+function headScale(g){
+  const L=LOOKS[LOOK]||LOOKS.std; if(L.s===1) return g;
+  const neck=332-(332-86)*L.b-86, dy=Math.max(neck,78*L.s-82);
+  return `<g transform="translate(0 ${dy.toFixed(1)}) translate(100 86) scale(${L.s}) translate(-100 -86)">${g}</g>`;
+}
+function bodyScale(g){ const L=LOOKS[LOOK]||LOOKS.std; return L.b===1?g:`<g transform="translate(100 332) scale(${L.b}) translate(-100 -332)">${g}</g>`; }
+function headWrap(headStr, bodyStr){ return bodyScale(bodyStr)+headScale(headStr); }
+function inkOutline(str){
+  const C='#2A2230', W=2.5;
+  return str.split(/(<!--F-->[\s\S]*?<!--\/F-->)/).map((p,i)=>{
+    if(i%2) return p;
+    p=p.replace(/<path d="([^"]+)" stroke="(#[0-9A-Fa-f]{3,8})" stroke-width="([\d.]+)" fill="none" stroke-linecap="round"\/>/g,(m,d,c,w)=>`<path d="${d}" stroke="${C}" stroke-width="${(+w+W*1.6).toFixed(1)}" fill="none" stroke-linecap="round"/>`+m);
+    return p.replace(/<(path|ellipse|rect|circle)\b([^>]*?)\/>/g,(m,t,a)=>{
+      if(/stroke|opacity|clip|class=/.test(a) || !/fill="#/.test(a)) return m;
+      const r=/ r="([\d.]+)"/.exec(a); if(t==='circle' && r && +r[1]<4) return m;
+      return `<${t}${a} stroke="${C}" stroke-width="${W}" stroke-linejoin="round"/>`;
+    });
+  }).join('');
+}
 function characterSVG(ch, uid, facing, opts){
   facing=facing||'front'; opts=opts||{};
+  LOOK=LOOKS[opts.look]?opts.look:'std';
   const vb = opts.avatar ? (facing==='side'?'52 2 100 100':'50 2 100 100') : '0 0 200 340';
   let inner;
   if(facing==='side') inner=svgSide(ch,uid);
   else if(facing==='threeq') inner=svgThreeQ(ch,uid);
   else if(facing==='back') inner=svgFB(ch,uid,'back');
   else inner=svgFB(ch,uid,'front');
+  if(LOOKS[LOOK].ink) inner=inkOutline(inner);
+  LOOK='std';
   return `<svg class="fig-root view-${facing}" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
 }
 
@@ -1618,7 +1690,7 @@ function renderCharacters(){
 
     const inner=document.createElement('div'); inner.className='stage-character-inner';
     inner.style.transform=inst.flipped?'scaleX(-1)':'none';
-    inner.innerHTML=characterSVG(def, inst.id, inst.facing||'front');
+    inner.innerHTML=characterSVG(def, inst.id, inst.facing||'front', {look:inst.look});
     el.appendChild(inner);
 
     const toolbar=document.createElement('div'); toolbar.className='obj-toolbar';
@@ -2207,7 +2279,7 @@ function renderSpeakerTracks(){
     const row=document.createElement('div'); row.className='speaker-track'; row.dataset.instId=inst.id;
 
     const avatar=document.createElement('div'); avatar.className='speaker-avatar';
-    avatar.innerHTML=characterSVG(def,'sp-'+inst.id,'front',{avatar:true});
+    avatar.innerHTML=characterSVG(def,'sp-'+inst.id,'front',{avatar:true,look:inst.look});
     row.appendChild(avatar);
     const name=document.createElement('div'); name.className='speaker-name'; name.textContent=$d(def.name); name.title=$d(def.name)+' – '+$d(def.tag);
     row.appendChild(name);
@@ -2262,6 +2334,13 @@ function renderSpeakerTracks(){
     const bub=document.createElement('input'); bub.type='checkbox'; bub.checked=inst.bubble!==false; bub.className='speaker-bubble';
     bub.addEventListener('change',()=>{ inst.bubble=bub.checked; });
     mk('opt-bubble',$t('Sprechblase','Speech bubble'),bub);
+    const bbtn=document.createElement('button'); bbtn.type='button'; bbtn.className='ctrl-btn ctrl-btn-sm speaker-bstyle';
+    bbtn.textContent='🎨 '+$t('Blase gestalten …','Style bubble …'); bbtn.title=$t('Form, Schrift, Farben und Textanzeige der Sprechblase dieser Figur','Shape, font, colours and text reveal of this figure’s speech bubble');
+    bbtn.addEventListener('click',()=>openBubbleDlg(inst)); mk('opt-bstyle',$t('Blasenstil','Bubble style'),bbtn);
+    const lk=document.createElement('select'); lk.className='speaker-look'; lk.dataset.instId=inst.id;
+    LOOK_LABELS.forEach(([v,d,e])=>{ const o=document.createElement('option'); o.value=v; o.textContent=$t(d,e); lk.appendChild(o); }); lk.value=inst.look||'std';
+    lk.addEventListener('change',()=>{ inst.look=lk.value; renderCharacters(); avatar.innerHTML=characterSVG(def,'sp-'+inst.id,'front',{avatar:true,look:inst.look}); });
+    mk('opt-look',$t('Figurenstil','Figure style'),lk).title=$t('Standard, Kontur, Cartoon (Kontur + größerer Kopf) oder Chibi (Riesenkopf)','Standard, outlined, cartoon (outline + bigger head) or chibi (huge head)');
 
     // Eigene Audiodatei (z. B. aus einem hochwertigen TTS-Dienst oder selbst aufgenommen) – Lippen/Blase laufen im Takt der Datei
     const clipBox=document.createElement('div'); clipBox.className='speaker-opt opt-clip';
@@ -2681,20 +2760,76 @@ const Music={
 };
 
 /* ================= Sprechblasen ================= */
+/* ================= Sprechblasen: Formen, Schrift, Farben – pro Figur einstellbar ================= */
+const BB_FONTS=[
+  ['sans','Standard (Sans)','Standard (sans)','var(--font-body)'],
+  ['rounded','Rund & freundlich','Rounded & friendly',"ui-rounded,'Arial Rounded MT Bold','Nunito','Varela Round',system-ui,sans-serif"],
+  ['comic','Comic','Comic',"'Comic Sans MS','Comic Neue','Chalkboard SE','Marker Felt','Bradley Hand',cursive"],
+  ['hand','Handschrift','Handwriting',"'Segoe Print','Bradley Hand','Noteworthy','Kalam','Comic Sans MS',cursive"],
+  ['serif','Serif (Erzähler)','Serif (narrator)',"Georgia,'Times New Roman',serif"],
+  ['impact','Plakativ (Schrei)','Bold display (shout)',"Impact,'Haettenschweiler','Arial Narrow Bold','Arial Black',sans-serif"],
+  ['mono','Schreibmaschine / Code','Typewriter / code',"ui-monospace,'SF Mono',Menlo,Consolas,monospace"]
+];
+const BB_SHAPES=[
+  ['box','Rechteck, abgerundet','Rounded box'],['round','Kapsel','Pill'],['oval','Oval (Comic-Sprechblase)','Oval (comic bubble)'],
+  ['square','Eckig','Square'],['cloud','Gedankenwolke','Thought cloud'],['burst','Ruf / Schrei (Zacken)','Shout (burst)'],
+  ['caption','Erzählerkasten','Caption box'],['note','Notizzettel','Sticky note'],['bar','Untertitel-Balken','Subtitle bar'],['sketch','Handgezeichnet (wackelig)','Hand-drawn (wobbly)']
+];
+const BB_TAILS=[['auto','Automatisch','Automatic'],['point','Spitze','Pointer'],['dots','Gedankenpunkte','Thought dots'],['none','Keine','None']];
+const BB_REVEALS=[['hl','Wort hervorheben (gesprochen)','Highlight spoken word'],['type','Mitschreiben (Schreibmaschine)','Type along (typewriter)'],['all','Ganzer Text sofort','Show all at once']];
+const BB_DEFAULT={preset:'classic',shape:'box',tail:'auto',font:'sans',size:17,bold:false,italic:false,color:'#1a1b22',fill:'#ffffff',stroke:'#1a1b22',sw:0,dash:false,reveal:'hl',align:'left',name:false,auto:false};
+const BB_PRESETS=[
+  ['classic','Klassisch','Classic',{}],
+  ['speech','Comic-Sprechblase','Comic speech',{shape:'oval',font:'comic',bold:true,sw:3,align:'center',size:18}],
+  ['thought','Gedanke','Thought',{shape:'cloud',font:'comic',italic:true,sw:3,align:'center',stroke:'#2B3350',fill:'#f4f7ff'}],
+  ['shout','Schrei','Shout',{shape:'burst',font:'impact',size:24,sw:3,fill:'#FFE27A',stroke:'#C9283F',color:'#C9283F',align:'center'}],
+  ['whisper','Flüstern','Whisper',{shape:'oval',font:'rounded',italic:true,size:14,sw:2,dash:true,stroke:'#8A92A8',color:'#5B6275',fill:'#F3F5FA',align:'center'}],
+  ['narrator','Erzähler','Narrator',{shape:'caption',font:'serif',sw:3,fill:'#FFF2A8',stroke:'#1a1b22',tail:'none',name:true}],
+  ['note','Notizzettel','Sticky note',{shape:'note',font:'hand',size:18,fill:'#FFF176',tail:'none',color:'#3b3320'}],
+  ['subtitle','Untertitel','Subtitle',{shape:'bar',font:'sans',size:20,fill:'#101218',color:'#ffffff',tail:'none',align:'center',name:true}],
+  ['sketch','Skizze','Sketch',{shape:'sketch',font:'hand',size:18,sw:3,stroke:'#2B3350',fill:'#FFFDF5'}],
+  ['retro','Retro-Terminal','Retro terminal',{shape:'square',font:'mono',size:16,sw:2,fill:'#08140D',stroke:'#44FF88',color:'#44FF88',reveal:'type'}],
+  ['pop','Pop (rund & bunt)','Pop (round & bold)',{shape:'round',font:'rounded',bold:true,sw:3,fill:'#7C6FFF',stroke:'#2B2466',color:'#ffffff',size:18}]
+];
+function bbStyle(inst){ return Object.assign({}, BB_DEFAULT, inst&&inst.bs||{}); }
+function bbFontCss(id){ const f=BB_FONTS.find(x=>x[0]===id)||BB_FONTS[0]; return f[3]; }
+function buildBubbleEl(st, text, words, opts){
+  opts=opts||{};
+  let shape=st.shape;
+  if(opts.mood && st.auto && (opts.mood==='anger'||opts.mood==='surprise')) shape='burst';
+  let tail=st.tail||'auto';
+  if(tail==='auto') tail = shape==='cloud'?'dots':(shape==='note'||shape==='bar'||shape==='caption')?'none':'point';
+  const b=document.createElement('div');
+  b.className='bubble bs-'+shape+' tl-'+tail+' rv-'+(st.reveal||'hl')+(st.bold?' b-bold':'')+(st.italic?' b-ital':'')+(opts.static?' static':'');
+  b.style.setProperty('--bg',st.fill); b.style.setProperty('--fg',st.color); b.style.setProperty('--bd',st.sw>0?st.stroke:'transparent');
+  b.style.setProperty('--bw',(st.sw||0)+'px'); b.style.setProperty('--bst',st.dash?'dashed':'solid'); b.style.setProperty('--bdash',st.dash?'7 5':'none');
+  b.style.setProperty('--bfs',st.size+'px'); b.style.setProperty('--bff',bbFontCss(st.font)); b.style.setProperty('--bal',st.align||'left');
+  if(shape==='cloud' || shape==='burst'){
+    const N=shape==='burst'?18:11; let d='';
+    if(shape==='burst'){ for(let i=0;i<N*2;i++){ const a=i*Math.PI/N, r=i%2?40:50, rx=r, ry=r; d+=(i?'L':'M')+(50+Math.cos(a)*rx).toFixed(1)+' '+(50+Math.sin(a)*ry).toFixed(1); } d+='Z'; }
+    else { for(let i=0;i<N;i++){ const a0=i*2*Math.PI/N, a1=(i+1)*2*Math.PI/N, am=(a0+a1)/2; const x0=50+Math.cos(a0)*41, y0=50+Math.sin(a0)*38, x1=50+Math.cos(a1)*41, y1=50+Math.sin(a1)*38, cx=50+Math.cos(am)*58, cy=50+Math.sin(am)*54; d+=(i?'':'M'+x0.toFixed(1)+' '+y0.toFixed(1))+'Q'+cx.toFixed(1)+' '+cy.toFixed(1)+' '+x1.toFixed(1)+' '+y1.toFixed(1); } d+='Z'; }
+    b.insertAdjacentHTML('afterbegin','<svg class="bb-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="'+d+'"/></svg>');
+  }
+  if(st.name && opts.name){ const n=document.createElement('span'); n.className='bb-name'; n.textContent=opts.name; b.appendChild(n); }
+  let p=0; const spans=[];
+  (words||[]).forEach(w=>{
+    if(w.s>p) b.appendChild(document.createTextNode(text.slice(p,w.s)));
+    const sp=document.createElement('span'); sp.className='w'; sp.textContent=text.slice(w.s,w.e); b.appendChild(sp); spans.push(sp); p=w.e;
+  });
+  if(p<text.length) b.appendChild(document.createTextNode(text.slice(p)));
+  b._shape=shape;
+  return b;
+}
 const Bubble={
   items:{},
   layer(){ return document.getElementById('stageBubbles'); },
   show(inst,job){
     this.hide(inst,true);
-    const b=document.createElement('div'); b.className='bubble'; b.dataset.instId=inst.id;
-    const text=job.text; let p=0;
-    job.plan.words.forEach(w=>{
-      if(w.s>p) b.appendChild(document.createTextNode(text.slice(p,w.s)));
-      const sp=document.createElement('span'); sp.className='w'; sp.textContent=text.slice(w.s,w.e); b.appendChild(sp); p=w.e;
-    });
-    if(p<text.length) b.appendChild(document.createTextNode(text.slice(p)));
+    const st=bbStyle(inst), rs=rigState(inst), def=characters.find(c=>c.id===inst.charId);
+    const b=buildBubbleEl(st, job.text, job.plan.words, {mood:rs.mood, name:def?$d(def.name):'', });
+    b.dataset.instId=inst.id;
     this.layer().appendChild(b);
-    this.items[inst.id]={el:b, spans:Array.prototype.slice.call(b.querySelectorAll('.w')), cur:-2};
+    this.items[inst.id]={el:b, spans:Array.prototype.slice.call(b.querySelectorAll('.w')), cur:-2, shape:b._shape};
     this.place(inst);
     requestAnimationFrame(()=>b.classList.add('on'));
   },
@@ -2708,11 +2843,13 @@ const Bubble={
     const it=this.items[inst.id], el=charEl(inst.id); if(!it||!el) return;
     const st=document.getElementById('stage').getBoundingClientRect(), r=el.getBoundingClientRect(), b=it.el, K=STAGE_K;
     const bw=b.offsetWidth, bh=b.offsetHeight;
+    if(it.shape==='bar'){ b.style.left=Math.max(6,(STAGE_W-bw)/2)+'px'; b.style.top=(STAGE_H-bh-26)+'px'; return; }
     const cx=(r.left-st.left+r.width/2)/K;
-    const left=Math.max(6,Math.min(STAGE_W-bw-6, cx-bw/2));
-    let top=(r.top-st.top)/K+(r.height/K)*0.04-bh-12; if(top<6) top=6;
+    const left=Math.max(10,Math.min(STAGE_W-bw-10, cx-bw/2));
+    const lift=(it.shape==='cloud'?36:it.shape==='burst'?18:12)+(b.classList.contains('tl-none')?-4:0);
+    let top=(r.top-st.top)/K+(r.height/K)*0.04-bh-lift; if(top<8) top=8;
     b.style.left=left+'px'; b.style.top=top+'px';
-    b.style.setProperty('--tail', Math.max(18,Math.min(bw-18,cx-left))+'px');
+    b.style.setProperty('--tail', Math.max(22,Math.min(bw-22,cx-left))+'px');
   },
   hide(inst,instant){
     const it=this.items[inst.id]; if(!it) return; delete this.items[inst.id];
@@ -2721,6 +2858,65 @@ const Bubble={
   },
   clear(){ const l=this.layer(); if(l) l.innerHTML=''; this.items={}; }
 };
+
+/* ---- Dialog „Sprechblase gestalten“ ---- */
+function openBubbleDlg(inst){
+  const def=characters.find(c=>c.id===inst.charId)||{name:''};
+  let dlg=document.getElementById('bubbleDlg'); if(dlg) dlg.remove();
+  dlg=document.createElement('div'); dlg.className='modal'; dlg.id='bubbleDlg';
+  dlg.innerHTML='<div class="modal-card bb-card" role="dialog" aria-modal="true"><h3></h3><div class="anim-hint"></div><div class="bb-prev"></div><label class="bb-l-presets"></label><div class="bb-presets"></div><div class="bb-grid"></div><div class="bb-checks"></div><div class="bb-hint"></div><div class="modal-row"></div></div>';
+  document.body.appendChild(dlg);
+  const q=(sel)=>dlg.querySelector(sel);
+  q('h3').textContent=$t('Sprechblase gestalten – ','Style speech bubble – ')+$d(def.name);
+  q('.anim-hint').textContent=$t('Gilt für alle Sprechzeilen dieser Figur. Der gesprochene Text wird in der Blase angezeigt, sobald „Sprechblase“ bei der Figur aktiv ist.','Applies to every line this figure speaks. The spoken text is shown in the bubble while “Speech bubble” is enabled for the figure.');
+  q('.bb-l-presets').textContent=$t('Vorlagen','Presets');
+  const sample=$t('Guten Tag! Wie kann ich helfen?','Hello! How can I help you?');
+  const words=[]; sample.replace(/\S+/g,(m,i)=>{ words.push({s:i,e:i+m.length}); return m; });
+  const get=()=>{ inst.bs=inst.bs||Object.assign({},BB_DEFAULT); return inst.bs; };
+  const set=(k,v)=>{ const st=get(); st[k]=v; if(k!=='preset') st.preset='custom'; refresh(); };
+  const grid=q('.bb-grid');
+  const field=(label,node)=>{ const w=document.createElement('div'); const l=document.createElement('label'); l.textContent=label; w.appendChild(l); w.appendChild(node); grid.appendChild(w); return node; };
+  const sel=(key,list,label)=>{ const e=document.createElement('select'); e.dataset.k=key; list.forEach(o=>{ const op=document.createElement('option'); op.value=o[0]; op.textContent=$t(o[1],o[2]); e.appendChild(op); }); e.addEventListener('change',()=>set(key,e.value)); return field(label,e); };
+  const rng=(key,min,max,step,label)=>{ const e=document.createElement('input'); e.type='range'; e.min=min; e.max=max; e.step=step; e.dataset.k=key; e.addEventListener('input',()=>set(key,+e.value)); return field(label,e); };
+  const col=(key,label)=>{ const e=document.createElement('input'); e.type='color'; e.dataset.k=key; e.addEventListener('input',()=>set(key,e.value)); return field(label,e); };
+  sel('shape',BB_SHAPES,$t('Form','Shape')); sel('tail',BB_TAILS,$t('Zeiger zur Figur','Pointer to figure'));
+  sel('font',BB_FONTS,$t('Schrift','Font')); rng('size',12,34,1,$t('Schriftgröße','Font size'));
+  col('color',$t('Textfarbe','Text colour')); col('fill',$t('Füllfarbe','Fill colour'));
+  col('stroke',$t('Randfarbe','Border colour')); rng('sw',0,6,1,$t('Randstärke','Border width'));
+  sel('reveal',BB_REVEALS,$t('Textanzeige','Text reveal')); sel('align',[['left','Linksbündig','Left'],['center','Zentriert','Centred']],$t('Ausrichtung','Alignment'));
+  const checks=q('.bb-checks');
+  const cb=(key,label,title)=>{ const l=document.createElement('label'); if(title) l.title=title; const e=document.createElement('input'); e.type='checkbox'; e.dataset.k=key; e.addEventListener('change',()=>set(key,e.checked)); l.appendChild(e); l.appendChild(document.createTextNode(label)); checks.appendChild(l); };
+  cb('bold',$t('Fett','Bold')); cb('italic',$t('Kursiv','Italic')); cb('dash',$t('Gestrichelter Rand','Dashed border'));
+  cb('name',$t('Sprechernamen anzeigen','Show speaker name'),$t('Zeigt den Namen der Figur in der Blase','Shows the figure’s name in the bubble'));
+  cb('auto',$t('Form folgt Reaktion (Ärger/Verwunderung → Zacken)','Shape follows reaction (anger/surprise → burst)'),$t('Bei der Reaktion „Ärger“ oder „Verwunderung“ wird automatisch die Schrei-Form genutzt','With the reaction “Anger” or “Surprise” the shout shape is used automatically'));
+  q('.bb-hint').textContent=$t('Schriften stammen vom Gerät (Comic, Handschrift usw. sind auf Windows, Mac und iPhone unterschiedlich hübsch). Ohne installierte Schrift greift automatisch eine Ersatzschrift.','Fonts come from your device (comic and handwriting faces look different on Windows, Mac and iPhone). If a font is not installed, a fallback font is used.');
+  const prev=q('.bb-prev'), chips=q('.bb-presets');
+  BB_PRESETS.forEach(pr=>{
+    const c=document.createElement('button'); c.type='button'; c.className='bb-chip'; c.dataset.preset=pr[0];
+    const mini=document.createElement('div'); mini.className='bb-mini';
+    mini.appendChild(buildBubbleEl(Object.assign({},BB_DEFAULT,pr[3],{name:false}),'Aa',[{s:0,e:2}],{static:true}));
+    c.appendChild(mini); c.appendChild(document.createTextNode($t(pr[1],pr[2])));
+    c.addEventListener('click',()=>{ inst.bs=Object.assign({},BB_DEFAULT,pr[3],{preset:pr[0]}); refresh(); });
+    chips.appendChild(c);
+  });
+  function refresh(){
+    const st=bbStyle(inst);
+    grid.querySelectorAll('[data-k]').forEach(e=>{ e.value=st[e.dataset.k]; });
+    checks.querySelectorAll('[data-k]').forEach(e=>{ e.checked=!!st[e.dataset.k]; });
+    chips.querySelectorAll('.bb-chip').forEach(c=>c.classList.toggle('sel',c.dataset.preset===st.preset));
+    prev.innerHTML='';
+    const b=buildBubbleEl(st,sample,words,{static:true,name:$d(def.name)});
+    b.querySelectorAll('.w').forEach((w,i)=>{ w.classList.toggle('done',i<2); w.classList.toggle('cur',i===2); });
+    prev.appendChild(b);
+  }
+  const row=q('.modal-row');
+  const mkBtn=(txt,cls,fn)=>{ const e=document.createElement('button'); e.type='button'; e.className='ctrl-btn'+(cls?' '+cls:''); e.textContent=txt; e.addEventListener('click',fn); row.appendChild(e); return e; };
+  mkBtn($t('Auf alle Figuren dieser Szene übertragen','Apply to all figures in this scene'),'bb-all',()=>{ getCurrentScene().characters.forEach(c=>{ c.bs=Object.assign({},bbStyle(inst)); }); });
+  mkBtn($t('Zurücksetzen','Reset'),'bb-reset',()=>{ inst.bs=Object.assign({},BB_DEFAULT); refresh(); });
+  mkBtn($t('Fertig','Done'),'primary bb-close',()=>{ dlg.remove(); });
+  dlg.addEventListener('pointerdown',e=>{ if(e.target===dlg) dlg.remove(); });
+  refresh();
+}
 
 /* ================= Wiedergabe: ein einziger Ablauf für Einzelzeile, Szene und Gesamtfilm ================= */
 function findInst(id){ return getCurrentScene().characters.find(c=>c.id===id); }
