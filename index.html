@@ -407,6 +407,46 @@ select.speaker-voice{max-width:190px;}
 .filmstrip-thumb svg{width:100%;height:100%;display:block;}
 .filmstrip-label{font-size:9.5px;padding:4px 6px;color:var(--text-secondary);display:flex;justify-content:space-between;align-items:center;gap:4px;}
 .filmstrip-label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mode-switch{position:absolute;right:8px;top:8px;z-index:20;display:flex;background:rgba(20,21,26,.82);border:1px solid var(--panel-border);border-radius:10px;overflow:hidden;backdrop-filter:blur(4px);}
+.mode-btn{background:none;border:none;color:var(--text-secondary);font:600 12px var(--font-body);padding:6px 11px;cursor:pointer;}
+.mode-btn.active{background:var(--accent-violet);color:#fff;}
+.char-quick{position:absolute;right:-38px;top:12%;display:flex;flex-direction:column;gap:6px;z-index:40;}
+.char-quick.left{right:auto;left:-38px;}
+.cq-btn{width:32px;height:32px;border-radius:50%;border:2px solid #fff;background:var(--accent-violet);color:#fff;font-size:15px;line-height:1;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.45);padding:0;touch-action:manipulation;}
+.cq-btn:hover{transform:scale(1.1);} .cq-cfg{background:#3a4660;} .cq-text{background:#17a398;}
+.cq-rec.recording{background:#e5484d;animation:recPulse 1s ease-in-out infinite;}
+body.playing .char-quick,body.preview-mode .char-quick,body.preview-mode .obj-toolbar,body.preview-mode .obj-handle,body.preview-mode #stageMarkers,body.picking .char-quick{display:none !important;}
+body.preview-mode .stage-character,body.preview-mode .stage-object{pointer-events:none;cursor:default;outline:none !important;}
+.char-pop{position:fixed;z-index:70;width:400px;max-width:calc(100vw - 12px);max-height:calc(100vh - 80px);overflow:auto;background:var(--panel);border:1px solid var(--panel-border);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.55);padding:10px 12px 14px;}
+.char-pop.sheet{left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;max-height:72vh;border-radius:16px 16px 0 0;}
+.cp-head{display:flex;align-items:center;justify-content:space-between;position:sticky;top:-10px;background:var(--panel);padding:8px 0;z-index:2;font-size:14px;}
+.cp-x{background:none;border:none;color:var(--text-secondary);font-size:16px;cursor:pointer;padding:4px 8px;}
+.cp-sec{margin-top:6px;} .cp-cfg{border-top:1px solid var(--panel-border);padding-top:8px;margin-top:12px;}
+.char-pop .speaker-track.in-pop{display:flex;flex-wrap:wrap;gap:6px;padding:0;border:none;background:none;}
+.char-pop .speaker-track.in-pop .speaker-line{flex:1 1 100%;min-width:0;order:5;}
+.char-pop .speaker-track.in-pop .speaker-opts{flex:1 1 100%;order:6;}
+
+#exportBar{display:none;position:fixed;left:0;right:0;top:0;height:44px;z-index:300;background:#1a0f10;color:#fff;align-items:center;justify-content:space-between;padding:0 14px;font:600 13px var(--font-body);border-bottom:2px solid #e5484d;}
+body.exporting #exportBar{display:flex;}
+body.exporting-play #exportBarText::before{content:'▶ ';}
+body.exporting .topbar,body.exporting .icon-rail,body.exporting .sidebar,body.exporting .timeline-panel,body.exporting .mode-switch,body.exporting .char-pop,body.exporting #stageMarkers,body.exporting .char-quick{display:none !important;}
+body.exporting .main{display:block;}
+body.exporting .stage-wrap{position:fixed;left:0;right:0;bottom:0;top:44px;z-index:200;background:#000;}
+body.exporting .stage-character,body.exporting .stage-object{pointer-events:none;outline:none !important;}
+body.exporting .obj-toolbar,body.exporting .obj-handle{display:none !important;}
+
+#stageCam{position:absolute;inset:0;transform-origin:0 0;will-change:transform;}
+.stage-character.pose-nod .head-group,.stage-character.pose-nod.talking .head-group{animation:nodH 1.1s ease-in-out infinite;}
+@keyframes nodH{0%,100%{transform:rotate(0deg) translateY(0);}25%{transform:rotate(6deg) translateY(3px);}50%{transform:rotate(-1deg) translateY(0);}75%{transform:rotate(5deg) translateY(2px);}}
+.stage-character.pose-shrug .arm-main{animation:shrInA .4s ease-out both,shrA 1.7s ease-in-out .4s infinite;}
+.stage-character.pose-shrug .arm-off{animation:shrInB .4s ease-out both,shrB 1.7s ease-in-out .4s infinite;}
+.stage-character.pose-shrug .torso,.stage-character.pose-shrug .head-group{animation:shrBob 1.7s ease-in-out infinite;}
+@keyframes shrInA{from{transform:rotate(0deg);}to{transform:rotate(-30deg);}} @keyframes shrInB{from{transform:rotate(0deg);}to{transform:rotate(30deg);}}
+@keyframes shrA{0%,100%{transform:rotate(-30deg);}45%{transform:rotate(-44deg);}} @keyframes shrB{0%,100%{transform:rotate(30deg);}45%{transform:rotate(44deg);}}
+@keyframes shrBob{0%,100%{transform:translateY(0);}45%{transform:translateY(-4px);}}
+
+.filmstrip-dup{margin-left:6px;margin-right:2px;}
+#undoBtn:disabled,#redoBtn:disabled{opacity:.35;cursor:default;}
 .filmstrip-del{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:11px;padding:0;flex-shrink:0;}
 .filmstrip-del:hover{color:var(--accent-pink);}
 .filmstrip-add{flex-shrink:0;width:60px;height:76px;border:1.5px dashed var(--panel-border);border-radius:var(--radius-md);background:none;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;font-family:var(--font-body);}
@@ -529,7 +569,7 @@ select.speaker-voice{background:var(--panel);border:1px solid var(--panel-border
   .obj-tool-btn{width:32px;height:32px;}
 }
 
-@media (max-width:520px){ #embedBtn{display:none;} .logo{font-size:13px;} }
+@media (max-width:520px){ #embedBtn{display:none;} .logo{font-size:13px;} .logo{display:none;} .topbar{padding:0 6px;} .topbar-actions{gap:4px;width:100%;justify-content:space-between;} .topbar-actions .btn{padding:6px 7px;font-size:12px;} }
 /* ---- Sprachumschalter, Stimmquellen-Dialog, Audio-Chip ---- */
 .lang-switch{display:flex;border:1px solid var(--panel-border);border-radius:var(--radius-sm);overflow:hidden;}
 .lang-btn{background:transparent;border:none;color:var(--text-secondary);font-size:12px;font-weight:600;padding:7px 11px;cursor:pointer;font-family:var(--font-body);}
@@ -551,10 +591,14 @@ select.speaker-lang,select.speaker-look{background:var(--panel);border:1px solid
 </head>
 <body>
 
+<div id="exportBar"><span id="exportBarText"></span><button id="exportBarStop" class="ctrl-btn ctrl-btn-sm">■ Stop</button></div>
 <div class="topbar">
   <div class="logo"><span class="dot"></span> Stagehand Studio</div>
   <div class="topbar-actions">
     <div class="lang-switch" role="group" aria-label="Sprache / Language"><button class="lang-btn" data-lang="de" title="Deutsch">DE</button><button class="lang-btn" data-lang="en" title="English">EN</button></div>
+    <button class="btn btn-ghost" id="undoBtn" title="Rückgängig (Strg+Z)" data-en-title="Undo (Ctrl+Z)">↶</button>
+    <button class="btn btn-ghost" id="redoBtn" title="Wiederholen (Strg+Umschalt+Z)" data-en-title="Redo (Ctrl+Shift+Z)">↷</button>
+    <button class="btn btn-ghost" id="projectBtn" data-en="Project">Projekt</button>
     <button class="btn btn-ghost" id="voicesBtn" data-en="Voices">Stimmen</button>
     <button class="btn btn-ghost" id="exportBtn" data-en="Export">Exportieren</button>
     <button class="btn btn-primary" id="embedBtn" data-en="Embed code">Embed-Code</button>
@@ -577,12 +621,18 @@ select.speaker-lang,select.speaker-look{background:var(--panel);border:1px solid
 
   <div class="stage-wrap">
     <div class="stage-area" id="stageArea">
+      <div class="mode-switch" id="modeSwitch" role="group" aria-label="Ansicht" data-en-aria="View">
+        <button class="mode-btn active" data-mode="edit" data-en="✎ Edit" title="Bearbeiten: Figuren antippen, einsprechen, konfigurieren" data-en-title="Edit: tap figures, record, configure">✎ Bearbeiten</button>
+        <button class="mode-btn" data-mode="preview" data-en="👁 Preview" title="Vorschau ohne Bearbeitungs-Symbole" data-en-title="Preview without editing overlays">👁 Vorschau</button>
+      </div>
       <div id="stageScaler">
       <div class="stage" id="stage">
+        <div id="stageCam">
         <div id="stageBackground"></div>
         <div id="stageObjects"></div>
         <div id="stageCharacters"></div>
         <div id="stageMarkers"></div>
+        </div>
         <div id="stageBubbles"></div>
         <div id="pickBanner" role="status"></div>
       </div>
@@ -595,6 +645,7 @@ select.speaker-lang,select.speaker-look{background:var(--panel);border:1px solid
         <div class="master-col">
           <div class="master-controls">
             <button class="ctrl-btn ctrl-btn-sm primary" id="playAllBtn" data-en="▶ Play all">▶ Alles abspielen</button>
+            <button class="ctrl-btn ctrl-btn-sm" id="pauseBtn" data-en="⏸ Pause" title="Pause / ab dieser Stelle weiter. Tipp: Ins Lineal klicken = ab dort abspielen" data-en-title="Pause / continue from here. Tip: click the ruler = play from there">⏸ Pause</button>
             <button class="ctrl-btn ctrl-btn-sm" id="stopAllBtn" data-en="■ Stop">■ Stopp</button>
             <span class="mini-time" id="masterTimeCode">00:00.0 / 00:00.0</span>
           </div>
@@ -658,7 +709,7 @@ const EN_DICT={
   'Keine':'None','Sanft':'Soft','Energetisch':'Energetic','Corporate':'Corporate','Spannungsvoll':'Tense',
   '✂ Schnitt':'✂ Cut','◐ Überblenden':'◐ Fade','→ Schieben':'→ Slide','↑ Hoch':'↑ Up','▥ Wischblende':'▥ Wipe','⤢ Zoom':'⤢ Zoom',
   'Neutral':'Neutral','Freude':'Joy','Ärger':'Anger','Verwunderung':'Surprise','Neuigkeiten':'News','Interessiertes Zuhören':'Listening',
-  'Stehen':'Standing','Gehen':'Walking','Zeigen':'Pointing','Winken':'Waving','Erklären':'Explaining','Jubeln':'Cheering',
+  'Nicken':'Nodding','Schulterzucken':'Shrugging','Stehen':'Standing','Gehen':'Walking','Zeigen':'Pointing','Winken':'Waving','Erklären':'Explaining','Jubeln':'Cheering',
   'Front':'Front','Seite':'Side','Rücken':'Back',
   'Kein Effekt':'No effect','Einblenden':'Fade in','Von unten einfliegen':'Rise from below','Von links einfliegen':'Slide in from left','Sanft vergrößern':'Gentle zoom','Reinpoppen':'Pop in',
   'Studio Dunkel':'Studio dark','Studio Hell':'Studio light','Himmel':'Sky','Mint':'Mint','Sonnenuntergang':'Sunset','Tafel':'Chalkboard','Violett':'Violet','Warm':'Warm',
@@ -1386,7 +1437,7 @@ async function addMusicFile(f,sc){
 const musicOptions = [['none','Keine'],['soft','Sanft'],['energetic','Energetisch'],['corporate','Corporate'],['tension','Spannungsvoll']];
 const transitionOptions = [['cut','✂ Schnitt'],['fade','◐ Überblenden'],['slide-left','→ Schieben'],['slide-up','↑ Hoch'],['wipe','▥ Wischblende'],['zoom','⤢ Zoom']];
 const reactionOptions = [['none','Neutral'],['joy','Freude'],['anger','Ärger'],['surprise','Verwunderung'],['news','Neuigkeiten'],['listening','Interessiertes Zuhören']];
-const poseOptions=[['idle','Stehen'],['walk','Gehen'],['point','Zeigen'],['wave','Winken'],['explain','Erklären'],['cheer','Jubeln']];
+const poseOptions=[['idle','Stehen'],['walk','Gehen'],['point','Zeigen'],['wave','Winken'],['explain','Erklären'],['cheer','Jubeln'],['nod','Nicken'],['shrug','Schulterzucken']];
 const facingOptions=[['front','Front'],['threeq','¾'],['side','Seite'],['back','Rücken']];
 const trOpts=(a)=>a.map(([v,l])=>[v,$d(l)]);        // Optionsliste in die Oberflächensprache übersetzen
 const effectOptions = [['none','Kein Effekt'],['fade-in','Einblenden'],['rise-up','Von unten einfliegen'],['slide-in-left','Von links einfliegen'],['zoom-in','Sanft vergrößern'],['pop','Reinpoppen']];
@@ -1421,7 +1472,7 @@ function makeScene(overrides){
     id:'scene'+(sceneCounter++), label:'Szene '+sceneCounter,
     bgType:'plain', bgId:'studio-light',
     transitionOut:'fade', bgMusic:'none', duration:8,
-    characters:[], objects:[]
+    characters:[], objects:[], camera:[]
   }, overrides||{});
 }
 let scenesTimeline=[ makeScene({label:'Szene 1'}) ];
@@ -1731,6 +1782,17 @@ function addCharacterToStage(charDefId){
 function bringCharToFront(id){ const cs=getCurrentScene().characters; const i=cs.findIndex(c=>c.id===id); if(i<0) return; const [c]=cs.splice(i,1); cs.push(c); renderCharacters(); }
 function sendCharToBack(id){ const cs=getCurrentScene().characters; const i=cs.findIndex(c=>c.id===id); if(i<0) return; const [c]=cs.splice(i,1); cs.unshift(c); renderCharacters(); }
 function toggleCharFlip(id){ const c=getCurrentScene().characters.find(c=>c.id===id); if(!c) return; c.flipped=!c.flipped; renderCharacters(); }
+/* Größe: Faktor f; Figuren behalten die Fußposition, Objekte ihre Mitte; Text skaliert die Schrift mit */
+function scaleEntity(kind,id,f){
+  const sc=getCurrentScene();
+  if(kind==='char'){ const c=sc.characters.find(c=>c.id===id); if(!c) return; const cx=c.x+c.w/2, by=c.y+c.h; c.w=Math.max(40,Math.min(STAGE_W*0.9,Math.round(c.w*f))); c.h=Math.round(c.w*1.7); c.x=Math.round(cx-c.w/2); c.y=Math.round(by-c.h); renderCharacters(); renderStageMarkers(); }
+  else { const o=sc.objects.find(o=>o.id===id); if(!o) return; const cx=o.x+o.w/2, cy=o.y+o.h/2; const w0=o.w; o.w=Math.max(16,Math.min(STAGE_W*1.5,Math.round(o.w*f))); o.h=Math.max(16,Math.round(o.h*(o.w/w0))); o.x=Math.round(cx-o.w/2); o.y=Math.round(cy-o.h/2); if(o.type==='text') o.fontSize=Math.max(8,Math.round((o.fontSize||24)*(o.w/w0))); renderObjects(); }
+}
+function dupEntity(kind,id){
+  const sc=getCurrentScene();
+  if(kind==='char'){ const c=sc.characters.find(c=>c.id===id); if(!c) return; const n=JSON.parse(JSON.stringify(c)); n.id='ch'+(charInstCounter++); (n.clips||[]).forEach(cl=>{ cl.id='cl'+(clipCounter++); }); n.x=Math.min(STAGE_W-n.w-4,c.x+c.w*0.6); sc.characters.push(n); selectedEntity={kind:'char',id:n.id}; renderCharacters(); renderSpeakerTracks(); renderObjectTimeline(); }
+  else { const o=sc.objects.find(o=>o.id===id); if(!o) return; const n=JSON.parse(JSON.stringify(o)); n.id='obj'+(objCounter++); n.x+=24; n.y+=24; sc.objects.push(n); selectEntity('obj',n.id); renderObjectTimeline(); }
+}
 function deleteCharInstance(id){
   const scene=getCurrentScene();
   scene.characters=scene.characters.filter(c=>c.id!==id);
@@ -1812,12 +1874,18 @@ function renderCharacters(){
       `<button class="obj-tool-btn" data-act="front" title="${$t('Nach vorne','Bring forward')}">⬆</button>`+
       `<button class="obj-tool-btn" data-act="back" title="${$t('Nach hinten','Send backward')}">⬇</button>`+
       `<button class="obj-tool-btn" data-act="flip" title="${$t('Spiegeln','Mirror')}">⇋</button>`+
-      `<button class="obj-tool-btn danger" data-act="delete" title="${$t('Löschen','Delete')}">🗑</button>`;
+      `<button class="obj-tool-btn" data-act="shrink" title="${$t('Kleiner','Smaller')}">－</button>`+
+      `<button class="obj-tool-btn" data-act="grow" title="${$t('Größer','Larger')}">＋</button>`+
+      `<button class="obj-tool-btn" data-act="dup" title="${$t('Duplizieren','Duplicate')}">⧉</button>`+
+      `<button class="obj-tool-btn danger" data-act="delete" title="${$t('Person löschen (samt Text und Sprecher)','Delete person (with text and speaker)')}">🗑</button>`;
     toolbar.addEventListener('pointerdown', e=>e.stopPropagation());
     toolbar.addEventListener('click', e=>{
       const btn=e.target.closest('.obj-tool-btn'); if(!btn) return;
       const act=btn.dataset.act;
-      if(act==='front') bringCharToFront(inst.id);
+      if(act==='grow') scaleEntity('char',inst.id,1.15);
+      else if(act==='shrink') scaleEntity('char',inst.id,1/1.15);
+      else if(act==='dup') dupEntity('char',inst.id);
+      else if(act==='front') bringCharToFront(inst.id);
       else if(act==='back') sendCharToBack(inst.id);
       else if(act==='flip'){ toggleCharFlip(inst.id); if(currentTab==='animation') renderPanel(); }
       else if(act==='delete') deleteCharInstance(inst.id);
@@ -1826,10 +1894,17 @@ function renderCharacters(){
 
     const handle=document.createElement('div'); handle.className='obj-handle';
     el.appendChild(handle);
+    // Schnellsymbole: einsprechen, Text, Konfiguration
+    const cq=document.createElement('div'); cq.className='char-quick'+((inst.x+inst.w/2)>STAGE_W*0.68?' left':'');
+    const qb=(cls,txt,title,fn)=>{ const b=document.createElement('button'); b.type='button'; b.className='cq-btn '+cls; b.dataset.instId=inst.id; b.textContent=txt; b.title=title; b.addEventListener('pointerdown',e=>e.stopPropagation()); b.addEventListener('click',e=>{ e.stopPropagation(); fn(b); }); cq.appendChild(b); return b; };
+    qb('cq-rec','🎙',$t('Einsprechen ('+instLang(inst).toUpperCase()+') – nochmal tippen zum Beenden','Record ('+instLang(inst).toUpperCase()+') – tap again to stop'),()=>toggleRecording(inst));
+    qb('cq-text','💬',$t('Sprechtext, Stimme und Sprache','Speech text, voice and language'),()=>Pop.open(inst,'text'));
+    qb('cq-cfg','⚙',$t('Figur konfigurieren (Zustand, Reaktion, Blickrichtung …)','Configure figure (state, reaction, facing …)'),()=>Pop.open(inst,'cfg'));
+    el.appendChild(cq);
 
     el.addEventListener('pointerdown', e=>{
       if(Player.running) return;
-      if(e.target===handle || e.target.closest('.obj-toolbar')) return;
+      if(e.target===handle || e.target.closest('.obj-toolbar') || e.target.closest('.char-quick')) return;
       const wasSelected=selectedEntity && selectedEntity.kind==='char' && selectedEntity.id===inst.id;
       if(!wasSelected) selectEntity('char', inst.id);
       const startX=e.clientX, startY=e.clientY, ox=inst.x, oy=inst.y;
@@ -1851,6 +1926,7 @@ function renderCharacters(){
     host.appendChild(el);
     applyRig(inst);
   });
+  refreshQuick(); if(window.Pop) Pop.reposition();
 }
 
 /* ================= Stage objects (Requisiten) ================= */
@@ -1911,12 +1987,18 @@ function renderObjects(){
       `<button class="obj-tool-btn" data-act="front" title="${$t('Nach vorne','Bring forward')}">⬆</button>`+
       `<button class="obj-tool-btn" data-act="back" title="${$t('Nach hinten','Send backward')}">⬇</button>`+
       `<button class="obj-tool-btn" data-act="flip" title="${$t('Spiegeln','Mirror')}">⇋</button>`+
+      `<button class="obj-tool-btn" data-act="shrink" title="${$t('Kleiner','Smaller')}">－</button>`+
+      `<button class="obj-tool-btn" data-act="grow" title="${$t('Größer','Larger')}">＋</button>`+
+      `<button class="obj-tool-btn" data-act="dup" title="${$t('Duplizieren','Duplicate')}">⧉</button>`+
       `<button class="obj-tool-btn danger" data-act="delete" title="${$t('Löschen','Delete')}">🗑</button>`;
     toolbar.addEventListener('pointerdown', e=>e.stopPropagation());
     toolbar.addEventListener('click', e=>{
       const btn=e.target.closest('.obj-tool-btn'); if(!btn) return;
       const act=btn.dataset.act;
-      if(act==='front') bringToFront(obj.id);
+      if(act==='grow') scaleEntity('obj',obj.id,1.15);
+      else if(act==='shrink') scaleEntity('obj',obj.id,1/1.15);
+      else if(act==='dup') dupEntity('obj',obj.id);
+      else if(act==='front') bringToFront(obj.id);
       else if(act==='back') sendToBack(obj.id);
       else if(act==='flip') toggleFlip(obj.id);
       else if(act==='delete') deleteObject(obj.id);
@@ -1938,7 +2020,8 @@ function renderObjects(){
     handle.addEventListener('pointerdown', e=>{
       e.stopPropagation(); if(Player.running) return;
       const startX=e.clientX, startY=e.clientY, ow=obj.w, oh=obj.h;
-      function onMove(ev){ obj.w=Math.max(24,ow+(ev.clientX-startX)/STAGE_K); obj.h=Math.max(24,oh+(ev.clientY-startY)/STAGE_K); const live=objEl(obj.id); if(live){ live.style.width=obj.w+'px'; live.style.height=obj.h+'px'; } }
+      const fs0=obj.fontSize||24;
+      function onMove(ev){ if(obj.type==='text'||!ev.shiftKey){ const k=Math.max(24/Math.min(ow,oh), Math.max((ow+(ev.clientX-startX)/STAGE_K)/ow, (oh+(ev.clientY-startY)/STAGE_K)/oh)); obj.w=ow*k; obj.h=oh*k; if(obj.type==='text'){ obj.fontSize=Math.max(8,Math.round(fs0*k)); const te=objEl(obj.id)&&objEl(obj.id).querySelector('.obj-text'); if(te) te.style.fontSize=obj.fontSize+'px'; } } else { obj.w=Math.max(24,ow+(ev.clientX-startX)/STAGE_K); obj.h=Math.max(24,oh+(ev.clientY-startY)/STAGE_K); } const live=objEl(obj.id); if(live){ live.style.width=obj.w+'px'; live.style.height=obj.h+'px'; } }
       function onUp(){ document.removeEventListener('pointermove',onMove); document.removeEventListener('pointerup',onUp); }
       document.addEventListener('pointermove',onMove); document.addEventListener('pointerup',onUp);
     });
@@ -1951,6 +2034,7 @@ document.getElementById('stage').addEventListener('pointerdown', e=>{
   if(e.target.id==='stage' || e.target.closest('#stageBackground')){ selectEntity(null,null); }
 });
 document.addEventListener('keydown', e=>{
+  if((e.key==='+'||e.key==='-'||e.key==='=') && selectedEntity && !Player.running){ const ae=document.activeElement; if(ae && (ae.tagName==='TEXTAREA'||ae.tagName==='INPUT'||ae.tagName==='SELECT'||ae.isContentEditable)) return; e.preventDefault(); scaleEntity(selectedEntity.kind,selectedEntity.id,e.key==='-'?1/1.1:1.1); return; }
   if((e.key==='Delete'||e.key==='Backspace') && selectedEntity){
     const ae=document.activeElement;
     if(ae && (ae.tagName==='TEXTAREA'||ae.tagName==='INPUT'||ae.isContentEditable)) return;
@@ -1979,6 +2063,20 @@ function addScene(){
   const scene=makeScene({label:'Szene '+(scenesTimeline.length+1), bgType:cur.bgType, bgId:cur.bgId, bgImage:cur.bgImage?Object.assign({},cur.bgImage):null});
   scenesTimeline.push(scene);
   selectScene(scenesTimeline.length-1);
+}
+function duplicateScene(idx){
+  const src=scenesTimeline[idx]; if(!src) return;
+  const n=JSON.parse(JSON.stringify(src)); n.id='scene'+(sceneCounter++);
+  n.label=(src.label||('Szene '+(idx+1)))+$t(' (Kopie)',' (copy)');
+  const omap={};
+  (n.objects||[]).forEach(o=>{ const nid='obj'+(objCounter++); omap[o.id]=nid; o.id=nid; });
+  const cmap={};
+  (n.characters||[]).forEach(c=>{ const nid='ch'+(charInstCounter++); cmap[c.id]=nid; c.id=nid; (c.clips||[]).forEach(cl=>{ cl.id='cl'+(clipCounter++); if(cl.at&&cl.at.kind==='obj'&&omap[cl.at.id]) cl.at.id=omap[cl.at.id]; }); });
+  (n.narrator?[n.narrator]:[]).forEach(c=>{ (c.clips||[]).forEach(cl=>{ cl.id='cl'+(clipCounter++); }); });
+  (n.camera||[]).forEach(cm=>{ cm.id='cm'+(clipCounter++); if(cm.target&&cm.target.indexOf('char:')===0&&cmap[cm.target.slice(5)]) cm.target='char:'+cmap[cm.target.slice(5)]; });
+  scenesTimeline.splice(idx+1,0,n);
+  selectScene(idx+1);
+  return n;
 }
 function deleteScene(idx){
   if(scenesTimeline.length<=1) return;
@@ -2012,6 +2110,9 @@ function renderSceneTrack(){
     const label=document.createElement('div'); label.className='filmstrip-label';
     const span=document.createElement('span'); span.textContent=(idx+1)+'. '+$d(scene.label);
     label.appendChild(span);
+    const dup=document.createElement('button'); dup.className='filmstrip-del filmstrip-dup'; dup.textContent='⧉'; dup.title=$t('Szene duplizieren (mit allen Objekten, Figuren und Texten)','Duplicate scene (with all objects, figures and texts)');
+    dup.addEventListener('click', e=>{ e.stopPropagation(); duplicateScene(idx); });
+    label.appendChild(dup);
     if(scenesTimeline.length>1){
       const del=document.createElement('button'); del.className='filmstrip-del'; del.textContent='✕'; del.title=$t('Szene löschen','Delete scene');
       del.addEventListener('click', e=>{ e.stopPropagation(); deleteScene(idx); });
@@ -2247,6 +2348,16 @@ function renderObjectTimeline(){
   let anyOverlap=false, maxEnd=0;
   spans.forEach(sp=>{ sp.overlap=spans.some(o=>o!==sp && o.s<sp.e-0.05 && sp.s<o.e-0.05); if(sp.overlap) anyOverlap=true; maxEnd=Math.max(maxEnd,sp.e); });
 
+  { const camBars=(scene.camera||[]).map(c=>({
+      start:c.start,dur:c.dur,color:'var(--accent-teal)',minDur:0.5,
+      options:[['wide',$t('🎥 Gesamtbild','🎥 Wide shot')]].concat(scene.characters.map(ch=>['char:'+ch.id,'🔍 '+$d((characters.find(d=>d.id===ch.charId)||{}).name||'')])).concat([['__del',$t('✕ Entfernen','✕ Remove')]]), selectValue:c.target||'wide',
+      title:$t('Kamerafahrt: bewegt sich in '+c.dur.toFixed(1)+' s auf den Ausschnitt und bleibt dort','Camera move: goes to the framing in '+c.dur.toFixed(1)+' s and stays there'),
+      onSelect:(v)=>{ if(v==='__del') scene.camera=scene.camera.filter(x=>x!==c); else c.target=v; renderObjectTimeline(); },
+      move:(v)=>{ c.start=v; }, resize:(d)=>{ c.dur=d; }, done:()=>{ scene.camera.sort((a,b)=>a.start-b.start); renderObjectTimeline(); },
+      extra:{text:'×'+(c.zoom||1.8),title:$t('Zoomstufe wechseln (1,4× – 3×)','Change zoom level (1.4× – 3×)'),cls:'cam-zoom',onClick:()=>{ const z=[1.4,1.8,2.4,3], i=z.indexOf(c.zoom); c.zoom=z[(i+1)%z.length]; renderObjectTimeline(); }}
+    }));
+    if(!camBars.length) camBars.push({start:0,dur:null,color:'transparent',className:'ghost',text:$t('Kamera: Gesamtbild — „＋“ für Zoom/Schwenk auf eine Figur','Camera: wide shot — “＋” for a zoom/pan on a figure')});
+    rows.appendChild(makeTimelineRow('🎥 '+$t('Kamera','Camera'),camBars,D,{add:{text:'＋',title:$t('Kamerafahrt hinzufügen','Add camera move'),onClick:addCameraClip}})); }
   if(scene.narrator){
     const n=scene.narrator, nsp=spans.find(x=>x.inst===n), nl='🎙 '+$t('Erzähler','Narrator')+' · '+$t('Sprache','Speech');
     if(nsp) rows.appendChild(makeTimelineRow(nl,[{
@@ -2488,7 +2599,7 @@ function makeNarrator(){
     bs:Object.assign({},BB_DEFAULT,BB_PRESETS.find(p=>p[0]==='subtitle')[3])};
 }
 function addNarrator(){ const sc=getCurrentScene(); if(sc.narrator) return sc.narrator; sc.narrator=makeNarrator(); renderSpeakerTracks(); renderObjectTimeline(); return sc.narrator; }
-function removeNarrator(){ const sc=getCurrentScene(); if(sc.narrator){ [sc.narrator.clip].concat(Object.values(sc.narrator.tx||{}).map(t=>t&&t.clip)).forEach(c=>{ if(c&&c.url&&c.url.indexOf('blob:')===0){ try{ URL.revokeObjectURL(c.url); }catch(_){} } }); } sc.narrator=null; renderSpeakerTracks(); renderObjectTimeline(); }
+function removeNarrator(){ const sc=getCurrentScene(); sc.narrator=null; renderSpeakerTracks(); renderObjectTimeline(); }
 function setAllLang(lang){
   scenesTimeline.forEach(sc=>{ sc.characters.concat(sc.narrator?[sc.narrator]:[]).forEach(i=>setInstLang(i,lang,true)); });
   renderSpeakerTracks(); renderObjectTimeline(); if(currentTab==='animation') renderPanel();
@@ -2531,13 +2642,21 @@ const Rec={
   },
   dict:null
 };
+async function toggleRecording(inst,onText){
+  if(Rec.cur){ await finishRecording(); refreshQuick(); return; }
+  if(!Rec.supported()){ alert($t('Aufnehmen wird von diesem Browser nicht unterstützt. Nimm stattdessen mit der Sprachmemos-App auf und lade die Datei hoch („Audiodatei“).','Recording is not supported by this browser. Record with the Voice Memos app instead and upload the file (“Audio file”).')); return; }
+  Player.stop(false);
+  try{ await Rec.start(inst,onText||function(){}); }
+  catch(e){ alert($t('Kein Zugriff auf das Mikrofon. Bitte den Zugriff in den Browser-Einstellungen erlauben (Seite muss über https geöffnet sein).','No access to the microphone. Please allow access in the browser settings (the page must be opened via https).')); return; }
+  refreshQuick();
+}
+function refreshQuick(){ document.querySelectorAll('.cq-rec').forEach(b=>{ const on=!!(Rec.cur&&Rec.cur.inst&&Rec.cur.inst.id===b.dataset.instId); b.classList.toggle('recording',on); b.textContent=on?'⏹':'🎙'; }); }
 async function finishRecording(){
   const c=Rec.cur; if(!c) return;
   const inst=c.inst, r=await Rec.stop(); if(!r||!r.blob.size){ renderSpeakerTracks(); return; }
   const url=URL.createObjectURL(r.blob); let dur=0;
   try{ dur=await audioDuration(url); }catch(_){}
   if(!(dur>0 && isFinite(dur))) dur=r.elapsed;
-  if(inst.clip && inst.clip.url && inst.clip.recorded) URL.revokeObjectURL(inst.clip.url);
   const ext=/mp4|m4a|aac/.test(r.blob.type)?'m4a':(/ogg/.test(r.blob.type)?'ogg':'webm');
   inst.clip={name:$t('Aufnahme ','Recording ')+instLang(inst).toUpperCase()+'.'+ext,url,dur,recorded:true,type:r.blob.type};
   const txt=(r.text||'').trim();
@@ -2557,6 +2676,7 @@ function renderSpeakerTracks(){
   const bl=document.createElement('span'); bl.textContent=$t('Alle Sprecher auf:','Set all speakers to:'); bar.appendChild(bl);
   ['de','en'].forEach(L=>{ const b=document.createElement('button'); b.type='button'; b.className='ctrl-btn ctrl-btn-sm all-lang-btn'; b.dataset.lang=L; b.textContent=L==='de'?'Deutsch':'English'; b.title=$t('Schaltet alle Figuren und den Erzähler in allen Szenen auf diese Sprache (Texte, Stimmen und Aufnahmen je Sprache bleiben erhalten)','Switches all figures and the narrator in all scenes to this language (texts, voices and recordings are kept per language)'); b.addEventListener('click',()=>setAllLang(L)); bar.appendChild(b); });
   if(!scene.narrator){ const nb=document.createElement('button'); nb.type='button'; nb.className='ctrl-btn ctrl-btn-sm add-narrator'; nb.textContent='🎙 '+$t('＋ Erzähler (Off-Sprecher)','＋ Narrator (voice-over)'); nb.title=$t('Zusätzliche Sprecherspur ohne Figur: eigene Stimme, optional als Untertitel-Balken','Extra speaker track without a figure: own voice, optionally shown as a subtitle bar'); nb.addEventListener('click',addNarrator); bar.appendChild(nb); }
+  [['⏱ '+$t('Zeiten automatisch','Auto timing'),false,$t('Setzt die Startzeiten der Sprecher dieser Szene nacheinander (aus der Sprechdauer) und passt die Szenenlänge an','Sets the speakers’ start times one after another (from speech duration) and fits the scene length'),'auto-time'],['⏱ '+$t('alle Szenen','all scenes'),true,$t('Dasselbe für alle Szenen','The same for all scenes'),'auto-time-all']].forEach(([t,all,ti,cls])=>{ const b=document.createElement('button'); b.type='button'; b.className='ctrl-btn ctrl-btn-sm '+cls; b.textContent=t; b.title=ti; b.addEventListener('click',()=>autoTimeAll(all)); bar.appendChild(b); });
   host.appendChild(bar);
   if(scene.characters.length===0 && !scene.narrator){
     const hint=document.createElement('div'); hint.className='speaker-empty-hint';
@@ -2564,9 +2684,12 @@ function renderSpeakerTracks(){
     host.appendChild(hint);
     return;
   }
-  scene.characters.concat(scene.narrator?[scene.narrator]:[]).forEach(inst=>{
+  scene.characters.concat(scene.narrator?[scene.narrator]:[]).forEach(inst=>{ const r=buildSpeakerRow(inst); if(r) host.appendChild(r); });
+  if(window.Pop) Pop.refresh();
+}
+function buildSpeakerRow(inst){
     const isN=!!inst.narrator;
-    const def=isN?NARR_DEF:characters.find(c=>c.id===inst.charId); if(!def) return;
+    const def=isN?NARR_DEF:characters.find(c=>c.id===inst.charId); if(!def) return null;
     const row=document.createElement('div'); row.className='speaker-track'+(isN?' is-narrator':''); row.dataset.instId=inst.id;
 
     const avatar=document.createElement('div'); avatar.className='speaker-avatar';
@@ -2672,14 +2795,7 @@ function renderSpeakerTracks(){
     const L0=instLang(inst).toUpperCase();
     const recLabel=()=>{ const c=Rec.cur&&Rec.cur.inst===inst?Rec.cur:null; if(!c){ recBtn.textContent='🎙 '+$t('Aufnehmen '+L0,'Record '+L0); recBtn.classList.remove('recording'); return; } recBtn.classList.add('recording'); recBtn.textContent='⏹ '+$t('Stopp','Stop')+' · '+Math.floor((performance.now()-c.t0)/1000)+' s'; };
     recBtn.title=$t('Direkt im Browser einsprechen ('+L0+'). Der gesprochene Text wird – wenn dein Browser das kann – als Transkript in die Sprechblase übernommen und lässt sich dort bearbeiten.','Record directly in the browser ('+L0+'). If your browser supports it, the spoken text is transcribed into the speech bubble and can be edited there.');
-    recBtn.addEventListener('click',async()=>{
-      if(Rec.cur){ await finishRecording(); return; }
-      if(!Rec.supported()){ alert($t('Aufnehmen wird von diesem Browser nicht unterstützt. Nimm stattdessen mit der Sprachmemos-App auf und lade die Datei hoch („Audiodatei“).','Recording is not supported by this browser. Record with the Voice Memos app instead and upload the file (“Audio file”).')); return; }
-      Player.stop(false);
-      try{ await Rec.start(inst,t=>{ line.placeholder='🎙 '+t; }); }
-      catch(e){ alert($t('Kein Zugriff auf das Mikrofon. Bitte den Zugriff in den Browser-Einstellungen erlauben (Seite muss über https geöffnet sein).','No access to the microphone. Please allow access in the browser settings (the page must be opened via https).')); return; }
-      recLabel(); const iv=setInterval(()=>{ if(!Rec.cur||Rec.cur.inst!==inst){ clearInterval(iv); return; } recLabel(); },500);
-    });
+    recBtn.addEventListener('click',async()=>{ await toggleRecording(inst,t=>{ line.placeholder='🎙 '+t; }); recLabel(); const iv=setInterval(()=>{ if(!Rec.cur||Rec.cur.inst!==inst||!recBtn.isConnected){ clearInterval(iv); return; } recLabel(); },500); });
     recLabel(); if(Rec.cur&&Rec.cur.inst===inst){ const iv=setInterval(()=>{ if(!Rec.cur||Rec.cur.inst!==inst||!recBtn.isConnected){ clearInterval(iv); return; } recLabel(); },500); }
     clipBox.insertBefore(recBtn, clipBox.children[1]||null);
     // Nur diktieren: Text direkt in die Sprechblase sprechen (ohne Audio zu speichern)
@@ -2700,11 +2816,11 @@ function renderSpeakerTracks(){
       clipBox.appendChild(tb);
     }
     opts.appendChild(clipBox);
+    if(!isN){ const dp=document.createElement('button'); dp.type='button'; dp.className='ctrl-btn ctrl-btn-sm speaker-del'; dp.textContent='🗑 '+$t('Person löschen','Delete person'); dp.title=$t('Entfernt die Person samt Sprechtext, Stimme und Aufnahmen','Removes the person with speech text, voice and recordings'); dp.addEventListener('click',()=>{ if(!inst.script||!inst.script.trim()||confirm($t('Person samt Sprechtext und Stimme löschen?','Delete person with speech text and voice?'))) deleteCharInstance(inst.id); }); opts.appendChild(dp); }
     if(isN){ const dn=document.createElement('button'); dn.type='button'; dn.className='ctrl-btn ctrl-btn-sm speaker-narr-del'; dn.textContent='✕ '+$t('Erzähler entfernen','Remove narrator'); dn.addEventListener('click',removeNarrator); opts.appendChild(dn); }
 
     row.appendChild(opts);
-    host.appendChild(row);
-  });
+    return row;
 }
 
 /* ================= Text → Visemen (deutsche Aussprache-Näherung) ================= */
@@ -2952,7 +3068,7 @@ const Speech={
       const dur=src.dur||0;
       if(dur>0){ const u=dur*1000/(job.rate||1)/Math.max(1,job.plan.total); job.unitMs=u; job.baseUnit=u; }
       job.audioMs=dur>0?dur*1000/(job.rate||1):0;
-      try{ if(Music.ensure() && Music.ctx.state==='running'){ const sn=Music.ctx.createMediaElementSource(a), an=Music.ctx.createAnalyser(); an.fftSize=512; sn.connect(an); an.connect(Music.ctx.destination); job.an=an; } }catch(_){ job.an=null; }
+      try{ if(Music.ensure() && Music.ctx.state==='running'){ const sn=Music.ctx.createMediaElementSource(a), an=Music.ctx.createAnalyser(); an.fftSize=512; sn.connect(an); an.connect(Music.ctx.destination); if(Music.recDest) an.connect(Music.recDest); job.an=an; } }catch(_){ job.an=null; }
       a.onplaying=()=>this._begin(job);
       a.onended=()=>this._finish(job,true);
       a.onerror=()=>{ if(this.current!==job||job.state==='done') return; if(job.state==='starting'){ this._abortAudio(job); this._silentStart(job); } else this._finish(job,true); };
@@ -3036,6 +3152,7 @@ const Music={
     this.master=this.ctx.createGain(); this.master.gain.value=0;
     this.an=this.ctx.createAnalyser(); this.an.fftSize=512;
     this.master.connect(this.an); this.an.connect(this.ctx.destination);
+    try{ this.recDest=this.ctx.createMediaStreamDestination(); this.master.connect(this.recDest); }catch(_){ this.recDest=null; }
     return true;
   },
   unlock(){ if(this.ensure() && this.ctx.state==='suspended') this.ctx.resume().catch(()=>{}); },
@@ -3379,22 +3496,25 @@ function buildSceneEvents(scene){
     if(hasText) ev.push({t:c.speechStart||0,pri:2,type:'speak',id:c.id});
   });
   if(scene.narrator && (scene.narrator.script||'').trim()) ev.push({t:scene.narrator.speechStart||0,pri:2,type:'speak',id:'narrator'});
+  (scene.camera||[]).forEach(cl=>ev.push({t:cl.start,pri:1,type:'cam',clip:cl}));
   ev.sort((a,b)=>a.t-b.t||a.pri-b.pri);
   return ev;
 }
 
 const Player={
   running:false, kind:null, timer:null, order:[], pos:0, scene:null, sceneT0:0, events:[], ei:0, nominalBefore:0, totalNominal:0, origIdx:0, lineInst:null, lineDur:0,
-  start(kind){
+  start(kind,opts){
+    opts=opts||{}; this.paused=null;
     this.stop(false);
     Speech.unlock(); Music.unlock();
-    this.running=true; this.kind=kind; rt={}; this.origIdx=currentSceneIndex;
+    this.running=true; this.kind=kind; rt={}; this.origIdx=(opts.origIdx!=null)?opts.origIdx:currentSceneIndex;
     document.body.classList.add('playing');
     selectedEntity=null;
-    this.order=(kind==='all')?scenesTimeline.map((s,i)=>i):[currentSceneIndex];
+    this.order=(kind==='all')?scenesTimeline.map((s,i)=>i):[(kind==='scene'&&opts.sceneIdx!=null)?opts.sceneIdx:currentSceneIndex];
     this.totalNominal=this.order.reduce((s,i)=>s+scenesTimeline[i].duration,0);
-    this.nominalBefore=0;
-    this.enter(0,'cut');
+    const p0=Math.max(0,this.order.indexOf((opts.sceneIdx!=null)?opts.sceneIdx:this.order[0]));
+    this.nominalBefore=this.order.slice(0,p0).reduce((s,i)=>s+scenesTimeline[i].duration,0);
+    this.enter(p0,'cut',opts.offset||0);
     this.timer=setInterval(()=>this.tick(),20);
   },
   startLine(inst){
@@ -3409,20 +3529,42 @@ const Player={
     this.events=[{t:0,pri:2,type:'speak',id:inst.id}]; this.ei=0; this.sceneT0=performance.now();
     this.timer=setInterval(()=>this.tick(),20);
   },
-  enter(pos,transition){
-    const idx=this.order[pos]; this.pos=pos;
+  enter(pos,transition,offset){
+    offset=offset||0; const idx=this.order[pos]; this.pos=pos;
     showScene(idx, transition);
     const scene=scenesTimeline[idx]; this.scene=scene;
     rt={}; scene.characters.forEach(c=>{ rt[c.id]={pose:c.action||'idle',mood:'none',talking:false,v:null}; applyRig(c); });
-    hideObjectsForPlayback(scene);
+    hideObjectsForPlayback(scene); resetCamera();
     this.events=buildSceneEvents(scene); this.ei=0;
-    this.sceneT0=performance.now();
+    this.sceneT0=performance.now()-offset*1000;
+    if(offset>0) this.seekApply(scene,offset);
     Music.setOpts(scene); Music.play(scene.bgMusic||'none');
     scene.characters.concat(scene.narrator?[scene.narrator]:[]).forEach(c=>{ if(c.voiceName==='__remote' && !c.clip && Remote.on() && (c.script||'').trim()) Remote.get(c.script.trim(),instLang(c)).catch(()=>{}); });
   },
+  /* Start ab Position: alles, was davor passiert ist, wird sofort angewendet; laufende Sprechzeilen beginnen von vorn */
+  seekApply(scene,off){
+    while(this.ei<this.events.length && this.events[this.ei].t<off){
+      const ev=this.events[this.ei++];
+      if(ev.type==='speak'){ const inst=findInst(ev.id); if(inst && ev.t+estimateSpeechDuration(inst)>off) Speech.enqueue(Speech.makeJob(inst)); continue; }
+      if(ev.type==='pose' && !ev.revert && ev.clip){
+        const inst=findInst(ev.id); if(!inst) continue; const end=ev.t+ev.clip.dur;
+        if(end>off){ setPose(inst,ev.pose,end-off,ev.clip); }
+        else if(ev.clip.to){ const el=charEl(inst.id); if(el){ el.style.left=Math.round(ev.clip.to.x-inst.w/2)+'px'; el.style.top=Math.round(ev.clip.to.y-inst.h)+'px'; } }
+        continue;
+      }
+      this.exec(ev,off);
+    }
+  },
+  pause(){
+    if(!this.running||this.kind==='line') return false;
+    const idx=this.order[this.pos], t=Math.max(0,(performance.now()-this.sceneT0)/1000), kind=this.kind, orig=this.origIdx;
+    this.stop(false); this.paused={kind,idx,t,orig}; updatePauseBtn(); return true;
+  },
+  resume(){ const p=this.paused; if(!p) return false; this.start(p.kind,{sceneIdx:p.idx,offset:p.t,origIdx:p.orig}); return true; },
   exec(ev,t){
     const inst=ev.id&&(ev.type==='pose'||ev.type==='mood'||ev.type==='speak')?findInst(ev.id):null;
     switch(ev.type){
+      case 'cam': applyCamera(ev.clip,Math.max(0,ev.t+ev.clip.dur-t)); break;
       case 'obj-show': revealObject(ev.id,ev.effect); break;
       case 'obj-hide': hideObject(ev.id); break;
       case 'pose':
@@ -3463,6 +3605,7 @@ const Player={
   },
   onSpeechStart(job){
     const inst=job.inst; if(!inst) return;
+    if(window.Exporter&&Exporter.rec) Exporter.cueStart(job);
     const s=rigState(inst); s.talking=true;
     job.coupled=(inst.reactionAuto!==false && inst.reaction && inst.reaction!=='none');
     if(job.coupled){ s.mood=inst.reaction; pulseChar(inst); }
@@ -3472,16 +3615,17 @@ const Player={
   },
   onSpeechEnd(job){
     const inst=job.inst; if(!inst) return;
+    if(window.Exporter&&Exporter.rec) Exporter.cueEnd(job);
     const s=rigState(inst); s.talking=false; s.v=null; applyRig(inst);
     Bubble.finish(inst); setTimeout(()=>Bubble.hide(inst),350);
     if(job.coupled){ setTimeout(()=>{ if(Player.running){ const st=rigState(inst); if(!st.talking){ st.mood='none'; applyRig(inst); } } },500); }
     if(!Speech.queue.length) Music.duck(false);
   },
   finish(restore){
-    if(!this.running) return;
+    if(!this.running) return; if(restore!==false) this.paused=null;
     clearInterval(this.timer); this.timer=null; this.running=false;
     Speech.stopAll(); Music.stop(); Bubble.clear();
-    document.body.classList.remove('playing'); rt={}; clearCursors();
+    document.body.classList.remove('playing'); rt={}; clearCursors(); if(restore!==false) resetCamera(); setTimeout(updatePauseBtn,0);
     document.getElementById('playhead').style.left='0%'; document.getElementById('timeCode').textContent='00:00.0 / 00:00.0';
     if(restore!==false){
       if(this.kind==='all' && currentSceneIndex!==this.origIdx) selectScene(this.origIdx);
@@ -3528,7 +3672,7 @@ function showScene(idx, transitionType){
 }
 
 /* ================= Top bar actions (Platzhalter) ================= */
-document.getElementById('exportBtn').addEventListener('click', ()=>{
+document.getElementById('exportBtn').addEventListener('click', ()=>{ if(window.openExportDlg) return window.openExportDlg();
   alert($t('Der MP4-Export rendert in der finalen Version alle Szenen inklusive Übergängen, Hintergrundmusik und aller Sprecherspuren (JSON → Headless-Browser → FFmpeg). In diesem Browser-Prototyp ist er nicht aktiv.','In the final version the MP4 export renders all scenes including transitions, background music and all speaker tracks (JSON → headless browser → FFmpeg). It is not active in this browser prototype.'));
 });
 document.getElementById('embedBtn').addEventListener('click', ()=>{
@@ -3592,6 +3736,418 @@ function updateVoiceDlgText(){
   });
 })();
 
+
+/* ================= Kleiner Dialog-Baukasten ================= */
+function openDlg(title, build){
+  const m=document.createElement('div'); m.className='modal dyn-dlg'; const card=document.createElement('div'); card.className='modal-card'; card.setAttribute('role','dialog'); card.setAttribute('aria-modal','true');
+  const h=document.createElement('h3'); h.textContent=title; card.appendChild(h); m.appendChild(card);
+  const close=()=>{ m.remove(); document.removeEventListener('keydown',esc); };
+  const esc=e=>{ if(e.key==='Escape') close(); }; document.addEventListener('keydown',esc);
+  m.addEventListener('click',e=>{ if(e.target===m) close(); });
+  build(card,close); document.body.appendChild(m); return {el:m,card,close};
+}
+function dlgBtn(text,fn,cls){ const b=document.createElement('button'); b.type='button'; b.className='ctrl-btn'+(cls?' '+cls:''); b.textContent=text; b.addEventListener('click',fn); return b; }
+function dlgRow(card){ const r=document.createElement('div'); r.className='modal-row'; card.appendChild(r); return r; }
+function dlgHint(card,text){ const d=document.createElement('div'); d.className='anim-hint'; d.textContent=text; card.appendChild(d); return d; }
+function dlgSelect(card,label,opts,val){ const l=document.createElement('label'); l.textContent=label; card.appendChild(l); const s=document.createElement('select'); s.style.cssText='width:100%;background:var(--panel-elevated);border:1px solid var(--panel-border);color:var(--text-primary);border-radius:6px;padding:9px;font-size:13px;'; opts.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; s.appendChild(o); }); s.value=val; card.appendChild(s); return s; }
+
+/* ================= Projekt speichern / laden ================= */
+const Project={
+  VERSION:1,
+  async blobToData(url){ const r=await fetch(url); const b=await r.blob(); return await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(b); }); },
+  snapshotObj(){ return {scenes:scenesTimeline, musicLib:musicLib, counters:{scene:sceneCounter,chr:charInstCounter,obj:objCounter,clip:clipCounter,music:musicSeq}}; },
+  /* embed=true: Blob-URLs (Aufnahmen, Musik) werden als Daten eingebettet; false: weggelassen (Autosave) */
+  async serialize(embed){
+    const o=this.snapshotObj(), blobs=new Set();
+    JSON.stringify(o,(k,v)=>{ if(typeof v==='string'&&v.indexOf('blob:')===0) blobs.add(v); return v; });
+    const map=new Map(); let missing=0;
+    if(embed) for(const u of blobs){ try{ map.set(u,await this.blobToData(u)); }catch(_){ missing++; } }
+    const txt=JSON.stringify({app:'stagehand-studio',version:this.VERSION,savedAt:new Date().toISOString(),uiLang:LANG,project:o},(k,v)=>{ if(typeof v==='string'&&v.indexOf('blob:')===0) return map.has(v)?map.get(v):null; return v; });
+    return {text:txt,missing,blobs:blobs.size};
+  },
+  load(text){
+    const d=JSON.parse(text);
+    if(!d||d.app!=='stagehand-studio'||!d.project||!Array.isArray(d.project.scenes)||!d.project.scenes.length) throw new Error('format');
+    const pr=d.project; Player.stop(false);
+    const dflt=()=>({label:'Szene',bgType:'plain',bgId:'studio-light',transitionOut:'fade',bgMusic:'none',duration:8,characters:[],objects:[]});
+    const scenes=pr.scenes.map((sc,i)=>{ const n=Object.assign(dflt(),sc); n.characters=(n.characters||[]).filter(c=>c&&characters.find(d=>d.id===c.charId)); n.objects=n.objects||[];
+      const fixClip=c=>{ if(c&&c.clip&&!c.clip.url) c.clip=null; if(c&&c.tx) Object.values(c.tx).forEach(t=>{ if(t&&t.clip&&!t.clip.url) t.clip=null; }); };
+      n.characters.forEach(fixClip); if(n.narrator) fixClip(n.narrator); return n; });
+    scenesTimeline.splice(0,scenesTimeline.length,...scenes);
+    musicLib.length=0; (pr.musicLib||[]).filter(m=>m&&m.url).forEach(m=>musicLib.push(m));
+    const c=pr.counters||{}, mx=(arr,pre)=>arr.reduce((m,x)=>{ const n=parseInt(String(x.id||'').replace(/\D/g,''))||0; return Math.max(m,n); },0);
+    let maxCh=0,maxOb=0,maxCl=0;
+    scenes.forEach(sc=>{ sc.characters.forEach(ch=>{ maxCh=Math.max(maxCh,mx([ch])); (ch.clips||[]).forEach(cl=>{ maxCl=Math.max(maxCl,mx([cl])); }); }); sc.objects.forEach(o=>{ maxOb=Math.max(maxOb,mx([o])); }); });
+    sceneCounter=Math.max(c.scene||1, scenes.length+1, scenes.reduce((m,sc)=>Math.max(m,mx([sc])),0)+1);
+    charInstCounter=Math.max(c.chr||1,maxCh+1); objCounter=Math.max(c.obj||1,maxOb+1); clipCounter=Math.max(c.clip||1,maxCl+1); musicSeq=Math.max(c.music||0,musicLib.reduce((m,x)=>Math.max(m,mx([x])),0));
+    currentSceneIndex=0; selectedEntity=null;
+    selectScene(0); refreshAll(); History.reset();
+    return scenes.length;
+  },
+  async saveFile(){
+    const r=await this.serialize(true), blob=new Blob([r.text],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Stagehand-Projekt-'+new Date().toISOString().slice(0,10)+'.stagehand.json';
+    document.body.appendChild(a); a.click(); setTimeout(()=>{ a.remove(); URL.revokeObjectURL(a.href); },1000);
+    return r;
+  },
+  async autosave(){ try{ const r=await this.serialize(false); if(r.text.length<4500000) localStorage.setItem('sh-autosave',r.text); }catch(_){} },
+  hasAutosave(){ try{ return !!localStorage.getItem('sh-autosave'); }catch(_){ return false; } }
+};
+function openProjectDlg(){
+  openDlg($t('Projekt','Project'),(card,close)=>{
+    dlgHint(card,$t('Speichert alles in einer Datei (.stagehand.json): Szenen, Figuren, Texte in Deutsch und Englisch, Stimmen, Aufnahmen, Hintergrundbilder und eigene Musik. Zum Weiterarbeiten oder als Sicherung.','Saves everything in one file (.stagehand.json): scenes, figures, texts in German and English, voices, recordings, background images and your own music. For continuing later or as a backup.'));
+    const st=document.createElement('div'); st.className='proj-status'; st.style.cssText='font-size:12px;margin-top:8px;color:var(--text-secondary);';
+    const r=dlgRow(card);
+    r.appendChild(dlgBtn('💾 '+$t('Projekt speichern','Save project'),async()=>{ st.textContent=$t('Speichere …','Saving …'); try{ const x=await Project.saveFile(); st.textContent=$t('Gespeichert','Saved')+(x.missing?' – '+x.missing+$t(' Datei(en) nicht lesbar',' file(s) unreadable'):'')+' ('+(x.text.length/1048576).toFixed(1)+' MB)'; }catch(e){ st.textContent=$t('Fehler beim Speichern: ','Saving failed: ')+(e&&e.message||e); } },'primary proj-save'));
+    const fi=document.createElement('input'); fi.type='file'; fi.accept='.json,application/json'; fi.className='proj-file'; fi.style.display='none';
+    fi.addEventListener('change',async()=>{ const f=fi.files&&fi.files[0]; fi.value=''; if(!f) return; try{ const n=Project.load(await f.text()); st.textContent=$t('Geladen: ','Loaded: ')+n+$t(' Szene(n)',' scene(s)'); }catch(e){ st.textContent=$t('Diese Datei ist kein Stagehand-Projekt.','This file is not a Stagehand project.'); } });
+    r.appendChild(dlgBtn('📂 '+$t('Projekt öffnen','Open project'),()=>fi.click(),'proj-open')); card.appendChild(fi);
+    const r2=dlgRow(card);
+    if(Project.hasAutosave()) r2.appendChild(dlgBtn('↺ '+$t('Letzten Autosave laden (ohne Aufnahmen/Musik)','Load last autosave (without recordings/music)'),()=>{ try{ const n=Project.load(localStorage.getItem('sh-autosave')); st.textContent=$t('Autosave geladen: ','Autosave loaded: ')+n+$t(' Szene(n)',' scene(s)'); }catch(e){ st.textContent=$t('Autosave nicht lesbar.','Autosave unreadable.'); } },'proj-auto'));
+    r2.appendChild(dlgBtn('🗋 '+$t('Neues leeres Projekt','New empty project'),()=>{ if(!confirm($t('Alles verwerfen und neu beginnen? (Vorher speichern!)','Discard everything and start new? (Save first!)'))) return; Player.stop(false); scenesTimeline.splice(0,scenesTimeline.length,makeScene({label:$t('Szene 1','Scene 1')})); musicLib.length=0; currentSceneIndex=0; selectedEntity=null; selectScene(0); refreshAll(); History.reset(); close(); },'proj-new'));
+    const th=document.createElement('label'); th.textContent=$t('Vorlagen (werden als neue Szenen angehängt)','Templates (appended as new scenes)'); card.appendChild(th);
+    TEMPLATES.forEach(T=>{ const rr=dlgRow(card); rr.style.marginTop='6px'; const b=dlgBtn('✨ '+T.name[LANG==='de'?0:1],()=>{ const n=applyTemplate(T.id); st.textContent=n+$t(' Szenen angelegt – Texte, Zeiten und Ziele lassen sich frei ändern.',' scenes created – texts, timings and targets can be changed freely.'); },'tpl-btn tpl-'+T.id); rr.appendChild(b); const d=document.createElement('span'); d.style.cssText='font-size:12px;color:var(--text-secondary);'; d.textContent=T.desc[LANG==='de'?0:1]; rr.appendChild(d); });
+    card.appendChild(st);
+    const r3=dlgRow(card); r3.appendChild(dlgBtn($t('Schließen','Close'),close,'primary'));
+  });
+}
+document.getElementById('projectBtn').addEventListener('click',openProjectDlg);
+
+/* ================= Rückgängig / Wiederholen (Schnappschüsse) ================= */
+const History={
+  stack:[], pos:-1, heavy:new Map(), busy:false, timer:null, MAX:60,
+  snap(){
+    const self=this;
+    return JSON.stringify({scenes:scenesTimeline,musicLib:musicLib},(k,v)=>{ if(typeof v==='string'&&v.length>1500){ const key=v.length+':'+v.slice(0,40)+v.slice(-40)+v.slice(v.length>>1,(v.length>>1)+40); self.heavy.set(key,v); return '\u0001'+key; } return v; });
+  },
+  restore(str){
+    const o=JSON.parse(str,(k,v)=>(typeof v==='string'&&v.charCodeAt(0)===1&&this.heavy.has(v.slice(1)))?this.heavy.get(v.slice(1)):v);
+    Player.stop(false);
+    scenesTimeline.splice(0,scenesTimeline.length,...o.scenes);
+    musicLib.length=0; o.musicLib.forEach(m=>musicLib.push(m));
+    if(currentSceneIndex>=scenesTimeline.length) currentSceneIndex=scenesTimeline.length-1;
+    selectedEntity=null; selectScene(currentSceneIndex); refreshAll();
+  },
+  reset(){ this.stack=[this.snap()]; this.pos=0; this.updateBtns(); },
+  commit(){
+    if(this.busy||Player.running) return;
+    const sn=this.snap(); if(sn===this.stack[this.pos]) return;
+    this.stack.splice(this.pos+1); this.stack.push(sn); if(this.stack.length>this.MAX) this.stack.shift(); this.pos=this.stack.length-1; this.updateBtns();
+    clearTimeout(this.autoT); this.autoT=setTimeout(()=>Project.autosave(),1500);
+  },
+  schedule(){ clearTimeout(this.timer); this.timer=setTimeout(()=>this.commit(),350); },
+  undo(){ this.commit(); if(this.pos<=0) return false; this.pos--; this.busy=true; try{ this.restore(this.stack[this.pos]); } finally{ this.busy=false; } this.updateBtns(); return true; },
+  redo(){ this.commit(); if(this.pos>=this.stack.length-1) return false; this.pos++; this.busy=true; try{ this.restore(this.stack[this.pos]); } finally{ this.busy=false; } this.updateBtns(); return true; },
+  updateBtns(){ const u=document.getElementById('undoBtn'), r=document.getElementById('redoBtn'); if(u) u.disabled=this.pos<=0; if(r) r.disabled=this.pos>=this.stack.length-1; }
+};
+['pointerup','change','click','keyup','input'].forEach(t=>document.addEventListener(t,()=>History.schedule(),true));
+document.getElementById('undoBtn').addEventListener('click',()=>History.undo());
+document.getElementById('redoBtn').addEventListener('click',()=>History.redo());
+document.addEventListener('keydown',e=>{
+  if(!(e.ctrlKey||e.metaKey)) return; const k=e.key.toLowerCase();
+  const ae=document.activeElement; if(ae&&(ae.tagName==='TEXTAREA'||(ae.tagName==='INPUT'&&ae.type!=='range'&&ae.type!=='checkbox')||ae.isContentEditable)) return;
+  if(k==='z'&&!e.shiftKey){ e.preventDefault(); History.undo(); } else if((k==='z'&&e.shiftKey)||k==='y'){ e.preventDefault(); History.redo(); }
+});
+
+/* ================= Figuren-Popover (Tippen auf die Figur) + Bearbeiten/Vorschau ================= */
+const Pop={
+  inst:null, el:null, focus:'text',
+  open(inst,focus){
+    this.inst=inst; this.focus=focus||'text'; selectedEntity={kind:'char',id:inst.id};
+    document.querySelectorAll('.stage-character').forEach(e=>e.classList.toggle('selected',e.dataset.instId===inst.id));
+    if(!this.el){ this.el=document.createElement('div'); this.el.className='char-pop'; this.el.addEventListener('pointerdown',e=>e.stopPropagation()); document.body.appendChild(this.el); }
+    this.build(true); this.reposition();
+  },
+  close(){ if(this.el){ this.el.remove(); this.el=null; } this.inst=null; },
+  build(first){
+    if(!this.el||!this.inst) return;
+    const inst=this.inst, def=characters.find(c=>c.id===inst.charId); if(!def||!getCurrentScene().characters.includes(inst)){ this.close(); return; }
+    const sc=this.el.scrollTop; this.el.innerHTML='';
+    const head=document.createElement('div'); head.className='cp-head';
+    const t=document.createElement('b'); t.textContent=$d(def.name)+' · '+$d(def.tag); head.appendChild(t);
+    const x=document.createElement('button'); x.type='button'; x.className='cp-x'; x.textContent='✕'; x.title=$t('Schließen','Close'); x.addEventListener('click',()=>this.close()); head.appendChild(x);
+    this.el.appendChild(head);
+    const sec=document.createElement('div'); sec.className='cp-sec cp-text'; const row=buildSpeakerRow(inst); if(row){ row.classList.add('in-pop'); sec.appendChild(row); } this.el.appendChild(sec);
+    const sec2=document.createElement('div'); sec2.className='cp-sec cp-cfg'; selectedEntity={kind:'char',id:inst.id}; renderAnimationTab(sec2); this.el.appendChild(sec2);
+    if(first){ const target=this.focus==='cfg'?sec2:sec; setTimeout(()=>{ if(!this.el) return; this.el.scrollTop=Math.max(0,target.offsetTop-44); if(this.focus==='text'){ const i=this.el.querySelector('.speaker-line'); if(i) i.focus({preventScroll:true}); } },0); } else this.el.scrollTop=sc;
+  },
+  refresh(){
+    if(!this.el) return; const ae=document.activeElement;
+    if(ae && this.el.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && ae.type!=='checkbox' && ae.type!=='button') return;
+    this.build(false);
+  },
+  reposition(){
+    if(!this.el||!this.inst) return;
+    const f=charEl(this.inst.id), p=this.el, vw=innerWidth, vh=innerHeight;
+    if(vw<760){ p.classList.add('sheet'); p.style.left=p.style.top=''; return; }
+    p.classList.remove('sheet'); const w=Math.min(400,vw-20); p.style.width=w+'px';
+    let left=vw-w-10, top=70;
+    if(f){ const r=f.getBoundingClientRect(); left=(r.right+16+w<=vw-6)?r.right+16:Math.max(6,r.left-16-w); top=Math.max(56,Math.min(r.top,vh-Math.min(p.offsetHeight||420,vh-70)-10)); }
+    p.style.left=Math.max(6,Math.min(left,vw-w-6))+'px'; p.style.top=top+'px';
+  }
+};
+window.Pop=Pop;
+addEventListener('resize',()=>Pop.reposition());
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&Pop.el&&!document.querySelector('.dyn-dlg')&&!document.querySelector('.modal:not([hidden])')&&!Pick.active) Pop.close(); });
+// Popover aktuell halten, wenn sich die Auswahl/Szene ändert
+(function(){ const _rp=renderPanel; renderPanel=function(){ _rp.apply(this,arguments); if(window.Pop) Pop.refresh(); }; })();
+(function(){ const _ss=selectScene; selectScene=function(){ Pop.close(); return _ss.apply(this,arguments); }; })();
+document.addEventListener('pointerdown',e=>{ if(Pop.el && !e.target.closest('.char-pop') && !e.target.closest('.char-quick') && !e.target.closest('.stage-character')) { if(e.target.closest('#stage')||e.target.closest('.timeline-panel')||e.target.closest('.sidebar')) Pop.close(); } },true);
+
+/* Bearbeiten ↔ Vorschau */
+function setPreviewMode(on){ document.body.classList.toggle('preview-mode',!!on); if(on){ Pop.close(); selectedEntity=null; renderObjects(); renderCharacters(); } document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',(b.dataset.mode==='preview')===!!on)); }
+(function(){ const sw=document.getElementById('modeSwitch'); sw.querySelectorAll('.mode-btn').forEach(b=>b.addEventListener('click',()=>setPreviewMode(b.dataset.mode==='preview'))); })();
+
+/* ================= Export: Video (MP4/WebM) + Untertitel ================= */
+const Exporter={
+  rec:null, cues:[], last:null,
+  gdm(){ return !!(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia&&window.MediaRecorder); },
+  formats(){
+    const ok=t=>{ try{ return window.MediaRecorder&&MediaRecorder.isTypeSupported(t); }catch(_){ return false; } };
+    const L=[];
+    const mp4=['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs=avc1','video/mp4'].find(ok);
+    const vp9=['video/webm;codecs=vp9,opus','video/webm;codecs=vp9'].find(ok), vp8=['video/webm;codecs=vp8,opus','video/webm'].find(ok);
+    if(mp4) L.push(['mp4',$t('MP4 (H.264) – läuft überall','MP4 (H.264) – plays everywhere'),mp4,'mp4']);
+    if(vp9) L.push(['webm9',$t('WebM (VP9) – klein, Browser/VLC','WebM (VP9) – small, browser/VLC'),vp9,'webm']);
+    if(vp8) L.push(['webm8',$t('WebM (VP8) – sehr kompatibel','WebM (VP8) – very compatible'),vp8,'webm']);
+    return L;
+  },
+  RES:[['1920x1080','Full HD 1920 × 1080'],['1280x720','HD 1280 × 720'],['960x540','960 × 540'],['854x480','480p 854 × 480']],
+  QUAL:[['hi','Hoch (große Datei)',1],['mid','Mittel (empfohlen)',0.5],['low','Klein',0.25],['tiny','Sehr klein',0.12]],
+  bitrate(res,fps,q){ const [w,h]=res.split('x').map(Number); const base=w*h*fps*0.11; const f=(this.QUAL.find(x=>x[0]===q)||[0,0,0.5])[2]; return Math.round(Math.max(250e3,base*f*0.6)); },
+  sceneList(scope){ return scope==='scene'?[getCurrentScene()]:scenesTimeline; },
+  /* Hinweise: welche Sprecher nutzen Browserstimmen (nicht direkt aufnehmbar)? */
+  browserVoiceLines(scope){
+    const out=[]; this.sceneList(scope).forEach(sc=>sc.characters.concat(sc.narrator?[sc.narrator]:[]).forEach(i=>{ if((i.script||'').trim() && i.audio!==false && !i.clip && !(i.voiceName==='__remote'&&Remote.on())) out.push(i); }));
+    return out;
+  },
+  totalDur(scope){ return this.sceneList(scope).reduce((s,sc)=>s+sc.duration,0); },
+  /* ---- Untertitel (geschätzte Zeiten aus Sprechdauer; beim Videoexport werden echte Zeiten mitgeschrieben) ---- */
+  view(inst,L){ if(instLang(inst)===L) return inst; const t=inst.tx&&inst.tx[L]; if(!t||!(t.script||'').trim()) return null; return Object.assign({},inst,{script:t.script,clip:t.clip,voiceName:t.voiceName,lang:L}); },
+  estimateCues(L,scope){
+    const cues=[]; let off=0;
+    this.sceneList(scope).forEach(sc=>{
+      const lines=sc.characters.concat(sc.narrator?[sc.narrator]:[]).map((i,k)=>({v:this.view(i,L),k,t0:i.speechStart||0})).filter(x=>x.v);
+      lines.sort((a,b)=>a.t0-b.t0||a.k-b.k); let cur=0;
+      lines.forEach(x=>{ const st=Math.max(x.t0,cur), d=estimateSpeechDuration(x.v), en=st+d; cues.push({start:off+st,end:off+en,text:x.v.script.trim()}); cur=en+0.05; });
+      off+=Math.max(sc.duration,cur+0.35);
+    });
+    return cues;
+  },
+  ts(sec,vtt){ sec=Math.max(0,sec); const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=Math.floor(sec%60), ms=Math.round((sec-Math.floor(sec))*1000); const p=(n,l)=>String(n).padStart(l,'0'); return p(h,2)+':'+p(m,2)+':'+p(s,2)+(vtt?'.':',')+p(Math.min(ms,999),3); },
+  toSubs(cues,fmt){
+    const vtt=fmt==='vtt'; let o=vtt?'WEBVTT\n\n':'';
+    cues.forEach((c,i)=>{ o+=(vtt?'':(i+1)+'\n')+this.ts(c.start,vtt)+' --> '+this.ts(c.end,vtt)+'\n'+c.text+'\n\n'; });
+    return o;
+  },
+  download(name,blobOrText,type){ const b=blobOrText instanceof Blob?blobOrText:new Blob([blobOrText],{type:type||'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ a.remove(); URL.revokeObjectURL(a.href); },2000); },
+  cueStart(job){ const r=this.rec; if(!r||!job.inst) return; r.open=r.open||{}; r.open[job.inst.id]={start:(performance.now()-r.t0)/1000,lang:instLang(job.inst),text:(job.text||job.inst.script||'').trim()}; },
+  cueEnd(job){ const r=this.rec; if(!r||!job.inst||!r.open||!r.open[job.inst.id]) return; const c=r.open[job.inst.id]; delete r.open[job.inst.id]; c.end=(performance.now()-r.t0)/1000; if(c.text) r.cues.push(c); },
+
+  /* ---- Aufnahme ---- */
+  async record(o,ui){
+    if(!this.gdm()) throw new Error('nogdm');
+    const fmt=this.formats().find(f=>f[0]===o.format); if(!fmt) throw new Error('noformat');
+    const [W,H]=o.res.split('x').map(Number), fps=o.fps;
+    // Bildschirmfreigabe (Dialog des Browsers; „Diesen Tab“ wählen)
+    const dm=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:fps},audio:!!o.tabAudio,preferCurrentTab:true,selfBrowserSurface:'include',systemAudio:'exclude',surfaceSwitching:'exclude'});
+    const vt=dm.getVideoTracks()[0];
+    document.body.classList.add('exporting'); fitStage(); renderStageMarkers(); selectedEntity=null; renderObjects(); renderCharacters();
+    Pop.close();
+    let cropped=false;
+    try{ if(window.CropTarget&&vt.cropTo){ const ct=await CropTarget.fromElement(document.getElementById('stage')); await vt.cropTo(ct); cropped=true; } }catch(_){}
+    const vid=document.createElement('video'); vid.muted=true; vid.playsInline=true; vid.srcObject=dm; await vid.play();
+    await new Promise(r=>setTimeout(r,500));
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const cx=cv.getContext('2d',{alpha:false}); const stageEl=document.getElementById('stage');
+    let raf=0, stopped=false;
+    const draw=()=>{ if(stopped) return; try{
+        if(cropped) cx.drawImage(vid,0,0,W,H);
+        else { const r=stageEl.getBoundingClientRect(), kx=vid.videoWidth/innerWidth, ky=vid.videoHeight/innerHeight; cx.drawImage(vid,r.left*kx,r.top*ky,r.width*kx,r.height*ky,0,0,W,H); }
+      }catch(_){} raf=requestAnimationFrame(draw); };
+    draw();
+    const out=cv.captureStream(fps);
+    // Ton: Tab-Audio (enthält auch Browserstimmen) – sonst der eigene Mix (Musik, Audiodateien, Aufnahmen, TTS-Server)
+    Music.unlock(); let audioSrc='none';
+    const ta=dm.getAudioTracks()[0];
+    if(o.tabAudio&&ta){ out.addTrack(ta); audioSrc='tab'; }
+    else if(Music.recDest){ const at=Music.recDest.stream.getAudioTracks()[0]; if(at){ out.addTrack(at); audioSrc='mix'; } }
+    const mr=new MediaRecorder(out,{mimeType:fmt[2],videoBitsPerSecond:this.bitrate(o.res,fps,o.quality),audioBitsPerSecond:128000});
+    const chunks=[]; mr.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
+    const done=new Promise(res=>{ mr.onstop=res; });
+    const total=this.totalDur(o.scope);
+    this.rec={t0:performance.now(),cues:[],open:null,mr,cancel:false};
+    vt.addEventListener('ended',()=>{ if(this.rec) this.rec.cancel=true; Player.stop(true); });
+    mr.start(1000);
+    ui&&ui.status&&ui.status($t('Aufnahme läuft …','Recording …'));
+    Player.start(o.scope==='scene'?'scene':'all');
+    const tick=setInterval(()=>{ if(this.rec&&ui&&ui.progress) ui.progress((performance.now()-this.rec.t0)/1000,total); },300);
+    await new Promise(res=>{ const iv=setInterval(()=>{ if(!Player.running){ clearInterval(iv); res(); } },150); });
+    await new Promise(r=>setTimeout(r,600));
+    clearInterval(tick); stopped=true; cancelAnimationFrame(raf);
+    const rec=this.rec; this.rec=null;
+    try{ if(mr.state!=='inactive') mr.stop(); }catch(_){}
+    await done; dm.getTracks().forEach(t=>t.stop());
+    document.body.classList.remove('exporting'); fitStage(); renderObjects(); renderCharacters(); renderStageMarkers();
+    const blob=new Blob(chunks,{type:(fmt[2].split(';')[0])});
+    this.last={blob,ext:fmt[3],cues:rec.cues,audio:audioSrc,cropped,cancel:rec.cancel,size:[W,H],dur:(performance.now()-rec.t0)/1000};
+    return this.last;
+  },
+  /* Vollbild-Ansicht ohne Aufnahme (z. B. um mit der Bildschirmaufnahme des iPhones aufzunehmen) */
+  async fullscreenPlay(scope){
+    document.body.classList.add('exporting','exporting-play'); fitStage(); Pop.close(); selectedEntity=null; renderObjects(); renderCharacters();
+    Player.start(scope==='scene'?'scene':'all');
+    await new Promise(res=>{ const iv=setInterval(()=>{ if(!Player.running){ clearInterval(iv); res(); } },150); });
+    document.body.classList.remove('exporting','exporting-play'); fitStage(); renderObjects(); renderCharacters();
+  }
+};
+window.Exporter=Exporter;
+(function(){
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&document.body.classList.contains('exporting')){ Player.stop(true); } });
+  document.getElementById('exportBarStop').addEventListener('click',()=>Player.stop(true));
+})();
+window.openExportDlg=function(){
+  const hasScenes=scenesTimeline.length>1;
+  openDlg($t('Exportieren','Export'),(card,close)=>{
+    const fm=Exporter.formats();
+    const mp4ok=fm.some(f=>f[0]==='mp4');
+    const sel={};
+    sel.scope=dlgSelect(card,$t('Umfang','Scope'),[['all',$t('Gesamte Animation (alle Szenen)','Whole animation (all scenes)')],['scene',$t('Nur aktuelle Szene','Current scene only')]],'all');
+    sel.format=dlgSelect(card,$t('Dateiformat','File format'),fm.length?fm.map(f=>[f[0],f[1]]):[['none',$t('nicht verfügbar','not available')]],fm.length?fm[0][0]:'none');
+    sel.res=dlgSelect(card,$t('Auflösung','Resolution'),Exporter.RES,'1280x720');
+    sel.fps=dlgSelect(card,$t('Bildrate','Frame rate'),[['24','24 fps'],['30','30 fps'],['60','60 fps']],'30');
+    sel.quality=dlgSelect(card,$t('Qualität / Kompression','Quality / compression'),Exporter.QUAL.map(q=>[q[0],$t(q[1],{hi:'High (large file)',mid:'Medium (recommended)',low:'Small',tiny:'Very small'}[q[0]])]),'mid');
+    const info=document.createElement('div'); info.className='anim-hint exp-info'; info.style.marginTop='8px'; card.appendChild(info);
+    // Ton
+    const bl=Exporter.browserVoiceLines('all');
+    const tl=document.createElement('label'); tl.style.cssText='display:flex;gap:8px;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--text-primary);margin-top:12px;';
+    const tc=document.createElement('input'); tc.type='checkbox'; tc.className='exp-tabaudio'; tc.checked=bl.length>0; tl.appendChild(tc);
+    const tt=document.createElement('span'); tt.textContent=$t('Ton des Tabs mit aufnehmen (im Freigabe-Fenster „Tab-Audio teilen“ aktivieren). Nötig, wenn Browser-/Systemstimmen sprechen – sie lassen sich nur so einfangen. Ohne Haken werden Musik, Audiodateien, Aufnahmen und TTS-Server-Stimmen direkt gemischt.','Record the tab’s sound too (tick “Share tab audio” in the share window). Needed when browser/system voices speak – that is the only way to capture them. Without it, music, audio files, recordings and TTS-server voices are mixed directly.'); tl.appendChild(tt); card.appendChild(tl);
+    const warn=document.createElement('div'); warn.className='anim-hint exp-warn'; warn.style.cssText='color:#ffb020;margin-top:6px;'; card.appendChild(warn);
+    const upd=()=>{
+      const D=Exporter.totalDur(sel.scope.value), br=Exporter.bitrate(sel.res.value,+sel.fps.value,sel.quality.value);
+      info.textContent=$t('Dauer ca. ','Duration approx. ')+fmt(D)+' · '+$t('Dateigröße ca. ','file size approx. ')+Math.max(0.1,(br+128000)*D/8/1048576).toFixed(1)+' MB';
+      const b2=Exporter.browserVoiceLines(sel.scope.value);
+      warn.textContent=(b2.length&&!tc.checked)?$t('Achtung: '+b2.length+' Sprecher nutzen Browserstimmen – ohne Tab-Audio bleiben sie im Video stumm.',b2.length+' speaker(s) use browser voices – without tab audio they will be silent in the video.'):'';
+    };
+    [sel.scope,sel.format,sel.res,sel.fps,sel.quality,tc].forEach(e=>e.addEventListener('change',upd)); upd();
+    if(!Exporter.gdm()) dlgHint(card,$t('Dieser Browser (z. B. iPhone/iPad-Safari) kann die Seite nicht selbst aufnehmen. Nutze „Vollbild abspielen“ und starte vorher die Bildschirmaufnahme von iOS (Kontrollzentrum) – oder öffne das Projekt am Computer in Chrome/Edge. Untertitel-Dateien gehen überall.','This browser (e.g. iPhone/iPad Safari) cannot record the page itself. Use “Play fullscreen” and start the iOS screen recording first (Control Center) – or open the project on a computer in Chrome/Edge. Subtitle files work everywhere.'));
+    else if(!mp4ok) dlgHint(card,$t('Dein Browser kann kein MP4 direkt aufnehmen (Chrome/Edge ab Version 126 und Safari können es). WebM lässt sich z. B. mit ffmpeg umwandeln: ffmpeg -i video.webm -c:v libx264 -crf 23 -c:a aac video.mp4','Your browser cannot record MP4 directly (Chrome/Edge 126+ and Safari can). WebM can be converted, e.g. with ffmpeg: ffmpeg -i video.webm -c:v libx264 -crf 23 -c:a aac video.mp4'));
+    const status=document.createElement('div'); status.className='exp-status'; status.style.cssText='font-size:12.5px;margin-top:10px;color:var(--text-secondary);'; card.appendChild(status);
+    const result=document.createElement('div'); result.className='exp-result'; card.appendChild(result);
+    const r1=dlgRow(card);
+    if(Exporter.gdm()&&fm.length){
+      r1.appendChild(dlgBtn('⏺ '+$t('Video exportieren','Export video'),async()=>{
+        const o={scope:sel.scope.value,format:sel.format.value,res:sel.res.value,fps:+sel.fps.value,quality:sel.quality.value,tabAudio:tc.checked};
+        status.textContent=$t('Wähle im Browser-Fenster „Diesen Tab“ aus …','Choose “This tab” in the browser window …'); result.innerHTML='';
+        const m=document.querySelector('.dyn-dlg'); 
+        try{
+          m.style.display='none';
+          const r=await Exporter.record(o,{progress:(t,tot)=>{ const b=document.getElementById('exportBarText'); if(b) b.textContent='● REC  '+fmt(Math.min(t,tot+2))+' / '+fmt(tot)+'   –   '+$t('Esc = abbrechen','Esc = cancel'); }});
+          m.style.display='';
+          showResult(r,result,status,o);
+        }catch(e){
+          m.style.display=''; document.body.classList.remove('exporting'); fitStage(); renderObjects(); renderCharacters();
+          status.textContent=(e&&e.name==='NotAllowedError')?$t('Die Freigabe wurde abgelehnt – ohne sie kann nicht aufgenommen werden.','Sharing was declined – recording is not possible without it.'):$t('Export fehlgeschlagen: ','Export failed: ')+(e&&e.message||e);
+        }
+      },'primary exp-go'));
+    }
+    r1.appendChild(dlgBtn('▶ '+$t('Vollbild abspielen','Play fullscreen'),async()=>{ const m=document.querySelector('.dyn-dlg'); m.style.display='none'; await Exporter.fullscreenPlay(sel.scope.value); m.style.display=''; },'exp-play'));
+    const r2=dlgRow(card);
+    const sub=(L,f)=>dlgBtn($t('Untertitel ','Subtitles ')+f.toUpperCase()+' '+L.toUpperCase(),()=>{ const c=Exporter.estimateCues(L,sel.scope.value); if(!c.length){ status.textContent=$t('Keine Texte in dieser Sprache vorhanden.','No texts in this language.'); return; } Exporter.download('Untertitel-'+L.toUpperCase()+'.'+f,Exporter.toSubs(c,f)); status.textContent=$t('Zeiten sind aus der Sprechdauer geschätzt; beim Videoexport werden die echten Zeiten mitgeschrieben.','Times are estimated from speech duration; a video export records the real times.'); },'exp-sub exp-sub-'+f+'-'+L);
+    ['de','en'].forEach(L=>['srt','vtt'].forEach(f=>r2.appendChild(sub(L,f))));
+    const r3=dlgRow(card); r3.appendChild(dlgBtn($t('Schließen','Close'),close,'primary'));
+  });
+  function showResult(r,box,status,o){
+    box.innerHTML='';
+    status.textContent=(r.cancel?$t('Abgebrochen – bisher aufgenommen: ','Cancelled – recorded so far: '):$t('Fertig: ','Done: '))+(r.blob.size/1048576).toFixed(1)+' MB · '+fmt(r.dur)+' · '+r.size[0]+'×'+r.size[1]+' · '+r.ext.toUpperCase()+' · '+$t('Ton: ','sound: ')+({tab:$t('Tab-Audio','tab audio'),mix:$t('direkter Mix','direct mix'),none:$t('keiner','none')})[r.audio]+(r.cropped?'':$t(' · Ausschnitt per Seitenverhältnis',' · cropped by position'));
+    const v=document.createElement('video'); v.controls=true; v.className='exp-video'; v.style.cssText='width:100%;margin-top:8px;border-radius:8px;background:#000;'; v.src=URL.createObjectURL(r.blob); box.appendChild(v);
+    const row=document.createElement('div'); row.className='modal-row'; box.appendChild(row);
+    row.appendChild(dlgBtn('⬇ '+$t('Datei speichern','Save file')+' (.'+r.ext+')',()=>Exporter.download('Stagehand-Video.'+r.ext,r.blob),'primary exp-save'));
+    ['de','en'].forEach(L=>{ if(!r.cues.length) return; const cs=r.cues.filter(c=>c.lang===L); if(cs.length) row.appendChild(dlgBtn($t('SRT ','SRT ')+L.toUpperCase()+' ('+$t('echte Zeiten','real times')+')',()=>Exporter.download('Untertitel-'+L.toUpperCase()+'.srt',Exporter.toSubs(cs,'srt')),'exp-srt-real')); });
+  }
+};
+
+function updatePauseBtn(){ const b=document.getElementById('pauseBtn'); if(!b) return; if(Player.running){ b.textContent=$t('⏸ Pause','⏸ Pause'); b.classList.remove('primary'); } else if(Player.paused){ b.textContent=$t('▶ Weiter','▶ Resume'); b.classList.add('primary'); } else { b.textContent=$t('⏸ Pause','⏸ Pause'); b.classList.remove('primary'); } }
+document.getElementById('pauseBtn').addEventListener('click',()=>{ if(Player.running) Player.pause(); else if(Player.paused) Player.resume(); });
+/* In die Lineale klicken = ab dieser Stelle abspielen (Szene bzw. Gesamtfilm) */
+(function(){
+  const sceneRuler=document.getElementById('objRuler'), masterWrap=document.querySelector('.master-ruler-wrap'), mini=document.querySelector('.mini-playhead-track');
+  const pctOf=(el,e)=>{ const r=el.getBoundingClientRect(); return Math.max(0,Math.min(0.999,(e.clientX-r.left)/Math.max(1,r.width))); };
+  [sceneRuler,mini].forEach(el=>{ if(!el) return; el.style.cursor='pointer'; el.title=$t('Klicken = ab hier abspielen','Click = play from here'); el.addEventListener('click',e=>{ if(Pick.active) return; const sc=getCurrentScene(); Player.start('scene',{offset:pctOf(el,e)*sc.duration}); }); });
+  if(masterWrap){ masterWrap.style.cursor='pointer'; masterWrap.addEventListener('click',e=>{ if(Pick.active) return; const tot=scenesTimeline.reduce((s,sc)=>s+sc.duration,0), at=pctOf(masterWrap,e)*tot; let acc=0; for(let i=0;i<scenesTimeline.length;i++){ const d=scenesTimeline[i].duration; if(at<acc+d||i===scenesTimeline.length-1){ Player.start('all',{sceneIdx:i,offset:Math.max(0,Math.min(d-0.05,at-acc))}); return; } acc+=d; } }); }
+})();
+
+/* ================= Automatisches Timing ================= */
+function autoTimeScene(sc,opts){
+  opts=opts||{}; const gap=opts.gap!=null?opts.gap:0.45; let cur=opts.lead!=null?opts.lead:0.5;
+  const lines=sc.characters.concat(sc.narrator?[sc.narrator]:[]).map((i,k)=>({i,k})).filter(x=>(x.i.script||'').trim());
+  lines.sort((a,b)=>(a.i.speechStart||0)-(b.i.speechStart||0)||a.k-b.k);
+  lines.forEach(x=>{ x.i.speechStart=Math.round(cur*10)/10; cur+=estimateSpeechDuration(x.i)+gap; });
+  if(lines.length){ const lastEnd=cur-gap; sc.duration=Math.max(4,Math.min(60,Math.ceil(lastEnd+1))); }
+  return lines.length;
+}
+function autoTimeAll(allScenes){
+  const list=allScenes?scenesTimeline:[getCurrentScene()]; let n=0; list.forEach(sc=>{ n+=autoTimeScene(sc); });
+  renderSpeakerTracks(); renderObjectTimeline(); renderMasterTimeline(); if(currentTab==='animation') renderPanel(); return n;
+}
+
+/* ================= Kamera (Zoom/Schwenk während der Wiedergabe) ================= */
+function cameraFraming(cl){
+  const sc=getCurrentScene(), z=Math.max(1,Math.min(4,cl.zoom||1));
+  if(!cl.target||cl.target==='wide'||z<=1.001) return {z:1,tx:0,ty:0};
+  let fx=STAGE_W/2, fy=STAGE_H/2;
+  if(cl.target.indexOf('char:')===0){ const c=sc.characters.find(c=>c.id===cl.target.slice(5)); if(c){ const f=charEl(c.id); fx=(f?f.offsetLeft:c.x)+c.w/2; fy=(f?f.offsetTop:c.y)+c.h*0.38; } }
+  else if(cl.target==='pt'&&cl.pt){ fx=cl.pt.x; fy=cl.pt.y; }
+  const tx=Math.max(STAGE_W-STAGE_W*z,Math.min(0,STAGE_W/2-fx*z)), ty=Math.max(STAGE_H-STAGE_H*z,Math.min(0,STAGE_H/2-fy*z));
+  return {z,tx,ty};
+}
+function applyCamera(cl,dur){
+  const cam=document.getElementById('stageCam'); if(!cam) return; const f=cameraFraming(cl);
+  cam.style.transition=dur>0?'transform '+dur+'s cubic-bezier(.45,.05,.4,1)':'none';
+  cam.style.transform='translate('+f.tx.toFixed(1)+'px,'+f.ty.toFixed(1)+'px) scale('+f.z+')';
+}
+function resetCamera(){ const cam=document.getElementById('stageCam'); if(cam){ cam.style.transition='none'; cam.style.transform='none'; } }
+function addCameraClip(){
+  const sc=getCurrentScene(); sc.camera=sc.camera||[]; const D=sc.duration;
+  const last=sc.camera.reduce((m,c)=>Math.max(m,c.start+c.dur),0), start=Math.max(0,Math.min(Math.round(last*10)/10,D-1));
+  const first=sc.characters[0];
+  sc.camera.push({id:'cm'+(clipCounter++),start,dur:Math.max(0.6,Math.min(1.5,D-start)),zoom:1.8,target:(sc.camera.length%2===0&&first)?('char:'+first.id):'wide'});
+  sc.camera.sort((a,b)=>a.start-b.start); renderObjectTimeline();
+}
+
+/* ================= Vorlagen (Erklärvideo-Gerüste, Texte in DE + EN) ================= */
+const TEMPLATES=[
+  {id:'pls',name:['Problem → Lösung → Aufruf','Problem → solution → call to action'],desc:['3 Szenen: Problem schildern, Lösung zeigen, zum Handeln auffordern','3 scenes: describe the problem, show the solution, call to action'],
+   scenes:[
+     {title:['Das Problem','The problem'],bg:'studio-dark',char:'lena',pose:'explain',mood:'anger',line:['Kennst du das? Alles ist verstreut, und du verlierst jeden Tag Zeit.','Sound familiar? Everything is scattered and you lose time every day.'],icon:'clipboard'},
+     {title:['Die Lösung','The solution'],bg:'studio-light',char:'markus',pose:'point',mood:'joy',line:['Mit unserer Lösung ist alles an einem Ort – einfach und schnell.','With our solution everything is in one place – simple and fast.'],icon:'monitor'},
+     {title:['Jetzt starten','Get started'],bg:'gradient-violet',char:'lena',pose:'cheer',mood:'joy',line:['Probiere es heute aus – wir freuen uns auf dich!','Try it today – we look forward to meeting you!'],icon:null}]},
+  {id:'steps',name:['In drei Schritten erklärt','Explained in three steps'],desc:['4 Szenen: Einleitung und drei Schritte mit Überschrift und Symbol','4 scenes: intro and three steps with heading and icon'],
+   scenes:[
+     {title:['So funktioniert es','How it works'],bg:'studio-light',char:'markus',pose:'wave',mood:'joy',line:['Hallo! In drei einfachen Schritten zeige ich dir, wie es geht.','Hello! In three simple steps I will show you how it works.'],icon:null},
+     {title:['Schritt 1','Step 1'],bg:'studio-light',char:'lena',pose:'point',mood:'none',line:['Zuerst legst du dein Projekt an.','First, you create your project.'],icon:'desk'},
+     {title:['Schritt 2','Step 2'],bg:'studio-light',char:'markus',pose:'point',mood:'none',line:['Dann trägst du deine Daten ein.','Then you enter your data.'],icon:'clipboard'},
+     {title:['Schritt 3','Step 3'],bg:'studio-light',char:'lena',pose:'cheer',mood:'joy',line:['Fertig! Schon bist du startklar.','Done! You are ready to go.'],icon:'safe'}]}
+];
+function applyTemplate(id){
+  const T=TEMPLATES.find(t=>t.id===id); if(!T) return 0; Player.stop(false);
+  const O=LANG==='de'?'en':'de', iL=LANG==='de'?0:1, iO=LANG==='de'?1:0;
+  T.scenes.forEach((def,n)=>{
+    const sc=makeScene({label:def.title[iL],bgType:'plain',bgId:def.bg,duration:8});
+    scenesTimeline.push(sc); currentSceneIndex=scenesTimeline.length-1;
+    const dark=(def.bg==='studio-dark'||def.bg==='gradient-violet'||def.bg==='sunset'); const objs=[{type:'text',content:def.title[iL],fontSize:40,bold:true,color:dark?'#F4F1EA':'#20222C',w:420,h:70,x:60,y:36,timelineStart:0}];
+    if(def.icon) objs.push({type:'icon',iconId:def.icon,w:150,h:150,x:690,y:120,timelineStart:0.6,effect:'pop'});
+    objs.forEach(o=>addObjectToStage(o));
+    const c=addCharacterToStage(def.char); c.x=def.icon?260:420; c.facing='threeq'; c.reaction=def.mood; c.script=def.line[iL]; c.lang=LANG; c.tx={[O]:{script:def.line[iO],voiceName:'',clip:null}}; c.todo={};
+    if(def.pose!=='wave'||true){ const e=autoTimeScene({characters:[c],objects:[],narrator:null,duration:8}); }
+    c.speechStart=0.8; c.clips=[{id:'cl'+(clipCounter++),start:0.3,dur:2,pose:def.pose}];
+    if(def.pose==='point'&&def.icon){ const ob=sc.objects.find(o=>o.type==='icon'); c.clips[0].at={kind:'obj',id:ob.id}; c.flipped=true; c.x=Math.round(STAGE_W*0.58); c.clips[0].start=0.9; }
+    sc.duration=Math.max(6,Math.min(30,Math.ceil(0.8+estimateSpeechDuration(c)+1)));
+  });
+  selectScene(scenesTimeline.length-T.scenes.length); refreshAll(); History.commit();
+  return T.scenes.length;
+}
+
 /* ================= Init: kleiner Dialog als Demo ================= */
 document.querySelector('.rail-btn[data-tab="scenes"]').classList.add('active');
 applyStatic();
@@ -3618,6 +4174,7 @@ renderPanel();
 renderSceneTrack();
 renderObjectTimeline();
 renderMasterTimeline();
+History.reset();
 
 </script>
 </body>

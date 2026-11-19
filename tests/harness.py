@@ -46,13 +46,34 @@ STUB = r"""
   });
 })();
 """
+REC_STUB=r"""
+(()=>{
+  function wav(sec){ const R=8000,n=Math.floor(R*sec),b=new ArrayBuffer(44+n*2),v=new DataView(b);
+    const s=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));};
+    s(0,'RIFF');v.setUint32(4,36+n*2,true);s(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,R,true);v.setUint32(28,R*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);s(36,'data');v.setUint32(40,n*2,true);
+    for(let i=0;i<n;i++) v.setInt16(44+i*2,Math.round(6000*Math.sin(i*0.2)),true); return new Blob([b],{type:'audio/wav'}); }
+  window.__rec={calls:0,lang:[]};
+  Object.defineProperty(navigator,'mediaDevices',{value:{getUserMedia:async()=>({getTracks:()=>[{stop(){}}]})},configurable:true});
+  class MR{ constructor(s,o){this.state='inactive';this.mimeType='audio/wav';}
+    start(){this.state='recording';} stop(){ this.state='inactive'; setTimeout(()=>{ this.ondataavailable&&this.ondataavailable({data:wav(1.5)}); this.onstop&&this.onstop(); },20); } }
+  MR.isTypeSupported=t=>t==='audio/wav'||t==='audio/webm';
+  window.MediaRecorder=MR;
+  class SR{ constructor(){ __rec.calls++; }
+    start(){ __rec.lang.push(this.lang); setTimeout(()=>{ this.onresult&&this.onresult({results:[Object.assign([{transcript:this.lang==='en-US'?'Hello this is a test':'Hallo das ist ein Test'}],{isFinal:true})]}); },60); }
+    stop(){ this.onend&&this.onend(); } }
+  window.SpeechRecognition=SR;
+})();
+"""
 class App:
-    def __init__(self, path, viewport=(1400,900), stub=True, mobile=False, lang='de'):
+    def __init__(self, path, viewport=(1400,900), stub=True, mobile=False, lang='de', capture=False):
         self.path=os.path.abspath(path); self.viewport=viewport; self.stub=stub; self.mobile=mobile; self.lang=lang
-        self.errs=[]
+        self.errs=[]; self.capture=capture
     def __enter__(self):
         self.pw=sync_playwright().start()
-        self.b=self.pw.chromium.launch(**launch_kwargs())
+        kw0=launch_kwargs()
+        if self.capture:   # Tab-Aufnahme braucht ein Fenster (unter Xvfb) und diese Schalter
+            kw0['headless']=False; kw0['args']+=['--auto-accept-this-tab-capture','--auto-select-tab-capture-source-by-title=Stagehand','--disable-gpu-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']
+        self.b=self.pw.chromium.launch(**kw0)
         kw={'viewport':{'width':self.viewport[0],'height':self.viewport[1]},'locale':'de-DE' if self.lang=='de' else 'en-US'}
         if self.mobile: kw.update({'has_touch':True,'is_mobile':True,'device_scale_factor':2})
         self.ctx=self.b.new_context(**kw)

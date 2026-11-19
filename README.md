@@ -25,6 +25,13 @@ Direkt öffnen (Doppelklick auf `index.html`) oder per GitHub Pages veröffentli
 * **Texte, Stimmen und Aufnahmen je Sprache**: jede Sprechzeile (und der Erzähler) merkt sich Text, Stimme und Aufnahme getrennt für **Deutsch und Englisch**. Chips „DE ✓ 🎵 / EN ⚠“ zeigen, was vorhanden bzw. noch nicht übersetzt ist; „Alle Sprecher auf Deutsch/English“ schaltet das ganze Projekt um.
 * **Aufnehmen & Transkribieren**: „🎙 Aufnehmen“ nimmt die Stimme im Browser auf (je Sprache getrennt); wenn der Browser Spracherkennung kann, entsteht dabei ein **Transkript**, das als Sprechtext/Blase übernommen und bearbeitet werden kann. „📝 Diktieren“ trägt nur den Text ein. Aufnahmen der **iOS-Sprachmemos** (oder anderer Rekorder) lassen sich als Audiodatei je Zeile und Sprache laden; den Text dazu tippst oder diktierst du als Transkript.
 * **Eigenes Hintergrundbild**: Foto/Grafik hochladen (JPG, PNG, HEIC …; wird auf ≤1920 px verkleinert), Modus „füllen“ oder „einpassen“, Abdunkeln und Weichzeichnen.
+* **Figur antippen**: Jede Figur zeigt im Bearbeiten-Modus drei Symbole – 🎙 Einsprechen, 💬 Text/Stimme/Sprache, ⚙ Konfiguration (Zustand, Reaktion, Blickrichtung, Figurenstil …) als Popover (auf dem Handy als Bottom-Sheet). Schalter **✎ Bearbeiten | 👁 Vorschau** blendet alle Bearbeitungs-Symbole aus.
+* **Größe, Duplizieren, Löschen**: Figuren und Objekte mit ＋/－ (oder Tasten +/−) oder Ziehpunkt (Seitenverhältnis bleibt, Text skaliert die Schrift mit); ⧉ dupliziert Figur/Objekt, **Szene duplizieren** kopiert alles (Objekte, Figuren, Texte in DE+EN, Ziele, Kamera). „Person löschen“ entfernt Figur samt Sprecherzeile und Text; neue Figuren bekommen sofort ihre Sprecher-Vorgaben.
+* **Projekt speichern/laden** (`.stagehand.json`, mit Aufnahmen, Bildern und Musik eingebettet), Autosave (ohne Medien) und **Rückgängig/Wiederholen** (Strg+Z / Strg+Umschalt+Z).
+* **Export**: Dialog mit Format (**MP4 H.264**, WebM VP9/VP8, je nach Browser), Auflösung (480p – Full HD), Bildrate, **Qualität/Kompression** (mit Größenschätzung), Umfang (alles/Szene) und Ton; dazu **Untertitel SRT/VTT** in Deutsch und Englisch. Die Aufnahme läuft in Echtzeit über die Tab-Freigabe von Chrome/Edge (Bühne exakt zugeschnitten). Ton: eigener Mix (Musik, Audiodateien, Aufnahmen, TTS-Server) oder Tab-Audio (nötig für Browserstimmen). „Vollbild abspielen“ ist für die Bildschirmaufnahme am iPhone gedacht.
+* **Wiedergabe-Steuerung**: Pause/Weiter, Klick ins Lineal = ab dort abspielen (Szene und Gesamtfilm), **⏱ Zeiten automatisch** (Sprecher nacheinander, Szenenlänge angepasst).
+* **Kamera**: Zoom/Schwenk auf eine Figur oder zurück zum Gesamtbild als Clips in der Timeline (4 Zoomstufen).
+* **Mehr Posen und Vorlagen**: Nicken, Schulterzucken; Vorlagen „Problem → Lösung → Aufruf“ und „In drei Schritten erklärt“ (Texte in DE+EN).
 * **Stimmquellen**: Browser-/Systemstimmen, eigene **Audiodatei** pro Zeile oder ein **eigener TTS-Server** (z. B. Piper) → [docs/VOICES.md](docs/VOICES.md)
 * **Hintergrundmusik**: vier Synth-Stile (WebAudio, kein Download) **oder eigene Dateien** (MP3, M4A, WAV, OGG, MP4 mit Tonspur) pro Szene – mit Lautstärke, Schleife und automatischer Absenkung beim Sprechen. Geladene Dateien gelten nur für die laufende Sitzung (sie werden nicht in der Seite gespeichert).
 * **Bewegung**: sinusförmiger Gehzyklus mit Fußhub und Rumpf-Wippen, überlappende Kopfbewegung, weiche Posenübergänge (Winken → Ruhe gleitet statt zu springen), Atmen, Blinzeln, Blickwechsel, Gestik beim Sprechen.
@@ -37,7 +44,7 @@ Ohne Einrichtung nutzt das Tool die Stimmen des Browsers/Betriebssystems – die
 
 ## Tests
 
-Browser-Tests mit Playwright (Rig, Bearbeiten, Wiedergabe, Lippen-Sync, Handy, Robustheit, Deutsch/Englisch, Audio-Quellen, Ziele, Aufnahme/Erzähler):
+Browser-Tests mit Playwright (Rig, Bearbeiten, Wiedergabe, Lippen-Sync, Handy, Robustheit, Deutsch/Englisch, Audio-Quellen, Ziele, Aufnahme/Erzähler, Projekt, Overlay, Export, Wiedergabe/Kamera):
 
 ```bash
 pip install -r tests/requirements.txt && python -m playwright install chromium
@@ -46,8 +53,8 @@ tests/run_all.sh          # optional: CHROME_PATH=/pfad/zu/chrome
 
 ## Stand / Grenzen
 
-* MP4-Export und Embed-Code sind Platzhalter (der Export soll später serverseitig rendern).
-* Es gibt noch kein Speichern/Laden von Projekten (auch Aufnahmen und Hintergrundbilder gelten nur für die laufende Sitzung); Audiodateien pro Zeile gelten nur für die laufende Sitzung.
+* Embed-Code ist ein Platzhalter. Der Videoexport nimmt in Echtzeit auf (Chrome/Edge am Computer); auf iPhone/iPad-Safari gibt es keine Seitenaufnahme – dort „Vollbild abspielen“ + iOS-Bildschirmaufnahme. Browserstimmen kommen nur über Tab-Audio ins Video (im Freigabe-Fenster „Tab-Audio teilen“).
+* Projekte lassen sich als Datei speichern; Autosave im Browser enthält keine Aufnahmen/Musik. Große Projekte mit vielen Aufnahmen werden entsprechend groß.
 * Transkription: Der Browser kann hochgeladene Dateien nicht in Text umwandeln, nur live beim Aufnehmen/Diktieren (je nach Browser; iOS-Safari nimmt und erkennt nicht immer gleichzeitig) – sonst Text tippen.
 * Sprachausgabe der Browser kann nicht mehrere Stimmen parallel – Überschneidungen werden nacheinander gesprochen.
 * Lizenz des Codes: noch nicht festgelegt (ohne Lizenzdatei gelten die gesetzlichen Standardrechte).
@@ -79,6 +86,13 @@ Open it directly (double-click `index.html`) or publish via GitHub Pages (Settin
 * **Texts, voices and recordings per language**: every speech line (and the narrator) keeps text, voice and recording separately for **German and English**. Chips “DE ✓ 🎵 / EN ⚠” show what exists or is not yet translated; “Set all speakers to German/English” switches the whole project.
 * **Recording & transcribing**: “🎙 Record” records the voice in the browser (separately per language); if the browser supports speech recognition a **transcript** is created that can be taken over as speech text/bubble and edited. “📝 Dictate” only enters the text. Recordings from the **iOS Voice Memos** app (or any recorder) can be loaded as an audio file per line and language; type or dictate the matching text as the transcript.
 * **Own background image**: upload a photo/graphic (JPG, PNG, HEIC …; downscaled to ≤1920 px), mode “fill” or “fit”, darken and blur.
+* **Tap a figure**: in edit mode every figure shows three icons – 🎙 record, 💬 text/voice/language, ⚙ configuration (state, reaction, facing, figure style …) as a popover (bottom sheet on phones). The **✎ Edit | 👁 Preview** switch hides all editing overlays.
+* **Resize, duplicate, delete**: figures and objects with ＋/－ (or the +/− keys) or the drag handle (aspect ratio kept, text scales its font); ⧉ duplicates a figure/object, **duplicate scene** copies everything (objects, figures, texts in DE+EN, targets, camera). “Delete person” removes the figure with its speaker row and text; new figures immediately get their speaker settings.
+* **Save/load project** (`.stagehand.json`, recordings, images and music embedded), autosave (without media) and **undo/redo** (Ctrl+Z / Ctrl+Shift+Z).
+* **Export**: dialog with format (**MP4 H.264**, WebM VP9/VP8, depending on the browser), resolution (480p – Full HD), frame rate, **quality/compression** (with size estimate), scope (all/scene) and sound; plus **SRT/VTT subtitles** in German and English. Recording runs in real time via Chrome/Edge tab sharing (stage cropped exactly). Sound: own mix (music, audio files, recordings, TTS server) or tab audio (needed for browser voices). “Play fullscreen” is meant for the iPhone’s screen recording.
+* **Playback control**: pause/resume, click the ruler = play from there (scene and whole film), **⏱ auto timing** (speakers one after another, scene length adjusted).
+* **Camera**: zoom/pan to a figure or back to the wide shot as timeline clips (4 zoom levels).
+* **More poses and templates**: nodding, shrugging; templates “Problem → solution → call to action” and “Explained in three steps” (texts in DE+EN).
 * **Voice sources**: browser/OS voices, your own **audio file** per line, or **your own TTS server** (e.g. Piper) → [docs/VOICES.md](docs/VOICES.md)
 * **Background music**: four synth styles (WebAudio, no download) **or your own files** (MP3, M4A, WAV, OGG, MP4 with an audio track) per scene – with volume, loop and automatic ducking while someone speaks. Loaded files only live for the current session (they are not stored in the page).
 * **Motion**: sine-based walk cycle with foot lift and torso bob, overlapping head movement, smooth pose transitions (wave → rest glides instead of snapping), breathing, blinking, glances, gestures while speaking.
@@ -91,7 +105,7 @@ Out of the box the tool uses your browser/OS voices – quality depends on the d
 
 ## Tests
 
-Playwright browser tests (rig, editing, playback, lip sync, mobile, robustness, German/English, audio sources, targets, recording/narrator):
+Playwright browser tests (rig, editing, playback, lip sync, mobile, robustness, German/English, audio sources, targets, recording/narrator, project, overlay, export, playback/camera):
 
 ```bash
 pip install -r tests/requirements.txt && python -m playwright install chromium
@@ -100,8 +114,8 @@ tests/run_all.sh          # optional: CHROME_PATH=/path/to/chrome
 
 ## Status / limits
 
-* MP4 export and embed code are placeholders (export is meant to render server-side later).
-* No saving/loading of projects yet (recordings and background images only live for the current session); per-line audio files only live for the current session.
+* Embed code is a placeholder. Video export records in real time (Chrome/Edge on a computer); iPhone/iPad Safari cannot record the page – use “Play fullscreen” + iOS screen recording there. Browser voices only reach the video via tab audio (tick “Share tab audio” in the share window).
+* Projects can be saved as a file; the browser autosave contains no recordings/music. Large projects with many recordings get large.
 * Transcription: the browser cannot turn uploaded files into text, only live while recording/dictating (depends on the browser; iOS Safari does not always record and recognise at once) – otherwise type the text.
 * Browser speech synthesis cannot speak several voices in parallel – overlapping lines are spoken one after another.
 * Code licence: not decided yet (without a licence file the default legal rights apply).

@@ -11,24 +11,8 @@ def make_png(p,w=640,h=360):
     def ch(t,d): c=struct.pack('>I',len(d))+t+d; return c+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)
     open(p,'wb').write(b'\x89PNG\r\n\x1a\n'+ch(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+ch(b'IDAT',zlib.compress(raw))+ch(b'IEND',b''))
 BG=os.path.join(tempfile.mkdtemp(),'bg.png'); make_png(BG)
-REC_STUB=r"""
-(()=>{
-  function wav(sec){ const R=8000,n=Math.floor(R*sec),b=new ArrayBuffer(44+n*2),v=new DataView(b);
-    const s=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));};
-    s(0,'RIFF');v.setUint32(4,36+n*2,true);s(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,R,true);v.setUint32(28,R*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);s(36,'data');v.setUint32(40,n*2,true);
-    for(let i=0;i<n;i++) v.setInt16(44+i*2,Math.round(6000*Math.sin(i*0.2)),true); return new Blob([b],{type:'audio/wav'}); }
-  window.__rec={calls:0,lang:[]};
-  Object.defineProperty(navigator,'mediaDevices',{value:{getUserMedia:async()=>({getTracks:()=>[{stop(){}}]})},configurable:true});
-  class MR{ constructor(s,o){this.state='inactive';this.mimeType='audio/wav';}
-    start(){this.state='recording';} stop(){ this.state='inactive'; setTimeout(()=>{ this.ondataavailable&&this.ondataavailable({data:wav(1.5)}); this.onstop&&this.onstop(); },20); } }
-  MR.isTypeSupported=t=>t==='audio/wav'||t==='audio/webm';
-  window.MediaRecorder=MR;
-  class SR{ constructor(){ __rec.calls++; }
-    start(){ __rec.lang.push(this.lang); setTimeout(()=>{ this.onresult&&this.onresult({results:[Object.assign([{transcript:this.lang==='en-US'?'Hello this is a test':'Hallo das ist ein Test'}],{isFinal:true})]}); },60); }
-    stop(){ this.onend&&this.onend(); } }
-  window.SpeechRecognition=SR;
-})();
-"""
+from harness import REC_STUB
+
 
 # ---------- Hintergrundbild
 with App(path,lang='de') as a:
