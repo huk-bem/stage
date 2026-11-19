@@ -445,11 +445,16 @@ body.exporting .obj-toolbar,body.exporting .obj-handle{display:none !important;}
 @keyframes shrA{0%,100%{transform:rotate(-30deg);}45%{transform:rotate(-44deg);}} @keyframes shrB{0%,100%{transform:rotate(30deg);}45%{transform:rotate(44deg);}}
 @keyframes shrBob{0%,100%{transform:translateY(0);}45%{transform:translateY(-4px);}}
 
-.filmstrip-dup{margin-left:6px;margin-right:2px;}
+.filmstrip-actions{display:flex;justify-content:space-between;gap:2px;padding:0 3px 4px;}
+.fs-btn{flex:1 1 0;min-width:0;height:26px;border:1px solid var(--panel-border);background:var(--panel);color:var(--text-secondary);border-radius:6px;font-size:11px;line-height:1;cursor:pointer;padding:0;touch-action:manipulation;white-space:nowrap;overflow:hidden;}
+.fs-btn:hover:not(:disabled){border-color:var(--accent-violet);color:var(--text-primary);}
+.fs-del:hover:not(:disabled){border-color:var(--accent-pink);color:var(--accent-pink);}
+.fs-btn:disabled{opacity:.35;cursor:not-allowed;}
+.filmstrip-card{height:auto;}
 #undoBtn:disabled,#redoBtn:disabled{opacity:.35;cursor:default;}
 .filmstrip-del{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:11px;padding:0;flex-shrink:0;}
 .filmstrip-del:hover{color:var(--accent-pink);}
-.filmstrip-add{flex-shrink:0;width:60px;height:76px;border:1.5px dashed var(--panel-border);border-radius:var(--radius-md);background:none;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;font-family:var(--font-body);}
+.filmstrip-add{flex-shrink:0;width:60px;height:104px;border:1.5px dashed var(--panel-border);border-radius:var(--radius-md);background:none;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;font-family:var(--font-body);}
 .filmstrip-add:hover{border-color:var(--accent-violet);color:var(--accent-violet);}
 
 .transition-connector{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -2078,8 +2083,16 @@ function duplicateScene(idx){
   selectScene(idx+1);
   return n;
 }
-function deleteScene(idx){
+/* Neutrale (leere) Szene an Position at einsetzen: Standard-Hintergrund, keine Figuren/Objekte */
+function insertNeutralScene(at){
+  at=Math.max(0,Math.min(scenesTimeline.length,at));
+  const sc=makeScene({label:'Szene '+(scenesTimeline.length+1), bgType:'plain', bgId:'studio-light', bgImage:null});
+  scenesTimeline.splice(at,0,sc); selectScene(at); return sc;
+}
+function sceneHasContent(sc){ return !!(sc.characters.length||sc.objects.length||sc.narrator||(sc.bgType==='image'&&sc.bgImage)); }
+function deleteScene(idx,ask){
   if(scenesTimeline.length<=1) return;
+  if(ask && sceneHasContent(scenesTimeline[idx]) && !confirm($t('Szene '+(idx+1)+' mit allen Figuren, Objekten und Texten löschen?','Delete scene '+(idx+1)+' with all figures, objects and texts?'))) return;
   scenesTimeline.splice(idx,1);
   if(currentSceneIndex>=scenesTimeline.length) currentSceneIndex=scenesTimeline.length-1;
   selectScene(currentSceneIndex);
@@ -2110,15 +2123,15 @@ function renderSceneTrack(){
     const label=document.createElement('div'); label.className='filmstrip-label';
     const span=document.createElement('span'); span.textContent=(idx+1)+'. '+$d(scene.label);
     label.appendChild(span);
-    const dup=document.createElement('button'); dup.className='filmstrip-del filmstrip-dup'; dup.textContent='⧉'; dup.title=$t('Szene duplizieren (mit allen Objekten, Figuren und Texten)','Duplicate scene (with all objects, figures and texts)');
-    dup.addEventListener('click', e=>{ e.stopPropagation(); duplicateScene(idx); });
-    label.appendChild(dup);
-    if(scenesTimeline.length>1){
-      const del=document.createElement('button'); del.className='filmstrip-del'; del.textContent='✕'; del.title=$t('Szene löschen','Delete scene');
-      del.addEventListener('click', e=>{ e.stopPropagation(); deleteScene(idx); });
-      label.appendChild(del);
-    }
     card.appendChild(label);
+    // Symbole an der Szene: leere Szene davor / Kopie / leere Szene danach / löschen
+    const act=document.createElement('div'); act.className='filmstrip-actions';
+    const ab=(cls,txt,title,fn,dis)=>{ const b=document.createElement('button'); b.type='button'; b.className='fs-btn '+cls; b.textContent=txt; b.title=title; if(dis) b.disabled=true; b.draggable=false; b.addEventListener('click',e=>{ e.stopPropagation(); if(!b.disabled) fn(); }); act.appendChild(b); return b; };
+    ab('fs-before','◂+',$t('Leere Szene davor einfügen','Insert empty scene before'),()=>insertNeutralScene(idx));
+    ab('filmstrip-dup fs-copy','⧉',$t('Szene kopieren (mit allen Objekten, Figuren und Texten)','Copy scene (with all objects, figures and texts)'),()=>duplicateScene(idx));
+    ab('fs-after','+▸',$t('Leere Szene danach einfügen','Insert empty scene after'),()=>insertNeutralScene(idx+1));
+    ab('fs-del','🗑',scenesTimeline.length>1?$t('Szene löschen','Delete scene'):$t('Mindestens eine Szene muss bleiben','At least one scene must remain'),()=>deleteScene(idx,true),scenesTimeline.length<=1);
+    card.appendChild(act);
     card.addEventListener('click', ()=>selectScene(idx));
     card.addEventListener('dragstart', ()=>{ dragIdx=idx; });
     card.addEventListener('dragover', e=>e.preventDefault());
@@ -2133,8 +2146,8 @@ function renderSceneTrack(){
     host.appendChild(card);
     if(idx<scenesTimeline.length-1) host.appendChild(makeTransitionConnector(idx));
   });
-  const addBtn=document.createElement('button'); addBtn.className='filmstrip-add'; addBtn.textContent='+'; addBtn.title=$t('Neue Szene','New scene');
-  addBtn.addEventListener('click', addScene);
+  const addBtn=document.createElement('button'); addBtn.className='filmstrip-add'; addBtn.textContent='+'; addBtn.title=$t('Neue leere Szene am Ende','New empty scene at the end');
+  addBtn.addEventListener('click', ()=>insertNeutralScene(scenesTimeline.length));
   host.appendChild(addBtn);
 }
 /* ================= Timeline: Balken verschieben / Dauer ziehen ================= */
