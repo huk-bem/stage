@@ -1432,8 +1432,20 @@ const plainBackgrounds = [
   {id:'sunset', name:'Sonnenuntergang', css:'linear-gradient(180deg,#5A4BA8 0%,#E8637C 55%,#FFB36B 100%)'},
   {id:'chalk', name:'Tafel', css:'radial-gradient(120% 90% at 50% 30%,#3D5B53 0%,#2A433C 70%,#1D312B 100%)'},
 ];
+/* Farben aus Paletten: 'pc-RRGGBB' (einfarbig, weich verlaufend) und 'pg-RRGGBB-RRGGBB' (Verlauf) werden bei Bedarf angelegt */
+const hex2rgb=h=>{ h=h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; };
+const rgb2hex=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const lumOf=h=>{ const [r,g,b]=hex2rgb(h).map(v=>{ v/=255; return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4); }); return .2126*r+.7152*g+.0722*b; };
+const contrastOf=(a,b)=>{ const x=lumOf(a),y=lumOf(b); return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); };
+function bgById(id){
+  let bg=plainBackgrounds.find(b=>b.id===id); if(bg) return bg;
+  let m=/^pc-([0-9A-Fa-f]{6})$/.exec(id||''), g=/^pg-([0-9A-Fa-f]{6})-([0-9A-Fa-f]{6})$/.exec(id||'');
+  if(m){ const c='#'+m[1].toUpperCase(); bg={id,name:c,hidden:true,mid:c,dark:lumOf(c)<.3,css:`radial-gradient(120% 90% at 50% 30%,${mixHex(c,'#FFFFFF',.22)} 0%,${c} 62%,${mixHex(c,'#000000',.16)} 100%)`}; }
+  else if(g){ const a='#'+g[1].toUpperCase(), b='#'+g[2].toUpperCase(), mid=mixHex(a,b,.5); bg={id,name:a+' → '+b,hidden:true,mid,dark:lumOf(mid)<.3,css:`linear-gradient(135deg,${a},${b})`}; }
+  if(bg) plainBackgrounds.push(bg); return bg||null;
+}
 function plainDeco(bg){
-  const dark=/dark|chalk|sunset|violet/.test(bg.id);
+  const dark=bg.dark!==undefined?bg.dark:/dark|chalk|sunset|violet/.test(bg.id);
   const dots=[[180,160,70],[420,300,44],[1180,200,90],[1420,420,52],[860,130,36],[640,420,60],[1300,120,40]];
   return `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
 ${dots.map(([x,y,r],i)=>`<circle class="bg-float" cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="${dark?.07:.34}" style="animation-duration:${8+i*1.3}s;animation-delay:-${i*1.1}s"/>`).join('')}
@@ -1661,6 +1673,48 @@ function faceEachOther(id){
   renderCharacters(); renderPanel();
 }
 
+
+/* ================= Farbpaletten ================= */
+const PALETTES=[
+ {id:'p1',n:['Lavendel & Salbei','Lavender & sage'],c:['#8377A5','#95C8CB','#F2E9C0','#E2B5B2']},
+ {id:'p2',n:['Bonbon-Pop','Candy pop'],c:['#D947B4','#64C0D7','#EEC0CA','#F3EC5D']},
+ {id:'p3',n:['Frühlingsbunt','Spring mix'],c:['#F0D457','#AED651','#8170CE','#E26068']},
+ {id:'p4',n:['Beeren & Sonne','Berry & sun'],c:['#B796A9','#734D98','#F1E45A','#E9B44C']},
+ {id:'p5',n:['Senf & Petrol','Mustard & teal'],c:['#EACC5C','#E7BD51','#5A9C9A','#99D5D6']},
+ {id:'p6',n:['Schiefer & Sand','Slate & sand'],c:['#343841','#F3E5C0','#7E95A3','#DCC2B1']},
+ {id:'p7',n:['Pastell-Kontrast','Pastel contrast'],c:['#D1DFDF','#E2B6D7','#E6DC94','#55B0C2']},
+ {id:'p8',n:['Türkis & Magenta','Turquoise & magenta'],c:['#74D1D6','#F2EF6E','#DDC2B1','#D83898']},
+ {id:'p9',n:['Honig & Himmel','Honey & sky'],c:['#F1D184','#E7BB4E','#5CADEF','#98DFF3']},
+ {id:'p10',n:['Mokka & Gelb','Mocha & yellow'],c:['#AB9C95','#020200','#ECEDEF','#F0D457']}
+];
+const palOpts={bg:true,text:true,bubble:true,all:false};
+function bestInk(bgHex,cands){ let best=null,bc=0; cands.concat(['#20222C','#F4F1EA']).forEach(c=>{ const k=contrastOf(bgHex,c); if(k>bc){ bc=k; best=c; } }); return best; }
+function applyPalette(p,opts){
+  opts=Object.assign({},palOpts,opts||{}); const list=opts.all?scenesTimeline:[getCurrentScene()];
+  const bgHex=mixHex(p.c[0],p.c[1],.5), fill=p.c.slice(2).sort((a,b)=>lumOf(b)-lumOf(a))[0];
+  list.forEach(sc=>{
+    if(opts.bg){ sc.bgType='plain'; sc.bgId='pg-'+p.c[0].slice(1)+'-'+p.c[1].slice(1); sc.bgImage=sc.bgImage||null; }
+    if(opts.text){ const ink=bestInk(bgHex,[p.c[2],p.c[3]].filter(c=>contrastOf(bgHex,c)>=4.5)); sc.objects.forEach(o=>{ if(o.type==='text') o.color=ink; }); }
+    if(opts.bubble){ const ink=bestInk(fill,[p.c[0],p.c[1]].filter(c=>contrastOf(fill,c)>=7)); sc.characters.concat(sc.narrator?[sc.narrator]:[]).forEach(i=>{ if(i.narrator&&(i.bs&&i.bs.preset==='subtitle')) return; i.bs=Object.assign({},BB_DEFAULT,i.bs||{},{fill,color:ink,stroke:ink}); }); }
+  });
+  renderStageBackground(); renderObjects(); renderSceneTrack(); renderSpeakerTracks(); renderObjectTimeline(); renderCharacters(); if(currentTab==='scenes') renderPanel(); History.commit();
+}
+function renderPaletteSection(container){
+  const t=document.createElement('div'); t.className='section-title'; t.textContent=$t('Farbpaletten','Colour palettes'); container.appendChild(t);
+  const hint=document.createElement('div'); hint.className='anim-hint'; hint.textContent=$t('„Palette anwenden“ stellt Hintergrund (Verlauf aus Farbe 1→2), Texte und Sprechblasen passend ein. Ein Klick auf eine einzelne Farbe setzt nur den Hintergrund.','“Apply palette” sets background (gradient colour 1→2), texts and speech bubbles to match. A click on a single colour sets only the background.'); container.appendChild(hint);
+  const row=document.createElement('div'); row.className='pal-opts'; row.style.cssText='display:flex;flex-wrap:wrap;gap:8px 12px;font-size:11.5px;margin:6px 0;';
+  [['bg',$t('Hintergrund','Background')],['text',$t('Texte','Texts')],['bubble',$t('Sprechblasen','Bubbles')],['all',$t('alle Szenen','all scenes')]].forEach(([k,l])=>{ const lb=document.createElement('label'); lb.style.cssText='display:inline-flex;gap:4px;align-items:center;cursor:pointer;'; const cb=document.createElement('input'); cb.type='checkbox'; cb.className='pal-opt-'+k; cb.checked=!!palOpts[k]; cb.addEventListener('change',()=>{ palOpts[k]=cb.checked; }); lb.appendChild(cb); lb.appendChild(document.createTextNode(l)); row.appendChild(lb); });
+  container.appendChild(row);
+  const grid=document.createElement('div'); grid.className='pal-grid'; grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;';
+  PALETTES.forEach(p=>{
+    const card=document.createElement('div'); card.className='pal-card pal-'+p.id; card.style.cssText='background:var(--panel-elevated);border-radius:var(--radius-md);padding:6px;border:1.5px solid transparent;'; card.title=$t(p.n[0],p.n[1]);
+    const sw=document.createElement('div'); sw.style.cssText='display:flex;border-radius:6px;overflow:hidden;height:30px;';
+    p.c.forEach(c=>{ const x=document.createElement('div'); x.className='pal-sw'; x.dataset.hex=c; x.style.cssText='flex:1;background:'+c; x.title=c; x.addEventListener('click',e=>{ e.stopPropagation(); const list=palOpts.all?scenesTimeline:[getCurrentScene()]; list.forEach(sc=>{ sc.bgType='plain'; sc.bgId='pc-'+c.slice(1); }); renderStageBackground(); renderSceneTrack(); renderObjectTimeline(); History.commit(); }); sw.appendChild(x); });
+    card.appendChild(sw); const nm=document.createElement('div'); nm.style.cssText='font-size:10px;color:var(--text-secondary);margin:4px 0;'; nm.textContent=$t(p.n[0],p.n[1]); card.appendChild(nm);
+    const ap=document.createElement('button'); ap.type='button'; ap.className='ctrl-btn ctrl-btn-sm pal-apply'; ap.style.cssText='width:100%;'; ap.textContent='✓ '+$t('Palette anwenden','Apply palette'); ap.title=$t('Stellt Hintergrund, Texte und Sprechblasen auf diese Palette ein','Sets background, texts and bubbles to this palette'); ap.addEventListener('click',()=>applyPalette(p)); card.appendChild(ap); grid.appendChild(card);
+  });
+  container.appendChild(grid);
+}
 function renderScenesTab(container){
   const scene=getCurrentScene();
   const t1=document.createElement('div'); t1.className='section-title'; t1.textContent=$t('Branchen-Szenen','Industry scenes');
@@ -1678,7 +1732,7 @@ function renderScenesTab(container){
   const t2=document.createElement('div'); t2.className='section-title'; t2.textContent=$t('Einfache Hintergründe','Plain backgrounds');
   container.appendChild(t2);
   const grid2=document.createElement('div'); grid2.className='bg-grid';
-  plainBackgrounds.forEach(bg=>{
+  plainBackgrounds.filter(bg=>!bg.hidden).forEach(bg=>{
     const card=document.createElement('div');
     card.className='bg-card'+(scene.bgType==='plain'&&scene.bgId===bg.id?' selected':'');
     card.innerHTML=`<div class="bg-swatch" style="background:${bg.css}"></div><div class="bg-name">${$d(bg.name)}</div>`;
@@ -1686,6 +1740,7 @@ function renderScenesTab(container){
     grid2.appendChild(card);
   });
   container.appendChild(grid2);
+  renderPaletteSection(container);
 
   // Eigenes Hintergrundbild
   const t3=document.createElement('div'); t3.className='section-title'; t3.textContent=$t('Eigenes Hintergrundbild','Your own background image');
@@ -1819,7 +1874,7 @@ function renderStageBackground(){
     el.style.background='none';
     el.innerHTML=sc?sc.svg:'';
   } else {
-    const bg=plainBackgrounds.find(b=>b.id===scene.bgId)||plainBackgrounds[0];
+    const bg=bgById(scene.bgId)||plainBackgrounds[0];
     el.innerHTML=plainDeco(bg);
     el.style.background=bg.css;
   }
@@ -2194,7 +2249,7 @@ function renderSceneTrack(){
     const thumb=document.createElement('div'); thumb.className='filmstrip-thumb';
     if(scene.bgType==='image' && scene.bgImage){ thumb.style.background='#101218 center/cover no-repeat url("'+scene.bgImage.url+'")'; }
     else if(scene.bgType==='scene'){ const sc=scenes.find(s=>s.id===scene.bgId); thumb.innerHTML=sc?sc.svg:''; }
-    else { const bg=plainBackgrounds.find(b=>b.id===scene.bgId)||plainBackgrounds[0]; thumb.style.background=bg.css; }
+    else { const bg=bgById(scene.bgId)||plainBackgrounds[0]; thumb.style.background=bg.css; }
     const sl=document.createElement('label'); sl.className='fs-sel'; sl.title=$t('In die Auswahl aufnehmen (für „Auswahl abspielen“ und den Export)','Include in the selection (for “Play selection” and the export)');
     const sc_=document.createElement('input'); sc_.type='checkbox'; sc_.checked=!!scene.sel; sc_.draggable=false;
     sc_.addEventListener('change',()=>{ scene.sel=sc_.checked; card.classList.toggle('sel',scene.sel); updateSelBtn(); }); sl.addEventListener('click',e=>e.stopPropagation()); sl.appendChild(sc_); thumb.appendChild(sl);
@@ -2533,7 +2588,7 @@ function renderObjectTimeline(){
   let bgLabel='Hintergrund';
   if(scene.bgType==='image' && scene.bgImage){ bgLabel=$t('Eigenes Bild: ','Own image: ')+scene.bgImage.name; }
   else if(scene.bgType==='scene'){ const sc=scenes.find(s=>s.id===scene.bgId); bgLabel=sc?sc.name:bgLabel; }
-  else { const bg=plainBackgrounds.find(b=>b.id===scene.bgId); bgLabel=bg?bg.name:bgLabel; }
+  else { const bg=bgById(scene.bgId); bgLabel=bg?bg.name:bgLabel; }
   bgLabel=scene.bgType==='image'?bgLabel:$d(bgLabel);
   rows.appendChild(makeTimelineRow($d('Hintergrund'),[{
     start:0,dur:null,color:'#C9A227',text:bgLabel,
