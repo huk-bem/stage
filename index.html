@@ -73,7 +73,10 @@ body{margin:0;height:100vh;background:var(--bg-app);color:var(--text-primary);fo
 
 .upload-btn{width:100%;background:var(--panel-elevated);border:1.5px dashed var(--panel-border);color:var(--text-secondary);border-radius:var(--radius-md);padding:10px;font-size:12px;cursor:pointer;margin-bottom:10px;font-family:var(--font-body);text-align:left;}
 .speaker-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 2px 8px;font-size:12px;color:var(--text-secondary);}
-.speaker-langchips{display:flex;gap:4px;align-items:center;}
+.speaker-langchips{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+.tr-auto{display:inline-flex;align-items:center;gap:2px;cursor:pointer;color:var(--text-secondary);}
+.tr-status{font-size:11px;color:var(--text-secondary);} .tr-status.ok{color:#4cd6a0;} .tr-status.err{color:#ff7a7a;}
+.add-lang-chip{padding:3px 7px;}
 .lang-chip{background:var(--panel-elevated);border:1px solid var(--panel-border);color:var(--text-secondary);border-radius:12px;padding:3px 8px;font:600 11px var(--font-body);cursor:pointer;}
 .lang-chip.active{border-color:var(--accent-violet);color:var(--text-primary);box-shadow:0 0 0 1px var(--accent-violet);}
 .lang-chip.has{color:var(--text-primary);} .lang-chip.todo{color:#ffb020;border-color:#ffb020;}
@@ -692,7 +695,7 @@ select.speaker-lang,select.speaker-look{background:var(--panel);border:1px solid
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="bbWobble" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".022 .03" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2"/></filter></svg>
 <div class="modal" id="voiceDlg" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="voiceDlgTitle">
-    <h3 id="voiceDlgTitle" data-en="Voice sources">Stimmquellen</h3>
+    <h3 id="voiceDlgTitle" data-en="Voice sources &amp; translation">Stimmquellen &amp; Übersetzung</h3>
     <div class="anim-hint" id="voiceDlgInfo"></div>
     <label for="remoteUrl" data-en="Own TTS server (optional)">Eigener TTS-Server (optional)</label>
     <input type="url" id="remoteUrl" placeholder="http://localhost:5002/tts" autocomplete="off">
@@ -701,6 +704,18 @@ select.speaker-lang,select.speaker-look{background:var(--panel);border:1px solid
     <div class="modal-row">
       <button class="ctrl-btn" id="remoteTest" data-en="Test connection">Verbindung testen</button>
       <span id="remoteStatus"></span>
+    </div>
+    <h3 style="margin-top:14px;font-size:14px;" data-en="Automatic translation">Automatische Übersetzung</h3>
+    <div class="anim-hint" data-en="Translates the speaker texts into the other project languages. “Automatic” tries the browser’s built-in translator first (on-device, Chrome), then your LibreTranslate server (if entered), then the free MyMemory service (the text is sent to that service; limited daily quota).">Übersetzt die Sprechertexte in die anderen Projektsprachen. „Automatisch“ probiert zuerst den eingebauten Browser-Übersetzer (lokal, Chrome), dann Ihren LibreTranslate-Server (falls eingetragen), dann den kostenlosen Dienst MyMemory (der Text wird dorthin gesendet; begrenztes Tageskontingent).</div>
+    <label for="trEngine" data-en="Translation engine">Übersetzungs-Engine</label>
+    <select id="trEngine"><option value="auto" data-en="Automatic (recommended)">Automatisch (empfohlen)</option><option value="browser" data-en="Browser translator only">Nur Browser-Übersetzer</option><option value="mymemory">MyMemory</option><option value="libre">LibreTranslate</option></select>
+    <label for="trUrl" data-en="LibreTranslate URL (optional)">LibreTranslate-URL (optional)</label>
+    <input type="url" id="trUrl" placeholder="https://libretranslate.example/translate" autocomplete="off">
+    <label for="trKey" data-en="LibreTranslate API key (optional)">LibreTranslate-API-Schlüssel (optional)</label>
+    <input type="text" id="trKey" autocomplete="off">
+    <div class="modal-row">
+      <button class="ctrl-btn" id="trTest" data-en="Test translation">Übersetzung testen</button>
+      <span id="trTestStatus"></span>
     </div>
     <div class="modal-row"><button class="ctrl-btn primary" id="voiceDlgClose" data-en="Close">Schließen</button></div>
   </div>
@@ -2545,7 +2560,15 @@ const Remote={
 Remote.load();
 
 /* ================= Sprecheraudio je Figur ================= */
-function instLang(inst){ return (inst&&inst.lang)==='en'?'en':'de'; }
+/* Sprachen für Sprechtexte: [Code, deutscher Name, englischer Name, BCP-47, Mundform-Klasse] – weitere Sprachen lassen sich über „＋ Sprache“ zum Projekt hinzufügen */
+const LANG_DEFS=[['de','Deutsch','German','de-DE','de'],['en','Englisch','English','en-US','en'],['es','Spanisch','Spanish','es-ES','rom'],['fr','Französisch','French','fr-FR','rom'],['it','Italienisch','Italian','it-IT','rom'],['pt','Portugiesisch','Portuguese','pt-PT','rom'],['nl','Niederländisch','Dutch','nl-NL','de'],['pl','Polnisch','Polish','pl-PL','rom'],['tr','Türkisch','Turkish','tr-TR','rom'],['sv','Schwedisch','Swedish','sv-SE','de'],['da','Dänisch','Danish','da-DK','de'],['cs','Tschechisch','Czech','cs-CZ','rom'],['ru','Russisch','Russian','ru-RU','gen'],['uk','Ukrainisch','Ukrainian','uk-UA','gen'],['ar','Arabisch','Arabic','ar-SA','gen'],['hi','Hindi','Hindi','hi-IN','gen'],['zh','Chinesisch','Chinese','zh-CN','gen'],['ja','Japanisch','Japanese','ja-JP','gen'],['ko','Koreanisch','Korean','ko-KR','gen']].map(a=>({c:a[0],n:[a[1],a[2]],bcp:a[3],vis:a[4]}));
+const validLang=c=>LANG_DEFS.some(d=>d.c===c);
+const langDef=c=>LANG_DEFS.find(d=>d.c===c)||LANG_DEFS[0];
+const langName=c=>$t(langDef(c).n[0],langDef(c).n[1]);
+let ProjLangs=['de','en'];                              // im Projekt verwendete Sprechsprachen (Reihenfolge = Anzeige)
+function addProjLang(c){ if(validLang(c)&&!ProjLangs.includes(c)) ProjLangs.push(c); }
+function ensureLangs(){ scenesTimeline.forEach(sc=>sc.characters.concat(sc.narrator?[sc.narrator]:[]).forEach(i=>{ if(validLang(i.lang)) addProjLang(i.lang); Object.keys(i.tx||{}).forEach(addProjLang); })); }
+function instLang(inst){ return validLang(inst&&inst.lang)?inst.lang:'de'; }
 function isLangVoice(v,lang){ return new RegExp('^'+lang+'([-_]|$)','i').test(v.lang||''); }
 function isGermanVoice(v){ return isLangVoice(v,'de'); }
 function voiceScore(v,lang){
@@ -2571,12 +2594,13 @@ function populateVoiceSelect(sel, current, lang){
   lang=lang||'de';
   const g=groupedVoices(lang);
   const nm=lang==='en'?$t('englische','English'):$t('deutsche','German');
+  const isDE=lang==='de'||lang==='en';
   sel.innerHTML='';
   const auto=document.createElement('option'); auto.value='';
-  auto.textContent=g.main.length?$t('Automatisch (beste '+nm+' Stimme)','Automatic (best '+nm+' voice)'):$t('Automatisch','Automatic');
+  auto.textContent=g.main.length?(isDE?$t('Automatisch (beste '+nm+' Stimme)','Automatic (best '+nm+' voice)'):$t('Automatisch (beste Stimme: '+langName(lang)+')','Automatic (best voice: '+langName(lang)+')')):$t('Automatisch','Automatic');
   sel.appendChild(auto);
   if(Remote.on()){ const o=document.createElement('option'); o.value='__remote'; o.textContent=$t('Eigener TTS-Server','Own TTS server'); sel.appendChild(o); }
-  if(g.main.length){ const og=document.createElement('optgroup'); og.label=lang==='en'?$t('Englisch','English'):$t('Deutsch','German'); g.main.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=voiceLabel(v,lang); og.appendChild(o); }); sel.appendChild(og); }
+  if(g.main.length){ const og=document.createElement('optgroup'); og.label=langName(lang); g.main.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=voiceLabel(v,lang); og.appendChild(o); }); sel.appendChild(og); }
   if(g.other.length){ const og=document.createElement('optgroup'); og.label=$t('Andere Sprachen','Other languages'); g.other.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=voiceLabel(v,lang); og.appendChild(o); }); sel.appendChild(og); }
   sel.value=current||'';
   if(sel.value!==(current||'')) sel.value='';
@@ -2590,7 +2614,7 @@ function refreshVoiceSelects(){
 /* Jede Sprechzeile hält Text, Stimme und Aufnahme getrennt für Deutsch und Englisch (inst.tx); die Felder script/voiceName/clip gelten für die aktive Sprache */
 function langStash(inst){ const L=instLang(inst); inst.tx=inst.tx||{}; inst.tx[L]={script:inst.script||'',voiceName:inst.voiceName||'',clip:inst.clip||null}; }
 function setInstLang(inst, lang, noRender){
-  lang=lang==='en'?'en':'de'; const old=instLang(inst);
+  lang=validLang(lang)?lang:'de'; addProjLang(lang); const old=instLang(inst);
   if(lang!==old){
     langStash(inst); inst.lang=lang; inst.todo=inst.todo||{};
     const t=inst.tx[lang];
@@ -2604,7 +2628,7 @@ function setInstLang(inst, lang, noRender){
 function langInfo(inst,L){
   const d=instLang(inst)===L?{script:inst.script,clip:inst.clip}:((inst.tx&&inst.tx[L])||null);
   const text=!!(d&&(d.script||'').trim());
-  return {text, clip:!!(d&&d.clip), todo:!!(text&&inst.todo&&inst.todo[L])};
+  return {text, clip:!!(d&&d.clip), todo:!!(text&&inst.todo&&inst.todo[L]), tr:!!(text&&inst.tr&&inst.tr[L])};
 }
 const NARR_DEF={id:'__narrator', name:'Erzähler', tag:'Off-Sprecher'};
 function makeNarrator(){
@@ -2618,6 +2642,108 @@ function setAllLang(lang){
   renderSpeakerTracks(); renderObjectTimeline(); if(currentTab==='animation') renderPanel();
 }
 
+/* ---- Automatische Übersetzung der Sprechtexte ----
+   Engines: Browser-Übersetzer (Chrome „Translator“-API, lokal), MyMemory (kostenlos, ohne Anmeldung), LibreTranslate (eigener Server/Key).
+   „Automatisch“ probiert die Reihenfolge Browser → LibreTranslate (falls eingetragen) → MyMemory. */
+const Translate={
+  cfg:{engine:'auto',url:'',key:'',auto:false}, cache:new Map(), browser:new Map(), seen:new WeakMap(), pending:new Set(), lastInput:0, msg:'', msgCls:'',
+  load(){ try{ const o=JSON.parse(localStorage.getItem('sh-translate')||'{}'); Object.assign(this.cfg,o); }catch(_){} },
+  save(){ try{ localStorage.setItem('sh-translate',JSON.stringify(this.cfg)); }catch(_){} },
+  say(m,cls){ this.msg=m||''; this.msgCls=cls||''; const e=document.getElementById('trStatus'); if(e){ e.textContent=this.msg; e.className='tr-status '+(cls||''); } },
+  chunks(text){   // Sätze zu Blöcken ≤ 450 Zeichen (MyMemory-Grenze)
+    const parts=text.match(/[^.!?。！？\n]+[.!?。！？]*\s*/g)||[text]; const out=[]; let cur='';
+    parts.forEach(p=>{ while(p.length>450){ if(cur){ out.push(cur); cur=''; } out.push(p.slice(0,450)); p=p.slice(450); } if((cur+p).length>450){ out.push(cur); cur=p; } else cur+=p; });
+    if(cur.trim()) out.push(cur); return out;
+  },
+  async viaBrowser(text,from,to){
+    if(!('Translator' in window)) throw new Error('no-browser-translator');
+    const k=from+'>'+to; let t=this.browser.get(k);
+    if(!t){ const av=await window.Translator.availability({sourceLanguage:from,targetLanguage:to}); if(av==='unavailable'||(av!=='available'&&this.cfg.engine!=='browser')) throw new Error('browser-translator-'+av); t=await window.Translator.create({sourceLanguage:from,targetLanguage:to}); this.browser.set(k,t); }
+    return await t.translate(text);
+  },
+  async viaMyMemory(text,from,to){
+    const res=[]; for(const c of this.chunks(text)){
+      const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(c)+'&langpair='+encodeURIComponent(from+'|'+to));
+      if(!r.ok) throw new Error('MyMemory HTTP '+r.status);
+      const j=await r.json(); const t=j&&j.responseData&&j.responseData.translatedText;
+      if(!t||(j.responseStatus&&+j.responseStatus!==200)) throw new Error('MyMemory: '+((j&&j.responseDetails)||'no result'));
+      const d=document.createElement('textarea'); d.innerHTML=t; res.push(d.value);
+    }
+    return res.join('').replace(/\s+/g,' ').trim();
+  },
+  async viaLibre(text,from,to){
+    if(!this.cfg.url) throw new Error('no-libre-url');
+    const r=await fetch(this.cfg.url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:text,source:from,target:to,format:'text',api_key:this.cfg.key||undefined})});
+    if(!r.ok) throw new Error('LibreTranslate HTTP '+r.status);
+    const j=await r.json(); if(!j||typeof j.translatedText!=='string') throw new Error('LibreTranslate: '+((j&&j.error)||'no result')); return j.translatedText;
+  },
+  order(){ const e=this.cfg.engine; if(e==='browser') return ['viaBrowser']; if(e==='mymemory') return ['viaMyMemory']; if(e==='libre') return ['viaLibre']; return ['viaBrowser'].concat(this.cfg.url?['viaLibre']:[],['viaMyMemory']); },
+  async run(text,from,to){
+    text=(text||'').trim(); if(!text) return ''; if(from===to) return text;
+    const ck=from+'>'+to+'|'+this.cfg.engine+'|'+text; if(this.cache.has(ck)) return this.cache.get(ck);
+    let err=null;
+    for(const m of this.order()){ try{ const o=(await Promise.race([this[m](text,from,to),new Promise((_,rj)=>setTimeout(()=>rj(new Error('timeout')),m==='viaBrowser'?60000:15000))])||'').trim(); if(o){ if(this.cache.size>400) this.cache.clear(); this.cache.set(ck,o); return o; } }catch(e){ err=e; } }
+    throw err||new Error('no engine');
+  }
+};
+Translate.load();
+/* Übersetzt die aktuelle Zeile in die Zielsprachen. force=false: von Hand geschriebene Zieltexte bleiben unberührt (werden in skipped gemeldet). */
+async function translateInst(inst, targets, opts){
+  opts=opts||{}; const from=instLang(inst), src=(inst.script||'').trim(), res={done:[],skipped:[],failed:[]};
+  if(!src) return res;
+  targets=(targets||ProjLangs).filter(L=>L!==from);
+  inst.tr=inst.tr||{}; inst.tx=inst.tx||{}; inst.todo=inst.todo||{};
+  for(const L of targets){
+    const cur=inst.tx[L], has=!!(cur&&(cur.script||'').trim());
+    if(has && !inst.tr[L] && !inst.todo[L] && !opts.force){ res.skipped.push(L); continue; }
+    try{
+      const out=await Translate.run(src,from,L);
+      if(instLang(inst)!==from || (inst.script||'').trim()!==src) return Object.assign(res,{stale:true});   // inzwischen geändert → verwerfen
+      if(instLang(inst)===L) inst.script=out; else inst.tx[L]=Object.assign({voiceName:'',clip:null},cur||{},{script:out});
+      inst.tr[L]=true; delete inst.todo[L]; res.done.push(L);
+    }catch(e){ res.failed.push(L); res.err=e; }
+  }
+  return res;
+}
+function trAfter(){ renderSpeakerTracks(); renderObjectTimeline(); if(currentTab==='animation') renderPanel(); History.schedule(); }
+async function translateInstUI(inst){
+  if(!(inst.script||'').trim()){ Translate.say($t('Diese Zeile hat noch keinen Text.','This line has no text yet.'),'err'); return; }
+  if(ProjLangs.length<2){ Translate.say($t('Füge zuerst über „＋ Sprache“ eine Zielsprache hinzu.','Add a target language first via “＋ Language”.'),'err'); return; }
+  Translate.say('⏳ '+$t('Übersetze …','Translating …'));
+  let r=await translateInst(inst);
+  if(r.skipped.length && confirm($t('Für '+r.skipped.map(langName).join(', ')+' gibt es schon einen eigenen Text. Mit der Übersetzung überschreiben?','There is already your own text for '+r.skipped.map(langName).join(', ')+'. Overwrite it with the translation?'))){
+    const r2=await translateInst(inst,r.skipped,{force:true}); r.done=r.done.concat(r2.done); r.failed=r.failed.concat(r2.failed); r.err=r.err||r2.err; r.skipped=[];
+  }
+  trAfter();
+  if(r.failed.length) Translate.say($t('Übersetzung fehlgeschlagen ('+r.failed.map(langName).join(', ')+'): ','Translation failed ('+r.failed.map(langName).join(', ')+'): ')+((r.err&&r.err.message)||'')+$t(' – Engine in „Stimmen“ prüfen.',' – check the engine under “Voices”.'),'err');
+  else Translate.say('✓ '+(r.done.length?$t('Übersetzt: ','Translated: ')+r.done.map(langName).join(', '):$t('Nichts zu übersetzen','Nothing to translate')),'ok');
+}
+/* Automatik: beobachtet alle Sprechzeilen; nach kurzer Tipp-Pause (oder Diktat/Transkript) wird in die anderen Projektsprachen übersetzt */
+setInterval(async()=>{
+  if(!Translate.cfg.auto||Translate.busy||ProjLangs.length<2||Date.now()-Translate.lastInput<1200||(window.Player&&Player.running)) return;
+  const all=[]; scenesTimeline.forEach(sc=>sc.characters.concat(sc.narrator?[sc.narrator]:[]).forEach(i=>all.push(i)));
+  for(const inst of all){
+    const key=instLang(inst)+'|'+(inst.script||'').trim(); if(!(inst.script||'').trim()||Translate.seen.get(inst)===key) continue;
+    Translate.seen.set(inst,key); Translate.busy=true; Translate.say('⏳ '+$t('Übersetze automatisch …','Translating automatically …'));
+    try{ const r=await translateInst(inst); if(r.done.length){ trAfter(); Translate.say('✓ '+$t('Automatisch übersetzt: ','Auto-translated: ')+r.done.map(langName).join(', '),'ok'); } else if(r.failed.length) Translate.say($t('Automatische Übersetzung fehlgeschlagen: ','Auto-translation failed: ')+((r.err&&r.err.message)||''),'err'); else Translate.say(''); }
+    finally{ Translate.busy=false; }
+    break;   // pro Takt eine Zeile (schont das Anfragen-Kontingent)
+  }
+},1500);
+document.addEventListener('input',e=>{ const t=e.target; if(t&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&t.type==='text'))) Translate.lastInput=Date.now(); },true);
+function addLangDialog(){
+  openDlg($t('Sprache hinzufügen','Add language'),(card,close)=>{
+    const p=document.createElement('p'); p.className='anim-hint'; p.textContent=$t('Die Sprache erscheint bei allen Sprechern (Text, Stimme, Aufnahme je Sprache) und im Untertitel-Export. Texte lassen sich automatisch übersetzen.','The language appears for all speakers (text, voice, recording per language) and in the subtitle export. Texts can be translated automatically.'); card.appendChild(p);
+    const sel=document.createElement('select'); sel.className='add-lang-select';
+    LANG_DEFS.filter(d=>!ProjLangs.includes(d.c)).forEach(d=>{ const o=document.createElement('option'); o.value=d.c; o.textContent=d.n[LANG==='en'?1:0]+' ('+d.c+')'; sel.appendChild(o); });
+    if(!sel.options.length){ p.textContent=$t('Alle verfügbaren Sprachen sind schon im Projekt.','All available languages are already in the project.'); }
+    else card.appendChild(sel);
+    const row=dlgRow(card);
+    if(sel.options.length) row.appendChild(dlgBtn('＋ '+$t('Hinzufügen','Add'),()=>{ const c=sel.value; addProjLang(c); close(); renderSpeakerTracks(); if(Translate.cfg.auto){ Translate.seen=new WeakMap(); } },'primary add-lang-ok'));
+    row.appendChild(dlgBtn($t('Abbrechen','Cancel'),close));
+  });
+}
+
 /* ---- Aufnehmen (Mikrofon) und Diktieren (Transkript) ---- */
 const SRClass=window.SpeechRecognition||window.webkitSpeechRecognition;
 const Rec={
@@ -2626,7 +2752,7 @@ const Rec={
   startSR(inst,onText){
     if(!SRClass) return null;
     try{
-      const r=new SRClass(); r.lang=instLang(inst)==='en'?'en-US':'de-DE'; r.continuous=true; r.interimResults=true;
+      const r=new SRClass(); r.lang=langDef(instLang(inst)).bcp; r.continuous=true; r.interimResults=true;
       const h={rec:r, fin:'', int:'', stopping:false, get text(){ return (this.fin+' '+this.int).replace(/\s+/g,' ').trim(); }};
       r.onresult=e=>{ let f='', i=''; for(let k=0;k<e.results.length;k++){ const x=e.results[k]; if(x.isFinal) f+=x[0].transcript+' '; else i+=x[0].transcript; } h.fin=f; h.int=i; if(onText) onText(h.text); };
       r.onerror=()=>{};
@@ -2674,7 +2800,7 @@ async function finishRecording(){
   inst.clip={name:$t('Aufnahme ','Recording ')+instLang(inst).toUpperCase()+'.'+ext,url,dur,recorded:true,type:r.blob.type};
   const txt=(r.text||'').trim();
   if(txt){
-    if(!(inst.script||'').trim()){ inst.script=txt; if(inst.todo) delete inst.todo[instLang(inst)]; inst.pendingTranscript=null; }
+    if(!(inst.script||'').trim()){ inst.script=txt; if(inst.todo) delete inst.todo[instLang(inst)];if(inst.tr) delete inst.tr[instLang(inst)]; inst.pendingTranscript=null; }
     else if(txt!==(inst.script||'').trim()) inst.pendingTranscript=txt;
   }
   renderSpeakerTracks(); renderObjectTimeline();
@@ -2687,7 +2813,12 @@ function renderSpeakerTracks(){
   host.innerHTML='';
   const bar=document.createElement('div'); bar.className='speaker-bar';
   const bl=document.createElement('span'); bl.textContent=$t('Alle Sprecher auf:','Set all speakers to:'); bar.appendChild(bl);
-  ['de','en'].forEach(L=>{ const b=document.createElement('button'); b.type='button'; b.className='ctrl-btn ctrl-btn-sm all-lang-btn'; b.dataset.lang=L; b.textContent=L==='de'?'Deutsch':'English'; b.title=$t('Schaltet alle Figuren und den Erzähler in allen Szenen auf diese Sprache (Texte, Stimmen und Aufnahmen je Sprache bleiben erhalten)','Switches all figures and the narrator in all scenes to this language (texts, voices and recordings are kept per language)'); b.addEventListener('click',()=>setAllLang(L)); bar.appendChild(b); });
+  ensureLangs(); ProjLangs.forEach(L=>{ const b=document.createElement('button'); b.type='button'; b.className='ctrl-btn ctrl-btn-sm all-lang-btn'; b.dataset.lang=L; b.textContent=L==='de'?'Deutsch':(L==='en'?'English':langDef(L).n[LANG==='en'?1:0]); b.title=$t('Schaltet alle Figuren und den Erzähler in allen Szenen auf diese Sprache (Texte, Stimmen und Aufnahmen je Sprache bleiben erhalten)','Switches all figures and the narrator in all scenes to this language (texts, voices and recordings are kept per language)'); b.addEventListener('click',()=>setAllLang(L)); bar.appendChild(b); });
+  const al=document.createElement('button'); al.type='button'; al.className='ctrl-btn ctrl-btn-sm add-lang'; al.textContent='＋ '+$t('Sprache','Language'); al.title=$t('Weitere Sprache für Sprechtexte hinzufügen','Add another language for the speaker texts'); al.addEventListener('click',()=>addLangDialog()); bar.appendChild(al);
+  const atl=document.createElement('label'); atl.className='tr-auto'; atl.title=$t('Übersetzt neue und geänderte Sprechertexte (auch Diktat/Transkript) automatisch in alle anderen Projektsprachen. Von Hand geschriebene Texte anderer Sprachen bleiben unberührt.','Automatically translates new and changed speaker texts (also dictation/transcript) into all other project languages. Texts you wrote by hand in other languages are left untouched.');
+  const atc=document.createElement('input'); atc.type='checkbox'; atc.className='tr-auto-cb'; atc.checked=!!Translate.cfg.auto; atc.addEventListener('change',()=>{ Translate.cfg.auto=atc.checked; Translate.save(); Translate.seen=new WeakMap(); });
+  atl.appendChild(atc); atl.appendChild(document.createTextNode(' 🌐 '+$t('Automatisch übersetzen','Auto-translate'))); bar.appendChild(atl);
+  const ts=document.createElement('span'); ts.id='trStatus'; ts.className='tr-status '+Translate.msgCls; ts.textContent=Translate.msg; bar.appendChild(ts);
   if(!scene.narrator){ const nb=document.createElement('button'); nb.type='button'; nb.className='ctrl-btn ctrl-btn-sm add-narrator'; nb.textContent='🎙 '+$t('＋ Erzähler (Off-Sprecher)','＋ Narrator (voice-over)'); nb.title=$t('Zusätzliche Sprecherspur ohne Figur: eigene Stimme, optional als Untertitel-Balken','Extra speaker track without a figure: own voice, optionally shown as a subtitle bar'); nb.addEventListener('click',addNarrator); bar.appendChild(nb); }
   [['⏱ '+$t('Zeiten automatisch','Auto timing'),false,$t('Setzt die Startzeiten der Sprecher dieser Szene nacheinander (aus der Sprechdauer) und passt die Szenenlänge an','Sets the speakers’ start times one after another (from speech duration) and fits the scene length'),'auto-time'],['⏱ '+$t('alle Szenen','all scenes'),true,$t('Dasselbe für alle Szenen','The same for all scenes'),'auto-time-all']].forEach(([t,all,ti,cls])=>{ const b=document.createElement('button'); b.type='button'; b.className='ctrl-btn ctrl-btn-sm '+cls; b.textContent=t; b.title=ti; b.addEventListener('click',()=>autoTimeAll(all)); bar.appendChild(b); });
   host.appendChild(bar);
@@ -2715,7 +2846,7 @@ function buildSpeakerRow(inst){
     const line=document.createElement('input'); line.type='text'; line.className='speaker-line'; line.dataset.instId=inst.id;
     line.placeholder=inst.clip?$t('Transkript für Sprechblase & Lippen – '+$d(def.name)+' …','Transcript for bubble & lips – '+$d(def.name)+' …'):$t('Sprechertext für '+$d(def.name)+' …','Speaker text for '+$d(def.name)+' …');
     line.value=inst.script||'';
-    line.addEventListener('input', ()=>{ inst.script=line.value; if(inst.todo) delete inst.todo[instLang(inst)]; renderObjectTimeline(); if(currentTab==='animation') renderPanel(); chipsRefresh(); });
+    line.addEventListener('input', ()=>{ inst.script=line.value; if(inst.todo) delete inst.todo[instLang(inst)];if(inst.tr) delete inst.tr[instLang(inst)]; renderObjectTimeline(); if(currentTab==='animation') renderPanel(); chipsRefresh(); });
     line.lang=instLang(inst); line.spellcheck=true;
     row.appendChild(line);
 
@@ -2738,17 +2869,19 @@ function buildSpeakerRow(inst){
     const chips=document.createElement('div'); chips.className='speaker-langchips';
     const chipsRefresh=()=>{
       chips.innerHTML='';
-      ['de','en'].forEach(L=>{
+      ProjLangs.forEach(L=>{
         const i=langInfo(inst,L), b=document.createElement('button'); b.type='button'; b.className='lang-chip'+(instLang(inst)===L?' active':'')+(i.todo?' todo':'')+(i.text?' has':''); b.dataset.lang=L;
-        b.textContent=L.toUpperCase()+' '+(i.todo?'⚠':(i.text?'✓':'–'))+(i.clip?' 🎵':'');
-        b.title=(L==='de'?$t('Deutsch','German'):$t('Englisch','English'))+': '+(i.todo?$t('Text noch nicht übersetzt (noch die Kopie der anderen Sprache)','text not yet translated (still a copy of the other language)'):(i.text?$t('Text vorhanden','text present'):$t('noch kein Text','no text yet')))+(i.clip?$t(' · eigene Aufnahme/Audiodatei',' · own recording/audio file'):'');
+        b.textContent=L.toUpperCase()+' '+(i.todo?'⚠':(i.text?'✓':'–'))+(i.tr?'🌐':'')+(i.clip?' 🎵':'');
+        b.title=langName(L)+': '+(i.todo?$t('Text noch nicht übersetzt (noch die Kopie der anderen Sprache)','text not yet translated (still a copy of the other language)'):(i.text?$t('Text vorhanden','text present'):$t('noch kein Text','no text yet')))+(i.clip?$t(' · eigene Aufnahme/Audiodatei',' · own recording/audio file'):'');
         b.addEventListener('click',()=>setInstLang(inst,L)); chips.appendChild(b);
       });
     };
     chipsRefresh(); opts.appendChild(chips);
+    const addL=document.createElement('button'); addL.type='button'; addL.className='lang-chip add-lang-chip'; addL.textContent='＋'; addL.title=$t('Weitere Sprache hinzufügen','Add another language'); addL.addEventListener('click',()=>addLangDialog()); chips.appendChild(addL);
+    const trB=document.createElement('button'); trB.type='button'; trB.className='ctrl-btn ctrl-btn-sm speaker-translate'; trB.textContent='🌐 '+$t('Übersetzen','Translate'); trB.title=$t('Übersetzt den Text dieser Zeile automatisch in alle anderen Projektsprachen (eigene, von Hand geschriebene Texte werden nur nach Rückfrage überschrieben)','Automatically translates this line into all other project languages (texts you wrote yourself are only overwritten after asking)'); trB.addEventListener('click',()=>translateInstUI(inst)); opts.appendChild(trB);
 
     const langSel=document.createElement('select'); langSel.className='speaker-lang'; langSel.dataset.instId=inst.id;
-    [['de','Deutsch'],['en','English']].forEach(([v,l])=>{ const o=document.createElement('option'); o.value=v; o.textContent=l; langSel.appendChild(o); });
+    ProjLangs.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v==='de'?'Deutsch':(v==='en'?'English':langDef(v).n[LANG==='en'?1:0]); langSel.appendChild(o); });
     langSel.value=instLang(inst);
     langSel.addEventListener('change', ()=>{ setInstLang(inst, langSel.value); });
     mk('opt-lang',$t('Sprache','Language'),langSel).title=$t('Sprache des Sprechtexts (bestimmt Stimmenauswahl und Mundformen)','Language of the spoken text (determines voice choice and mouth shapes)');
@@ -2817,7 +2950,7 @@ function buildSpeakerRow(inst){
       const dl=()=>{ dBtn.textContent=Rec.dict&&Rec.dict.inst===inst?'⏹ '+$t('Fertig','Done'):'📝 '+$t('Diktieren','Dictate'); };
       dBtn.title=$t('Text einsprechen und als Sprechtext/Sprechblase eintragen – danach bearbeiten','Speak the text and enter it as speech text/bubble – edit afterwards');
       dBtn.addEventListener('click',()=>{
-        if(Rec.dict){ const t=Rec.stopSR(Rec.dict.h); const d=Rec.dict; Rec.dict=null; if(t){ d.inst.script=t; if(d.inst.todo) delete d.inst.todo[instLang(d.inst)]; } renderSpeakerTracks(); renderObjectTimeline(); return; }
+        if(Rec.dict){ const t=Rec.stopSR(Rec.dict.h); const d=Rec.dict; Rec.dict=null; if(t){ d.inst.script=t; if(d.inst.todo) delete d.inst.todo[instLang(d.inst)];if(d.inst.tr) delete d.inst.tr[instLang(d.inst)]; } renderSpeakerTracks(); renderObjectTimeline(); return; }
         const h=Rec.startSR(inst,t=>{ line.value=t; inst.script=t; renderObjectTimeline(); }); if(!h) return; Rec.dict={inst,h}; dl();
       });
       dl(); clipBox.appendChild(dBtn);
@@ -2825,7 +2958,7 @@ function buildSpeakerRow(inst){
     if(inst.pendingTranscript){
       const tb=document.createElement('button'); tb.type='button'; tb.className='ctrl-btn ctrl-btn-sm speaker-transcript';
       tb.textContent='📝 '+$t('Transkript übernehmen','Use transcript'); tb.title=inst.pendingTranscript;
-      tb.addEventListener('click',()=>{ inst.script=inst.pendingTranscript; inst.pendingTranscript=null; if(inst.todo) delete inst.todo[instLang(inst)]; renderSpeakerTracks(); renderObjectTimeline(); });
+      tb.addEventListener('click',()=>{ inst.script=inst.pendingTranscript; inst.pendingTranscript=null; if(inst.todo) delete inst.todo[instLang(inst)];if(inst.tr) delete inst.tr[instLang(inst)]; renderSpeakerTracks(); renderObjectTimeline(); });
       clipBox.appendChild(tb);
     }
     opts.appendChild(clipBox);
@@ -2929,9 +3062,21 @@ function wordToVisemesEN(raw){
   if(!out.length) out.push(['e',1]);
   return finalizeVisemes(out);
 }
-function wordToVisemes(raw,lang){ return lang==='en'?wordToVisemesEN(raw):wordToVisemesDE(raw); }
+function wordToVisemesGen(raw){   // Schriften ohne Regelwerk (kyrillisch, arabisch, CJK …): Silbenrhythmus mit wechselnden Mundformen
+  const out=[], cyc=['a','o','e','mm','i','u']; let k=0;
+  for(const ch of raw){ const cp=ch.codePointAt(0); out.push([cyc[(cp+k)%cyc.length],1]); k++; }
+  if(!out.length) out.push(['e',1]);
+  return finalizeVisemes(out);
+}
+function wordToVisemes(raw,lang){
+  const cls=langDef(lang).vis;
+  if(cls==='en') return wordToVisemesEN(raw);
+  if(cls==='rom') return wordToVisemesDE(raw.normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+  if(cls==='gen' && !/^[A-Za-z]/.test(raw)) return wordToVisemesGen(raw);
+  return wordToVisemesDE(raw);
+}
 function buildPlan(text,lang){
-  const re=/[0-9A-Za-zÀ-ÿß][0-9A-Za-zÀ-ÿß'’\-]*/g;
+  const re=/[\p{L}\p{N}][\p{L}\p{N}'’\-]*/gu;
   const words=[]; let m;
   while((m=re.exec(text))){ words.push({s:m.index,e:m.index+m[0].length,t:m[0]}); }
   const seq=[]; let u=0;
@@ -2946,7 +3091,7 @@ function buildPlan(text,lang){
   return {words,seq,total:u};
 }
 const planCache=new Map();
-function getPlan(text,lang){ lang=lang==='en'?'en':'de'; const k=lang+'|'+text; let p=planCache.get(k); if(!p){ p=buildPlan(text,lang); if(planCache.size>300) planCache.clear(); planCache.set(k,p); } return p; }
+function getPlan(text,lang){ lang=validLang(lang)?lang:'de'; const k=lang+'|'+text; let p=planCache.get(k); if(!p){ p=buildPlan(text,lang); if(planCache.size>300) planCache.clear(); planCache.set(k,p); } return p; }
 
 /* Kalibrierung: wie lange braucht eine Stimme pro „Einheit“? Wird nach jeder echten Wiedergabe verfeinert. */
 const DEFAULT_UNIT_MS=61;
@@ -3013,10 +3158,10 @@ const Speech={
     const lang=instLang(inst);
     const de=groupedVoices(lang).main; if(!de.length) return null;
     const def=characters.find(c=>c.id===inst.charId)||{};
-    const FEM=lang==='en'
+    const FEM=(lang!=='en'&&lang!=='de')?/female|woman|femme|mujer|donna|mulher|vrouw|kvinna|kobieta|женщин/i:lang==='en'
       ? /aria|jenny|sonia|libby|michelle|ana\b|zira|hazel|susan|samantha|karen|moira|tessa|fiona|serena|victoria|allison|kate|catherine|female|emma|amy|joanna|salli|kimberly|ivy|nicole|olivia/i
       : /katja|marlene|vicki|anna|petra|amala|seraphina|hedda|helena|elke|claudia|female|weiblich|sabine|marie|monika|steffi|vera|lea\b/i;
-    const MALE=lang==='en'
+    const MALE=(lang!=='en'&&lang!=='de')?/\bmale\b|homme|hombre|uomo|homem|\bman\b|mężczyzn|мужчин/i:lang==='en'
       ? /guy|ryan|davis|christopher|eric|roger|steffan|george|mark|david|james|richard|alex|daniel|fred|tom\b|oliver|arthur|rishi|aaron|\bmale\b|brian|matthew|joey|justin|russell|nicolas/i
       : /conrad|killian|stefan|markus|hans|jonas|florian|daniel|martin|\bmale\b|männlich|yannick|jörg|thomas|klaus|reed|bernd|dieter/i;
     const pref=de.filter(v=>def.female?FEM.test(v.name):MALE.test(v.name));
@@ -3055,7 +3200,7 @@ const Speech={
     if(inst.voiceName==='__remote' && Remote.on()){ job.kind='remote'; this._startAudio(job, ()=>Remote.get(job.text,lang)); return; }
     if(!this.ok){ this._silentStart(job); return; }
     const u=new SpeechSynthesisUtterance(job.text);
-    const v=this.pickVoice(job.inst); u.lang=v?v.lang:(lang==='en'?'en-US':'de-DE'); if(v) u.voice=v;
+    const v=this.pickVoice(job.inst); u.lang=v?v.lang:langDef(lang).bcp; if(v) u.voice=v;
     u.rate=job.rate; u.pitch=job.pitch; u.volume=1;
     u.onstart=()=>this._begin(job);
     u.onboundary=(e)=>{ if(this.current!==job||job.state!=='speaking') return; if(e.name&&e.name!=='word') return; Lip.boundary(job, e.charIndex||0, performance.now()); };
@@ -3731,6 +3876,17 @@ function updateVoiceDlgText(){
   const dlg=document.getElementById('voiceDlg'), url=document.getElementById('remoteUrl'), vo=document.getElementById('remoteVoice'), st=document.getElementById('remoteStatus');
   const open=()=>{ url.value=Remote.url; vo.value=Remote.voice; st.textContent=''; st.className=''; updateVoiceDlgText(); dlg.hidden=false; url.focus(); };
   const close=()=>{ Remote.url=url.value.trim(); Remote.voice=vo.value.trim(); Remote.save(); Remote.cache.clear(); Remote.dur.clear(); dlg.hidden=true; refreshVoiceSelects(); renderObjectTimeline(); };
+  /* Übersetzungs-Einstellungen: werden sofort gespeichert */
+  const trE=document.getElementById('trEngine'), trU=document.getElementById('trUrl'), trK=document.getElementById('trKey'), trS=document.getElementById('trTestStatus');
+  const trLoad=()=>{ trE.value=Translate.cfg.engine; trU.value=Translate.cfg.url||''; trK.value=Translate.cfg.key||''; trS.textContent=''; trS.className=''; };
+  const trSave=()=>{ Translate.cfg.engine=trE.value; Translate.cfg.url=trU.value.trim(); Translate.cfg.key=trK.value.trim(); Translate.save(); Translate.cache.clear(); };
+  [trE,trU,trK].forEach(e=>e.addEventListener('change',trSave)); [trU,trK].forEach(e=>e.addEventListener('input',trSave));
+  document.getElementById('trTest').addEventListener('click',async()=>{
+    trSave(); trS.className=''; trS.textContent=$t('Teste …','Testing …');
+    try{ const o=await Translate.run($t('Guten Morgen, willkommen in unserer Filiale.','Good morning, welcome to our branch.'),LANG==='en'?'en':'de',LANG==='en'?'de':'en'); trS.className='ok'; trS.textContent='✓ '+o; }
+    catch(e){ trS.className='err'; trS.textContent=$t('Fehler: ','Error: ')+(e&&e.message||e); }
+  });
+  document.getElementById('voicesBtn').addEventListener('click',()=>{ trLoad(); });
   document.getElementById('voicesBtn').addEventListener('click',open);
   document.getElementById('voiceDlgClose').addEventListener('click',close);
   dlg.addEventListener('click',e=>{ if(e.target===dlg) close(); });
@@ -3768,7 +3924,7 @@ function dlgSelect(card,label,opts,val){ const l=document.createElement('label')
 const Project={
   VERSION:1,
   async blobToData(url){ const r=await fetch(url); const b=await r.blob(); return await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(b); }); },
-  snapshotObj(){ return {scenes:scenesTimeline, musicLib:musicLib, counters:{scene:sceneCounter,chr:charInstCounter,obj:objCounter,clip:clipCounter,music:musicSeq}}; },
+  snapshotObj(){ return {scenes:scenesTimeline, musicLib:musicLib, counters:{scene:sceneCounter,chr:charInstCounter,obj:objCounter,clip:clipCounter,music:musicSeq}, langs:ProjLangs.slice()}; },
   /* embed=true: Blob-URLs (Aufnahmen, Musik) werden als Daten eingebettet; false: weggelassen (Autosave) */
   async serialize(embed){
     const o=this.snapshotObj(), blobs=new Set();
@@ -3787,6 +3943,7 @@ const Project={
       const fixClip=c=>{ if(c&&c.clip&&!c.clip.url) c.clip=null; if(c&&c.tx) Object.values(c.tx).forEach(t=>{ if(t&&t.clip&&!t.clip.url) t.clip=null; }); };
       n.characters.forEach(fixClip); if(n.narrator) fixClip(n.narrator); return n; });
     scenesTimeline.splice(0,scenesTimeline.length,...scenes);
+    ProjLangs=['de','en']; (Array.isArray(pr.langs)?pr.langs:[]).forEach(addProjLang); ensureLangs();
     musicLib.length=0; (pr.musicLib||[]).filter(m=>m&&m.url).forEach(m=>musicLib.push(m));
     const c=pr.counters||{}, mx=(arr,pre)=>arr.reduce((m,x)=>{ const n=parseInt(String(x.id||'').replace(/\D/g,''))||0; return Math.max(m,n); },0);
     let maxCh=0,maxOb=0,maxCl=0;
@@ -4067,7 +4224,7 @@ window.openExportDlg=function(){
     r1.appendChild(dlgBtn('▶ '+$t('Vollbild abspielen','Play fullscreen'),async()=>{ const m=document.querySelector('.dyn-dlg'); m.style.display='none'; await Exporter.fullscreenPlay(sel.scope.value); m.style.display=''; },'exp-play'));
     const r2=dlgRow(card);
     const sub=(L,f)=>dlgBtn($t('Untertitel ','Subtitles ')+f.toUpperCase()+' '+L.toUpperCase(),()=>{ const c=Exporter.estimateCues(L,sel.scope.value); if(!c.length){ status.textContent=$t('Keine Texte in dieser Sprache vorhanden.','No texts in this language.'); return; } Exporter.download('Untertitel-'+L.toUpperCase()+'.'+f,Exporter.toSubs(c,f)); status.textContent=$t('Zeiten sind aus der Sprechdauer geschätzt; beim Videoexport werden die echten Zeiten mitgeschrieben.','Times are estimated from speech duration; a video export records the real times.'); },'exp-sub exp-sub-'+f+'-'+L);
-    ['de','en'].forEach(L=>['srt','vtt'].forEach(f=>r2.appendChild(sub(L,f))));
+    ensureLangs(); ProjLangs.forEach(L=>['srt','vtt'].forEach(f=>r2.appendChild(sub(L,f))));
     const r3=dlgRow(card); r3.appendChild(dlgBtn($t('Schließen','Close'),close,'primary'));
   });
   function showResult(r,box,status,o){
@@ -4076,7 +4233,7 @@ window.openExportDlg=function(){
     const v=document.createElement('video'); v.controls=true; v.className='exp-video'; v.style.cssText='width:100%;margin-top:8px;border-radius:8px;background:#000;'; v.src=URL.createObjectURL(r.blob); box.appendChild(v);
     const row=document.createElement('div'); row.className='modal-row'; box.appendChild(row);
     row.appendChild(dlgBtn('⬇ '+$t('Datei speichern','Save file')+' (.'+r.ext+')',()=>Exporter.download('Stagehand-Video.'+r.ext,r.blob),'primary exp-save'));
-    ['de','en'].forEach(L=>{ if(!r.cues.length) return; const cs=r.cues.filter(c=>c.lang===L); if(cs.length) row.appendChild(dlgBtn($t('SRT ','SRT ')+L.toUpperCase()+' ('+$t('echte Zeiten','real times')+')',()=>Exporter.download('Untertitel-'+L.toUpperCase()+'.srt',Exporter.toSubs(cs,'srt')),'exp-srt-real')); });
+    ProjLangs.forEach(L=>{ if(!r.cues.length) return; const cs=r.cues.filter(c=>c.lang===L); if(cs.length) row.appendChild(dlgBtn($t('SRT ','SRT ')+L.toUpperCase()+' ('+$t('echte Zeiten','real times')+')',()=>Exporter.download('Untertitel-'+L.toUpperCase()+'.srt',Exporter.toSubs(cs,'srt')),'exp-srt-real')); });
   }
 };
 
