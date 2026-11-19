@@ -253,7 +253,25 @@ body{margin:0;height:100vh;background:var(--bg-app);color:var(--text-primary);fo
 /* Sprechblasen */
 #stageBubbles{position:absolute;inset:0;pointer-events:none;z-index:30;}
 .bubble{position:absolute;max-width:46%;box-sizing:border-box;isolation:isolate;background:var(--bg,#fff);color:var(--fg,#1a1b22);border:var(--bw,0px) var(--bst,solid) var(--bd,transparent);border-radius:14px;padding:8px 12px;font-family:var(--bff,var(--font-body));font-weight:600;font-size:var(--bfs,17px);line-height:1.3;text-align:var(--bal,left);box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;transform:translateY(8px) scale(.9);transition:opacity .18s,transform .28s cubic-bezier(.3,1.5,.5,1);}
+.bubble{transform-origin:var(--tail,50%) 100%;}
 .bubble.on{opacity:1;transform:none;}
+.bubble.on.po-pop,.bubble.static.anim.po-pop{animation:bbPop .5s cubic-bezier(.2,.8,.3,1) both;}
+.bubble.on.po-jelly,.bubble.static.anim.po-jelly{animation:bbJelly .7s ease-out both;}
+.bubble.on.po-slide,.bubble.static.anim.po-slide{animation:bbSlide .38s cubic-bezier(.2,.9,.3,1) both;}
+.bubble.on.po-drop,.bubble.static.anim.po-drop{animation:bbDrop .6s cubic-bezier(.3,1.2,.4,1) both;}
+.bubble.on.po-flip,.bubble.static.anim.po-flip{animation:bbFlip .5s cubic-bezier(.2,.9,.3,1.2) both;}
+.bubble.on.po-shake,.bubble.static.anim.po-shake{animation:bbShake .55s ease-out both;}
+.bubble.on.po-none,.bubble.static.po-none{transition:none;transform:none;}
+@keyframes bbPop{0%{opacity:0;transform:scale(.15) rotate(-5deg);}55%{opacity:1;transform:scale(1.16) rotate(1.8deg);}78%{transform:scale(.94) rotate(-.6deg);}100%{opacity:1;transform:none;}}
+@keyframes bbJelly{0%{opacity:0;transform:scale(.3,.1);}30%{opacity:1;transform:scale(.8,1.28);}48%{transform:scale(1.14,.86);}64%{transform:scale(.95,1.06);}80%{transform:scale(1.03,.98);}100%{opacity:1;transform:none;}}
+@keyframes bbSlide{0%{opacity:0;transform:translateY(28px);}100%{opacity:1;transform:none;}}
+@keyframes bbDrop{0%{opacity:0;transform:translateY(-46px) scale(.9);}55%{opacity:1;transform:translateY(7px) scale(1.03,.96);}78%{transform:translateY(-3px);}100%{opacity:1;transform:none;}}
+@keyframes bbFlip{0%{opacity:0;transform:perspective(600px) rotateX(85deg) scale(.8);}100%{opacity:1;transform:none;}}
+@keyframes bbShake{0%{opacity:0;transform:scale(.4);}25%{opacity:1;transform:scale(1.12) rotate(-3deg);}38%{transform:translateX(-7px) rotate(2.5deg);}50%{transform:translateX(6px) rotate(-2deg);}62%{transform:translateX(-4px) rotate(1.2deg);}75%{transform:translateX(3px);}100%{opacity:1;transform:none;}}
+.bubble.wp .w{display:inline-block;}
+.bubble.wp .w.cur{animation:bbWord .28s cubic-bezier(.3,1.6,.5,1);}
+@keyframes bbWord{0%{transform:scale(.8);}55%{transform:scale(1.22);}100%{transform:scale(1);}}
+@media (prefers-reduced-motion:reduce){.bubble.on[class*=po-],.bubble.static.anim[class*=po-]{animation:none;}.bubble.wp .w.cur{animation:none;}}
 .bubble.b-bold{font-weight:800;}
 .bubble.b-ital{font-style:italic;}
 .bubble::after{content:'';position:absolute;bottom:-8px;left:var(--tail,50%);width:14px;height:14px;box-sizing:border-box;background:var(--bg,#fff);border-right:var(--bw,0px) var(--bst,solid) var(--bd,transparent);border-bottom:var(--bw,0px) var(--bst,solid) var(--bd,transparent);transform:translateX(-50%) rotate(45deg);border-radius:0 0 4px 0;}
@@ -648,6 +666,8 @@ function mixHex(a,b,t){
   return '#'+[0,2,4].map(i=>ch(i).toString(16).padStart(2,'0')).join('');
 }
 
+/* Frauen: schmalere Schultern, deutlichere Taille, etwas schmalere Beine */
+function buildOf(ch){ const b=BUILD[ch.build||'reg']; return ch.female?{sw:b.sw-5,ww:b.ww-3.5,hw:b.hw,legW:b.legW-1.5}:b; }
 const BUILD = {
   slim:  {sw:40, ww:31, hw:38, legW:23},
   reg:   {sw:45, ww:38, hw:41, legW:25},
@@ -683,25 +703,25 @@ function hairFront(style,c,v){
     case 'messy':
       R.front=`<path d="M70 52 C64 34 70 20 80 14 L82 6 L90 12 L98 4 L105 11 L114 5 L118 14 L127 12 L126 24 C132 32 131 42 130 52 C128 42 124 36 118 33 C106 37 92 35 83 30 C79 36 74 44 70 52Z" fill="${c}"/>`; break;
     case 'bob':
-      R.behind=`<path d="M100 11 C80 11 67 28 67 48 C62 70 63 88 71 98 Q100 107 129 98 C137 88 138 70 133 48 C133 28 120 11 100 11Z" fill="${c}"/>`;
-      R.front=`<path d="M72 54 C66 25 84 9 101 9 C120 9 134 25 128 54 C127 44 121 34 112 27 C100 38 82 38 73 52Z" fill="${c}"/><path id="" d="M73 36 L81 38 C78 52 80 72 82 88 C82 94 75 95 73 90 C69 78 69 60 73 36Z" fill="${c}"/><path transform="translate(200 0) scale(-1 1)" d="M73 36 L81 38 C78 52 80 72 82 88 C82 94 75 95 73 90 C69 78 69 60 73 36Z" fill="${c}"/>`+hl('M84 15 Q92 11 100 14'); break;
+      R.behind=`<path d="M100 11 C80 11 67 28 67 48 C62 70 63 88 71 98 Q80 103 89 97 C86 92 85 86 86 80 L114 80 C115 86 114 92 111 97 Q120 103 129 98 C137 88 138 70 133 48 C133 28 120 11 100 11Z" fill="${c}"/>`;
+      R.front=`<path d="M72 66 C65 50 65 26 84 12 C94 6 108 6 118 12 C137 26 137 50 128 66 C125 71 120 69 120.5 64 C121 54 119 40 112 28 C100 38 86 40 80 52 C79 58 80 62 81 66 C77 71 72 69 72 66Z" fill="${c}"/>`+hl('M84 15 Q92 11 100 14'); break;
     case 'wavy':
-      R.behind=`<path d="M100 10 C78 10 66 28 66 48 C60 78 66 100 64 120 Q68 130 77 123 Q84 131 92 123 L108 123 Q116 131 123 123 Q132 130 136 120 C134 100 140 78 134 48 C134 28 122 10 100 10Z" fill="${c}"/>`;
-      R.front=`<path d="M72 54 C65 24 84 8 101 8 C120 8 135 24 128 54 C127 41 120 31 110 25 C98 38 82 37 73 52Z" fill="${c}"/><path d="M73 36 L81 38 C78 52 82 76 80 102 C79 110 69 111 68 102 C68 86 68 60 73 36Z" fill="${c}"/><path transform="translate(200 0) scale(-1 1)" d="M73 36 L81 38 C78 52 82 76 80 102 C79 110 69 111 68 102 C68 86 68 60 73 36Z" fill="${c}"/>`+hl('M82 14 Q92 10 102 13'); break;
+      R.behind=`<path d="M100 10 C78 10 66 28 66 48 C60 78 66 100 64 120 Q68 131 77 124 Q84 132 91 122 C88 108 86 94 87 80 L113 80 C114 94 112 108 109 122 Q116 132 123 124 Q132 131 136 120 C134 100 140 78 134 48 C134 28 122 10 100 10Z" fill="${c}"/>`;
+      R.front=`<path d="M72 66 C65 50 65 26 84 12 C94 6 108 6 118 12 C137 26 137 50 128 66 C125 71 120 69 120.5 64 C121 54 119 40 112 28 C100 38 86 40 80 52 C79 58 80 62 81 66 C77 71 72 69 72 66Z" fill="${c}"/>`+hl('M82 14 Q92 10 102 13'); break;
     case 'long':
-      R.behind=`<path d="M100 10 C78 10 66 28 66 48 C60 86 62 120 66 140 Q100 150 134 140 C138 120 140 86 134 48 C134 28 122 10 100 10Z" fill="${c}"/>`;
-      R.front=`<path d="M72 54 C66 23 84 8 101 8 C120 8 134 23 128 54 C127 42 121 31 110 25 C98 38 82 38 73 52Z" fill="${c}"/><path d="M73 36 L81 38 C78 54 82 82 83 134 C82 143 71 143 70 134 C66 112 66 70 73 36Z" fill="${c}"/><path transform="translate(200 0) scale(-1 1)" d="M73 36 L81 38 C78 54 82 82 83 134 C82 143 71 143 70 134 C66 112 66 70 73 36Z" fill="${c}"/>`+hl('M84 14 Q92 10 100 13'); break;
+      R.behind=`<path d="M100 10 C78 10 66 28 66 48 C60 86 62 120 66 140 Q78 148 93 140 C89 120 86 100 87 80 L113 80 C114 100 111 120 107 140 Q122 148 134 140 C138 120 140 86 134 48 C134 28 122 10 100 10Z" fill="${c}"/>`;
+      R.front=`<path d="M72 66 C65 50 65 26 84 12 C94 6 108 6 118 12 C137 26 137 50 128 66 C125 71 120 69 120.5 64 C121 54 119 40 112 28 C100 38 86 40 80 52 C79 58 80 62 81 66 C77 71 72 69 72 66Z" fill="${c}"/>`+hl('M84 14 Q92 10 100 13'); break;
     case 'ponytail':
       R.behind=`<path d="M118 40 C148 38 158 74 150 106 C148 117 137 115 139 105 C143 82 136 62 120 56Z" fill="${c}"/>`;
-      R.front=`<path d="M72 54 C66 25 84 9 101 9 C120 9 134 25 128 54 C127 44 121 34 112 27 C100 38 82 38 73 52Z" fill="${c}"/><ellipse cx="124" cy="45" rx="4.4" ry="5.4" transform="rotate(20 124 45)" fill="#E8637C"/>`+hl('M84 15 Q92 11 100 14'); break;
+      R.front=`<path d="M73 57 C66 28 84 9 101 9 C120 9 134 28 127 57 Q125.4 58.6 124.2 56 C123 47 119 38 111 30 C99 40 84 40 77 46 C75 50 75 54 74.6 56 Q73.6 58.6 73 57Z" fill="${c}"/><ellipse cx="124" cy="45" rx="4.4" ry="5.4" transform="rotate(20 124 45)" fill="#E8637C"/>`+hl('M84 15 Q92 11 100 14'); break;
     case 'bun':
-      R.front=`<circle cx="100" cy="7" r="12" fill="${c}"/><path d="M72 54 C66 25 84 9 101 9 C120 9 134 25 128 54 C127 44 121 34 112 27 C100 38 82 38 73 52Z" fill="${c}"/>`+hl('M84 15 Q92 11 100 14'); break;
+      R.front=`<circle cx="100" cy="7" r="12" fill="${c}"/><path d="M73 57 C66 28 84 9 101 9 C120 9 134 28 127 57 Q125.4 58.6 124.2 56 C123 47 119 38 111 30 C99 40 84 40 77 46 C75 50 75 54 74.6 56 Q73.6 58.6 73 57Z" fill="${c}"/>`+hl('M84 15 Q92 11 100 14'); break;
     case 'curly':
       R.front=`<g fill="${c}"><circle cx="74" cy="42" r="12"/><circle cx="82" cy="24" r="14"/><circle cx="100" cy="17" r="15"/><circle cx="118" cy="24" r="14"/><circle cx="126" cy="42" r="12"/></g><circle cx="90" cy="19" r="5" fill="${l}" opacity=".25"/>`; break;
     case 'afro':
       R.behind=`<circle cx="100" cy="36" r="40" fill="${c}"/>`;
       R.front=`<path d="M74 50 C75 30 90 22 100 22 C112 22 126 30 126 50 C120 38 112 34 100 34 C88 34 80 38 74 50Z" fill="${c}"/>`; break;
-    default: R.front=`<path d="M72 54 C66 25 84 9 101 9 C120 9 134 25 128 54 C127 44 121 34 112 27 C100 38 82 38 73 52Z" fill="${c}"/>`;
+    default: R.front=`<path d="M73 57 C66 28 84 9 101 9 C120 9 134 28 127 57 Q125.4 58.6 124.2 56 C123 47 119 38 111 30 C99 40 84 40 77 46 C75 50 75 54 74.6 56 Q73.6 58.6 73 57Z" fill="${c}"/>`;
   }
   return R;
 }
@@ -809,7 +829,7 @@ function faceFront(ch, mode){
   // mode: 'front' | 'threeq'
   const hc=shade(ch.hair==='#C9C9C9'||ch.hair==='#BDBDBD'?ch.hair:ch.hair,.85);
   const skinD=shade(ch.skin,.82);
-  const bw = ch.brow==='thick'?3.1:(ch.brow==='thin'?1.8:2.4);
+  const bw = ch.brow==='thick'?3.1:(ch.brow==='thin'?1.8:(ch.female?1.9:2.4));
   const lx=87, rx=113, ey=51;
   const sxL = mode==='threeq'?0.8:1, sxR=1;
   const blush=`<ellipse cx="81" cy="64.5" rx="6.6" ry="3.8" fill="#FF6F8E" opacity=".34"/><ellipse cx="119" cy="64.5" rx="6.6" ry="3.8" fill="#FF6F8E" opacity=".34"/>`;
@@ -840,7 +860,7 @@ function glassesFront(ch){
 }
 function faceSide(ch){
   const hc=shade(ch.hair,.85), skinD=shade(ch.skin,.82);
-  const bw = ch.brow==='thick'?3.1:(ch.brow==='thin'?1.8:2.4);
+  const bw = ch.brow==='thick'?3.1:(ch.brow==='thin'?1.8:(ch.female?1.9:2.4));
   let s=`<ellipse cx="112" cy="64" rx="6" ry="3.6" fill="#FF6F8E" opacity=".32"/>`;
   s+=`<g class="eye-g" style="transform-box:view-box;transform-origin:117px 51px">${eyeSVG(117,51,.78,ch,-1)}</g>`;
   s+=`<path class="brow-left" d="M109.5 41.8 Q116.5 36.6 124 40.4" stroke="${hc}" stroke-width="${bw}" fill="none" stroke-linecap="round"/>`;
@@ -969,7 +989,7 @@ function garmentFB(ch,b,view){
   return {under, over};
 }
 function bodyFB(ch, view){
-  const b=BUILD[ch.build||'reg'];
+  const b=buildOf(ch);
   const back = view==='back';
   const col=topColors(ch);
   const gm=garmentFB(ch,b,view);
@@ -996,14 +1016,17 @@ function headFB(ch, uid, view, mode){
   let g=`<g class="head-group" style="transform-box:view-box;transform-origin:100px 88px">`;
   g+= three ? `<g transform="translate(3 0)">` : '';
   g+=H.behind;
-  const ear=(cx)=>`<ellipse cx="${cx}" cy="54" rx="5.6" ry="8.6" fill="${skin}"/><path d="M${cx+(cx<100?1.6:-1.6)} 49 Q${cx+(cx<100?-1.2:1.2)} 54 ${cx+(cx<100?1.6:-1.6)} 60" stroke="${skinD}" stroke-width="1.3" fill="none" opacity=".6" stroke-linecap="round"/>`;
-  if(view==='back') g+=ear(73)+ear(127); else if(three) g+=ear(73); else g+=ear(73)+ear(127);
+  // Frauen: kleinere, tiefer sitzende Ohren, bei Haar über den Ohren (Bob/Wellig/Lang) ganz verdeckt – keine „Hörner“ auf Augenhöhe
+  const fem=!!ch.female, hideEars=view!=='back' && fem && /^(bob|wavy|long)$/.test(ch.hairStyle);
+  const ear=(cx)=>{ const sg=cx<100?1:-1, ex=cx+(fem?sg*1.4:0), ry=fem?6.2:8.6, rx=fem?4.1:5.6, ey=fem?57:54;
+    return `<ellipse cx="${ex}" cy="${ey}" rx="${rx}" ry="${ry}" fill="${skin}"/><path d="M${ex+sg*1.3} ${ey-4.2} Q${ex-sg*1} ${ey} ${ex+sg*1.3} ${ey+4.2}" stroke="${skinD}" stroke-width="1.2" fill="none" opacity=".6" stroke-linecap="round"/>`; };
+  if(hideEars){} else if(view==='back') g+=ear(73)+ear(127); else if(three) g+=ear(73); else g+=ear(73)+ear(127);
   const hp=headPathFront(ch.jaw);
   g+=`<defs><clipPath id="${cid}"><path d="${hp}"/></clipPath></defs>`;
   g+=`<path d="${hp}" fill="${skin}"/>`;
   g+=`<g clip-path="url(#${cid})"><ellipse cx="${three?96:118}" cy="66" rx="${three?18:20}" ry="30" fill="${skinD}" opacity="${three?.18:.24}"/><ellipse cx="86" cy="36" rx="14" ry="9" fill="${skinL}" opacity=".3"/></g>`;
   if(view==='front'){
-    g+= three ? `<g transform="translate(6.5 0)"><!--F-->`+faceFront(ch,'threeq')+`<!--/F--></g>` : `<!--F-->`+faceFront(ch,'front')+`<!--/F-->`;
+    g+= three ? `<g transform="translate(${ch.female?4.5:6.5} 0) translate(100 0) scale(${ch.female?.87:1} 1) translate(-100 0)"><!--F-->`+faceFront(ch,'threeq')+`<!--/F--></g>` : `<!--F-->`+faceFront(ch,'front')+`<!--/F-->`;
   }
   g+=H.front;
   g+= three ? `</g>` : '';
@@ -1015,13 +1038,13 @@ function svgFB(ch, uid, view){
 }
 function svgThreeQ(ch, uid){
   // 3/4-Ansicht: Körper leicht gestaucht und verschoben, Gesichtszüge Richtung Blickrichtung (rechts) verschoben
-  const b=BUILD[ch.build||'reg'];
+  const b=buildOf(ch);
   const body=bodyFB(ch,'front');
   return bodyScale(`<g transform="translate(104 0) scale(.88 1) translate(-100 0)">${body}</g>`)+`<g transform="translate(2 0)">${headFB(ch,uid,'front','threeq')}</g>`;
 }
 /* ---------- Profil-Ansicht (blickt nach rechts) ---------- */
 function svgSide(ch, uid){
-  const bk=ch.build||'reg', b=BUILD[bk];
+  const bk=ch.build||'reg', b=buildOf(ch);
   const dep={slim:46,reg:52,broad:60}[bk];
   const xb=Math.round(102-dep*0.52), xf=Math.round(102+dep*0.48);
   const col=topColors(ch), tc=ch.topColor, shirt=ch.shirt||'#F4F1EA', skin=ch.skin, skinD=shade(skin,.82), skinL=shade(skin,1.1);
@@ -2776,31 +2799,33 @@ const BB_SHAPES=[
   ['caption','Erzählerkasten','Caption box'],['note','Notizzettel','Sticky note'],['bar','Untertitel-Balken','Subtitle bar'],['sketch','Handgezeichnet (wackelig)','Hand-drawn (wobbly)']
 ];
 const BB_TAILS=[['auto','Automatisch','Automatic'],['point','Spitze','Pointer'],['dots','Gedankenpunkte','Thought dots'],['none','Keine','None']];
+const BB_POPS=[['soft','Sanft einblenden','Soft fade-in'],['pop','Pop (aufpoppen)','Pop (bounce in)'],['jelly','Gummi (Jelly)','Jelly'],['shake','Ruf (Wackeln)','Shout (shake)'],['drop','Fallen lassen','Drop in'],['slide','Hochgleiten','Slide up'],['flip','Aufklappen','Flip open'],['none','Sofort (ohne Effekt)','Instant (no effect)']];
 const BB_REVEALS=[['hl','Wort hervorheben (gesprochen)','Highlight spoken word'],['type','Mitschreiben (Schreibmaschine)','Type along (typewriter)'],['all','Ganzer Text sofort','Show all at once']];
-const BB_DEFAULT={preset:'classic',shape:'box',tail:'auto',font:'sans',size:17,bold:false,italic:false,color:'#1a1b22',fill:'#ffffff',stroke:'#1a1b22',sw:0,dash:false,reveal:'hl',align:'left',name:false,auto:false};
+const BB_DEFAULT={preset:'classic',shape:'box',tail:'auto',font:'sans',size:17,bold:false,italic:false,color:'#1a1b22',fill:'#ffffff',stroke:'#1a1b22',sw:0,dash:false,reveal:'hl',align:'left',name:false,auto:false,pop:'soft',wp:false};
 const BB_PRESETS=[
   ['classic','Klassisch','Classic',{}],
-  ['speech','Comic-Sprechblase','Comic speech',{shape:'oval',font:'comic',bold:true,sw:3,align:'center',size:18}],
-  ['thought','Gedanke','Thought',{shape:'cloud',font:'comic',italic:true,sw:3,align:'center',stroke:'#2B3350',fill:'#f4f7ff'}],
-  ['shout','Schrei','Shout',{shape:'burst',font:'impact',size:24,sw:3,fill:'#FFE27A',stroke:'#C9283F',color:'#C9283F',align:'center'}],
-  ['whisper','Flüstern','Whisper',{shape:'oval',font:'rounded',italic:true,size:14,sw:2,dash:true,stroke:'#8A92A8',color:'#5B6275',fill:'#F3F5FA',align:'center'}],
-  ['narrator','Erzähler','Narrator',{shape:'caption',font:'serif',sw:3,fill:'#FFF2A8',stroke:'#1a1b22',tail:'none',name:true}],
-  ['note','Notizzettel','Sticky note',{shape:'note',font:'hand',size:18,fill:'#FFF176',tail:'none',color:'#3b3320'}],
+  ['speech','Comic-Sprechblase','Comic speech',{shape:'oval',font:'comic',bold:true,sw:3,align:'center',size:18,pop:'pop'}],
+  ['thought','Gedanke','Thought',{shape:'cloud',font:'comic',italic:true,sw:3,align:'center',stroke:'#2B3350',fill:'#f4f7ff',pop:'drop'}],
+  ['shout','Schrei','Shout',{shape:'burst',font:'impact',size:24,sw:3,fill:'#FFE27A',stroke:'#C9283F',color:'#C9283F',align:'center',pop:'shake'}],
+  ['whisper','Flüstern','Whisper',{shape:'oval',font:'rounded',italic:true,size:14,sw:2,dash:true,stroke:'#8A92A8',color:'#5B6275',fill:'#F3F5FA',align:'center',pop:'slide'}],
+  ['narrator','Erzähler','Narrator',{shape:'caption',font:'serif',sw:3,fill:'#FFF2A8',stroke:'#1a1b22',tail:'none',name:true,pop:'slide'}],
+  ['note','Notizzettel','Sticky note',{shape:'note',font:'hand',size:18,fill:'#FFF176',tail:'none',color:'#3b3320',pop:'drop'}],
   ['subtitle','Untertitel','Subtitle',{shape:'bar',font:'sans',size:20,fill:'#101218',color:'#ffffff',tail:'none',align:'center',name:true}],
-  ['sketch','Skizze','Sketch',{shape:'sketch',font:'hand',size:18,sw:3,stroke:'#2B3350',fill:'#FFFDF5'}],
-  ['retro','Retro-Terminal','Retro terminal',{shape:'square',font:'mono',size:16,sw:2,fill:'#08140D',stroke:'#44FF88',color:'#44FF88',reveal:'type'}],
-  ['pop','Pop (rund & bunt)','Pop (round & bold)',{shape:'round',font:'rounded',bold:true,sw:3,fill:'#7C6FFF',stroke:'#2B2466',color:'#ffffff',size:18}]
+  ['sketch','Skizze','Sketch',{shape:'sketch',font:'hand',size:18,sw:3,stroke:'#2B3350',fill:'#FFFDF5',pop:'pop'}],
+  ['retro','Retro-Terminal','Retro terminal',{shape:'square',font:'mono',size:16,sw:2,fill:'#08140D',stroke:'#44FF88',color:'#44FF88',reveal:'type',pop:'flip'}],
+  ['pop','Pop (rund & bunt)','Pop (round & bold)',{shape:'round',font:'rounded',bold:true,sw:3,fill:'#7C6FFF',stroke:'#2B2466',color:'#ffffff',size:18,pop:'jelly'}]
 ];
 function bbStyle(inst){ return Object.assign({}, BB_DEFAULT, inst&&inst.bs||{}); }
 function bbFontCss(id){ const f=BB_FONTS.find(x=>x[0]===id)||BB_FONTS[0]; return f[3]; }
 function buildBubbleEl(st, text, words, opts){
   opts=opts||{};
   let shape=st.shape;
-  if(opts.mood && st.auto && (opts.mood==='anger'||opts.mood==='surprise')) shape='burst';
+  let pop=BB_POPS.some(x=>x[0]===st.pop)?st.pop:'soft';
+  if(opts.mood && st.auto && (opts.mood==='anger'||opts.mood==='surprise')){ shape='burst'; pop='shake'; }
   let tail=st.tail||'auto';
   if(tail==='auto') tail = shape==='cloud'?'dots':(shape==='note'||shape==='bar'||shape==='caption')?'none':'point';
   const b=document.createElement('div');
-  b.className='bubble bs-'+shape+' tl-'+tail+' rv-'+(st.reveal||'hl')+(st.bold?' b-bold':'')+(st.italic?' b-ital':'')+(opts.static?' static':'');
+  b.className='bubble bs-'+shape+' tl-'+tail+' po-'+pop+(st.wp?' wp':'')+' rv-'+(st.reveal||'hl')+(st.bold?' b-bold':'')+(st.italic?' b-ital':'')+(opts.static?' static':'');
   b.style.setProperty('--bg',st.fill); b.style.setProperty('--fg',st.color); b.style.setProperty('--bd',st.sw>0?st.stroke:'transparent');
   b.style.setProperty('--bw',(st.sw||0)+'px'); b.style.setProperty('--bst',st.dash?'dashed':'solid'); b.style.setProperty('--bdash',st.dash?'7 5':'none');
   b.style.setProperty('--bfs',st.size+'px'); b.style.setProperty('--bff',bbFontCss(st.font)); b.style.setProperty('--bal',st.align||'left');
@@ -2873,7 +2898,7 @@ function openBubbleDlg(inst){
   const sample=$t('Guten Tag! Wie kann ich helfen?','Hello! How can I help you?');
   const words=[]; sample.replace(/\S+/g,(m,i)=>{ words.push({s:i,e:i+m.length}); return m; });
   const get=()=>{ inst.bs=inst.bs||Object.assign({},BB_DEFAULT); return inst.bs; };
-  const set=(k,v)=>{ const st=get(); st[k]=v; if(k!=='preset') st.preset='custom'; refresh(); };
+  const set=(k,v)=>{ const st=get(); st[k]=v; if(k!=='preset') st.preset='custom'; refresh(k==='pop'); };
   const grid=q('.bb-grid');
   const field=(label,node)=>{ const w=document.createElement('div'); const l=document.createElement('label'); l.textContent=label; w.appendChild(l); w.appendChild(node); grid.appendChild(w); return node; };
   const sel=(key,list,label)=>{ const e=document.createElement('select'); e.dataset.k=key; list.forEach(o=>{ const op=document.createElement('option'); op.value=o[0]; op.textContent=$t(o[1],o[2]); e.appendChild(op); }); e.addEventListener('change',()=>set(key,e.value)); return field(label,e); };
@@ -2883,10 +2908,12 @@ function openBubbleDlg(inst){
   sel('font',BB_FONTS,$t('Schrift','Font')); rng('size',12,34,1,$t('Schriftgröße','Font size'));
   col('color',$t('Textfarbe','Text colour')); col('fill',$t('Füllfarbe','Fill colour'));
   col('stroke',$t('Randfarbe','Border colour')); rng('sw',0,6,1,$t('Randstärke','Border width'));
+  sel('pop',BB_POPS,$t('Einblend-Effekt (Pop-up)','Entrance effect (pop-up)'));
   sel('reveal',BB_REVEALS,$t('Textanzeige','Text reveal')); sel('align',[['left','Linksbündig','Left'],['center','Zentriert','Centred']],$t('Ausrichtung','Alignment'));
   const checks=q('.bb-checks');
   const cb=(key,label,title)=>{ const l=document.createElement('label'); if(title) l.title=title; const e=document.createElement('input'); e.type='checkbox'; e.dataset.k=key; e.addEventListener('change',()=>set(key,e.checked)); l.appendChild(e); l.appendChild(document.createTextNode(label)); checks.appendChild(l); };
   cb('bold',$t('Fett','Bold')); cb('italic',$t('Kursiv','Italic')); cb('dash',$t('Gestrichelter Rand','Dashed border'));
+  cb('wp',$t('Wort springt beim Sprechen','Word bounces while spoken'),$t('Das gerade gesprochene Wort „hüpft“ kurz','The word being spoken bounces briefly'));
   cb('name',$t('Sprechernamen anzeigen','Show speaker name'),$t('Zeigt den Namen der Figur in der Blase','Shows the figure’s name in the bubble'));
   cb('auto',$t('Form folgt Reaktion (Ärger/Verwunderung → Zacken)','Shape follows reaction (anger/surprise → burst)'),$t('Bei der Reaktion „Ärger“ oder „Verwunderung“ wird automatisch die Schrei-Form genutzt','With the reaction “Anger” or “Surprise” the shout shape is used automatically'));
   q('.bb-hint').textContent=$t('Schriften stammen vom Gerät (Comic, Handschrift usw. sind auf Windows, Mac und iPhone unterschiedlich hübsch). Ohne installierte Schrift greift automatisch eine Ersatzschrift.','Fonts come from your device (comic and handwriting faces look different on Windows, Mac and iPhone). If a font is not installed, a fallback font is used.');
@@ -2896,10 +2923,10 @@ function openBubbleDlg(inst){
     const mini=document.createElement('div'); mini.className='bb-mini';
     mini.appendChild(buildBubbleEl(Object.assign({},BB_DEFAULT,pr[3],{name:false}),'Aa',[{s:0,e:2}],{static:true}));
     c.appendChild(mini); c.appendChild(document.createTextNode($t(pr[1],pr[2])));
-    c.addEventListener('click',()=>{ inst.bs=Object.assign({},BB_DEFAULT,pr[3],{preset:pr[0]}); refresh(); });
+    c.addEventListener('click',()=>{ inst.bs=Object.assign({},BB_DEFAULT,pr[3],{preset:pr[0]}); refresh(true); });
     chips.appendChild(c);
   });
-  function refresh(){
+  function refresh(play){
     const st=bbStyle(inst);
     grid.querySelectorAll('[data-k]').forEach(e=>{ e.value=st[e.dataset.k]; });
     checks.querySelectorAll('[data-k]').forEach(e=>{ e.checked=!!st[e.dataset.k]; });
@@ -2908,9 +2935,11 @@ function openBubbleDlg(inst){
     const b=buildBubbleEl(st,sample,words,{static:true,name:$d(def.name)});
     b.querySelectorAll('.w').forEach((w,i)=>{ w.classList.toggle('done',i<2); w.classList.toggle('cur',i===2); });
     prev.appendChild(b);
+    if(play){ b.classList.remove('anim'); void b.offsetWidth; b.classList.add('anim'); }
   }
   const row=q('.modal-row');
   const mkBtn=(txt,cls,fn)=>{ const e=document.createElement('button'); e.type='button'; e.className='ctrl-btn'+(cls?' '+cls:''); e.textContent=txt; e.addEventListener('click',fn); row.appendChild(e); return e; };
+  mkBtn('▶ '+$t('Effekt abspielen','Play effect'),'bb-play',()=>refresh(true));
   mkBtn($t('Auf alle Figuren dieser Szene übertragen','Apply to all figures in this scene'),'bb-all',()=>{ getCurrentScene().characters.forEach(c=>{ c.bs=Object.assign({},bbStyle(inst)); }); });
   mkBtn($t('Zurücksetzen','Reset'),'bb-reset',()=>{ inst.bs=Object.assign({},BB_DEFAULT); refresh(); });
   mkBtn($t('Fertig','Done'),'primary bb-close',()=>{ dlg.remove(); });

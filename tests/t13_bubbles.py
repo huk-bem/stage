@@ -79,6 +79,32 @@ with App(path,viewport=(1400,900)) as a:
     ink=a.ev("charEl(scenesTimeline[0].characters[0].id).querySelector('svg').innerHTML.includes('#2A2230')")
     sc=a.ev("charEl(scenesTimeline[0].characters[0].id).querySelector('svg').innerHTML.includes('scale(1.4')")
     check(ink and sc,'Chibi: Kontur + Riesenkopf gerendert')
+    # Pop-up-Effekte
+    check(len(a.ev("BB_POPS"))==8,'8 Einblend-Effekte')
+    for pop in ['pop','jelly','shake','drop','slide','flip']:
+        a.ev(f"()=>{{ Bubble.clear(); const i=scenesTimeline[0].characters[0]; i.bs=Object.assign({{}},BB_DEFAULT,{{pop:'{pop}'}}); Bubble.show(i,{{text:'Hallo Welt',plan:{{words:[{{s:0,e:5}},{{s:6,e:10}}]}}}}); 0 }}")
+        pg.wait_for_timeout(120)
+        an=a.ev("(()=>{ const b=document.querySelector('.bubble'); const cs=getComputedStyle(b); return [b.className.includes('po-%s'), cs.animationName, parseFloat(cs.opacity)]; })()"%pop)
+        check(an[0] and an[1].startswith('bb') and an[2]>0,f'Effekt {pop}: Animation läuft ({an[1]})')
+    pg.wait_for_timeout(900)
+    check(a.ev("getComputedStyle(document.querySelector('.bubble')).opacity")=='1' and a.ev("getComputedStyle(document.querySelector('.bubble')).transform") in ('none','matrix(1, 0, 0, 1, 0, 0)'),'Nach dem Effekt: Blase ruhig und voll sichtbar')
+    a.ev("()=>{ Bubble.clear(); const i=scenesTimeline[0].characters[0]; i.bs=Object.assign({},BB_DEFAULT,{pop:'none'}); Bubble.show(i,{text:'Hallo',plan:{words:[{s:0,e:5}]}}); 0 }")
+    pg.wait_for_timeout(60)
+    check(a.ev("getComputedStyle(document.querySelector('.bubble')).animationName")=='none','„Sofort“: keine Animation')
+    # Wort-Pop
+    a.ev("()=>{ Bubble.clear(); const i=scenesTimeline[0].characters[0]; i.bs=Object.assign({},BB_DEFAULT,{wp:true}); Bubble.show(i,{text:'Hallo Welt',plan:{words:[{s:0,e:5},{s:6,e:10}]}}); Bubble.update(i,1); 0 }")
+    check(a.ev("document.querySelector('.bubble.wp .w.cur')!==null")==True,'Wort-Pop: aktuelles Wort markiert')
+    # Reaktion erzwingt Ruf-Effekt
+    r=a.ev("(()=>{ const b=buildBubbleEl(Object.assign({},BB_DEFAULT,{auto:true,pop:'soft'}),'X',[{s:0,e:1}],{mood:'anger'}); return b.className; })()")
+    check('bs-burst' in r and 'po-shake' in r,'Ärger + „Form folgt Reaktion“: Zacken + Wackeln')
+    a.ev("()=>{ Bubble.clear(); 0 }")
+    # Dialog: Effekt wählen und abspielen
+    a.ev("()=>{ openBubbleDlg(scenesTimeline[0].characters[0]); 0 }")
+    a.ev("()=>{ const s=document.querySelector('#bubbleDlg select[data-k=pop]'); s.value='jelly'; s.dispatchEvent(new Event('change',{bubbles:true})); 0 }")
+    pg.wait_for_timeout(80)
+    check(a.ev("scenesTimeline[0].characters[0].bs.pop")=='jelly' and a.ev("getComputedStyle(document.querySelector('#bubbleDlg .bb-prev .bubble')).animationName")=='bbJelly','Dialog: Effekt wählen spielt Vorschau')
+    check(a.ev("!!document.querySelector('#bubbleDlg .bb-play')"),'Button „Effekt abspielen“')
+    a.ev("document.querySelector('#bubbleDlg .bb-close').click()")
     # EN
     a.ev("()=>{ const i=scenesTimeline[0].characters[0]; openBubbleDlg(i); 0 }")
     check(a.ev("document.querySelector('#bubbleDlg h3').textContent.length")>5,'Dialogtitel vorhanden')
