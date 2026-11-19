@@ -35,7 +35,7 @@ with App(path) as a:
     n1=len(a.ev("scenesTimeline[0].characters[1].clips"))
     check(n1==n0+1,'„＋ Pose“ legt einen Clip an')
     bb=bar_box(pg,'Markus · Pose'); s0=a.ev("scenesTimeline[0].characters[1].clips[0].start")
-    drag(pg,bb['x']+bb['w']*0.3,bb['y']+bb['h']/2,bb['tw']*3/12)
+    drag(pg,bb['x']+10,bb['y']+bb['h']/2,bb['tw']*3/12)  # linker Rand = Greiffläche (rechts: Pose-Wahl und Ziel-Button)
     s1=a.ev("scenesTimeline[0].characters[1].clips[0].start")
     check(abs((s1-s0)-3)<0.3,f'Pose-Clip um 3 s nach rechts verschoben ({s0}→{s1})')
     bb=bar_box(pg,'Markus · Pose'); d0=a.ev("scenesTimeline[0].characters[1].clips[0].dur")

@@ -72,6 +72,17 @@ body{margin:0;height:100vh;background:var(--bg-app);color:var(--text-primary);fo
 .bg-name{font-size:11px;padding:6px 8px;background:var(--panel-elevated);}
 
 .upload-btn{width:100%;background:var(--panel-elevated);border:1.5px dashed var(--panel-border);color:var(--text-secondary);border-radius:var(--radius-md);padding:10px;font-size:12px;cursor:pointer;margin-bottom:10px;font-family:var(--font-body);text-align:left;}
+.speaker-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 2px 8px;font-size:12px;color:var(--text-secondary);}
+.speaker-langchips{display:flex;gap:4px;align-items:center;}
+.lang-chip{background:var(--panel-elevated);border:1px solid var(--panel-border);color:var(--text-secondary);border-radius:12px;padding:3px 8px;font:600 11px var(--font-body);cursor:pointer;}
+.lang-chip.active{border-color:var(--accent-violet);color:var(--text-primary);box-shadow:0 0 0 1px var(--accent-violet);}
+.lang-chip.has{color:var(--text-primary);} .lang-chip.todo{color:#ffb020;border-color:#ffb020;}
+.speaker-rec.recording{background:#e5484d;color:#fff;border-color:#e5484d;animation:recPulse 1s ease-in-out infinite;}
+@keyframes recPulse{50%{opacity:.65;}}
+.speaker-track.is-narrator{border-left:3px solid var(--accent-teal);}
+.bgimg-box{margin-top:8px;display:flex;flex-direction:column;gap:6px;}
+.bgimg-row{display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center;font-size:12px;color:var(--text-secondary);}
+.bgimg-row select,.bgimg-row input{width:100%;}
 .upload-btn:hover{color:var(--text-primary);border-color:var(--accent-violet);}
 
 .filter-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
@@ -109,6 +120,8 @@ body{margin:0;height:100vh;background:var(--bg-app);color:var(--text-primary);fo
 /* Hintergründe: sanfte Bewegung (nur auf der Bühne; Vorschaubilder bleiben statisch) */
 #stageBackground .bg-cloud{animation:bgDrift 46s ease-in-out infinite alternate;}
 #stageBackground .bg-cloud-b{animation-duration:64s;animation-direction:alternate-reverse;}
+#stageBackground img.bgimg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+#stageBackground img.bgimg-back{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;filter:blur(22px) brightness(.75);pointer-events:none;}
 #stageBackground .bg-sway{transform-box:fill-box;transform-origin:50% 100%;animation:bgSway 5s ease-in-out infinite;}
 #stageBackground .bg-sway-g{transform-box:fill-box;transform-origin:50% 100%;animation:bgSway 3.2s ease-in-out infinite;}
 #stageBackground .bg-flag{animation:bgFlag 2.2s ease-in-out infinite;}
@@ -197,6 +210,9 @@ body{margin:0;height:100vh;background:var(--bg-app);color:var(--text-primary);fo
 
 /* Pose: Zeigen / Winken / Erklären / Jubeln – jeweils weiches Einblenden aus der Ruhelage, dann Schleife */
 .pose-point .arm-main{transform:rotate(-80deg);animation:none;}
+.stage-character.pose-point.aim-main .arm-main{transform:rotate(var(--aim,-80deg));animation:none;}
+.stage-character.pose-point.aim-off .arm-off{transform:rotate(var(--aim,80deg));animation:none;}
+.stage-character.pose-point.aim-off .arm-main{transform:rotate(-3deg);}
 .pose-point .view-side .arm-main{transform:rotate(-88deg);}
 .pose-wave .arm-main{animation:waveIn .5s cubic-bezier(.2,.9,.3,1.15) both,waveA .62s ease-in-out .5s infinite;}
 .pose-wave .view-side .arm-main{animation:waveInS .5s cubic-bezier(.2,.9,.3,1.15) both,waveS .62s ease-in-out .5s infinite;}
@@ -252,6 +268,25 @@ body{margin:0;height:100vh;background:var(--bg-app);color:var(--text-primary);fo
 
 /* Sprechblasen */
 #stageBubbles{position:absolute;inset:0;pointer-events:none;z-index:30;}
+#stageMarkers{position:absolute;inset:0;pointer-events:none;z-index:25;}
+#stageMarkers .mk-svg{position:absolute;inset:0;overflow:visible;pointer-events:none;}
+.mk-walk{fill:none;stroke:#17c3b2;stroke-width:3;stroke-dasharray:9 7;stroke-linecap:round;}
+.mk-point{fill:none;stroke:#ffb020;stroke-width:2.5;stroke-dasharray:2 6;stroke-linecap:round;}
+.mk-pin{position:absolute;pointer-events:auto;cursor:grab;touch-action:none;display:flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;border-radius:14px;font:700 13px/1.1 var(--font-body);color:#10151a;box-shadow:0 2px 8px rgba(0,0,0,.4);white-space:nowrap;user-select:none;-webkit-user-select:none;}
+.mk-pin.walk{background:#17c3b2;transform:translate(-50%,-100%);margin-top:-6px;}
+.mk-pin.point{background:#ffb020;transform:translate(-50%,-50%);}
+.mk-pin.walk::after{content:'';position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:inherit;transform:translateX(-50%) rotate(45deg);border-radius:0 0 3px 0;z-index:-1;}
+.mk-pin .mk-x{margin-left:4px;font-weight:800;opacity:.55;cursor:pointer;padding:0 2px;}
+.mk-pin .mk-x:hover{opacity:1;}
+.mk-pin.dragging{cursor:grabbing;box-shadow:0 0 0 2px #fff,0 4px 12px rgba(0,0,0,.5);}
+body.playing #stageMarkers{display:none;}
+#pickBanner{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:60;background:#17151f;color:#fff;border:2px solid var(--accent-violet);border-radius:12px;padding:8px 14px;font:600 14px var(--font-body);display:none;box-shadow:0 6px 20px rgba(0,0,0,.5);max-width:90%;text-align:center;}
+body.picking #pickBanner{display:block;}
+body.picking #stage{cursor:crosshair;outline:3px dashed var(--accent-violet);outline-offset:-3px;}
+.timeline-bar.has-extra{justify-content:flex-end;gap:4px;padding-right:12px;}
+.timeline-bar .bar-btn{flex:none;background:rgba(255,255,255,.55);border:none;border-radius:8px;font-size:11px;line-height:1;padding:2px 5px;cursor:pointer;color:#14151a;}
+.timeline-bar .bar-btn.set{background:#fff;box-shadow:inset 0 0 0 2px #14151a;}
+
 .bubble{position:absolute;max-width:46%;box-sizing:border-box;isolation:isolate;background:var(--bg,#fff);color:var(--fg,#1a1b22);border:var(--bw,0px) var(--bst,solid) var(--bd,transparent);border-radius:14px;padding:8px 12px;font-family:var(--bff,var(--font-body));font-weight:600;font-size:var(--bfs,17px);line-height:1.3;text-align:var(--bal,left);box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;transform:translateY(8px) scale(.9);transition:opacity .18s,transform .28s cubic-bezier(.3,1.5,.5,1);}
 .bubble{transform-origin:var(--tail,50%) 100%;}
 .bubble.on{opacity:1;transform:none;}
@@ -510,7 +545,7 @@ select.speaker-voice{background:var(--panel);border:1px solid var(--panel-border
 #remoteStatus{font-size:12px;color:var(--text-secondary);}
 #remoteStatus.ok{color:#5BC27E;} #remoteStatus.err{color:var(--accent-pink);}
 .speaker-opt.opt-clip .ctrl-btn{padding:4px 9px;font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-select.speaker-lang{background:var(--panel);border:1px solid var(--panel-border);color:var(--text-primary);border-radius:6px;padding:5px;font-size:11px;}
+select.speaker-lang,select.speaker-look{background:var(--panel);border:1px solid var(--panel-border);color:var(--text-primary);border-radius:6px;padding:5px;font-size:11px;}
 </style>
 
 </head>
@@ -547,7 +582,9 @@ select.speaker-lang{background:var(--panel);border:1px solid var(--panel-border)
         <div id="stageBackground"></div>
         <div id="stageObjects"></div>
         <div id="stageCharacters"></div>
+        <div id="stageMarkers"></div>
         <div id="stageBubbles"></div>
+        <div id="pickBanner" role="status"></div>
       </div>
       </div>
     </div>
@@ -1464,10 +1501,10 @@ function renderAnimationTab(container){
 
   section($t('Grundpose (Ruhezustand)','Base pose (resting state)'));
   btnRow(trOpts(poseOptions), inst.action||'idle', (val)=>{ inst.action=val; renderCharacters(); renderPanel(); renderObjectTimeline(); });
-  check($t('Beim Gehen über die Bühne laufen (nur Seite/¾)','Move across the stage while walking (side/¾ only)'), inst.walkMove!==false, v=>{ inst.walkMove=v; });
+  check($t('Beim Gehen ohne Ziel über die Bühne laufen (nur Seite/¾)','Move across the stage while walking without a target (side/¾ only)'), inst.walkMove!==false, v=>{ inst.walkMove=v; });
   check($t('Gestik beim Sprechen','Gestures while speaking'), inst.gesture!==false, v=>{ inst.gesture=v; renderCharacters(); });
   const ph=document.createElement('div'); ph.className='anim-hint'; ph.style.margin='4px 0 16px';
-  ph.textContent=$t('Zeitlich begrenzte Posen (z. B. 3 s Gehen, dann Zeigen) legst du in der Timeline mit „＋ Pose“ an.','Time-limited poses (e.g. 3 s walking, then pointing) are added in the timeline with “＋ Pose”.');
+  ph.textContent=$t('Zeitlich begrenzte Posen (z. B. Gehen, dann Zeigen) legst du in der Timeline mit „＋“ an. Bei „Gehen“ und „Zeigen“ legst du mit „👣/👉 Ziel“ fest, wohin die Figur läuft bzw. worauf sie zeigt – das Ziel erscheint als Pin auf der Bühne und lässt sich dort verschieben.','Time-limited poses (e.g. walking, then pointing) are added in the timeline with “＋”. For “Walking” and “Pointing” use “👣/👉 Target” to set where the figure walks or what she points at – the target appears as a pin on the stage and can be dragged there.');
   container.appendChild(ph);
 
   section($t('Reaktion','Reaction'));
@@ -1520,6 +1557,54 @@ function renderScenesTab(container){
     grid2.appendChild(card);
   });
   container.appendChild(grid2);
+
+  // Eigenes Hintergrundbild
+  const t3=document.createElement('div'); t3.className='section-title'; t3.textContent=$t('Eigenes Hintergrundbild','Your own background image');
+  container.appendChild(t3);
+  const up=document.createElement('button'); up.type='button'; up.className='upload-btn bgimg-btn'; up.textContent=(scene.bgType==='image'&&scene.bgImage)?'🖼 '+$t('Anderes Bild wählen','Choose another image'):'🖼 '+$t('+ Bild hochladen (JPG, PNG, HEIC …)','+ Upload image (JPG, PNG, HEIC …)');
+  const fi=document.createElement('input'); fi.type='file'; fi.accept='image/*'; fi.className='bgimg-file'; fi.style.display='none';
+  fi.addEventListener('change',async()=>{
+    const f=fi.files&&fi.files[0]; if(!f) return;
+    try{ const b=await loadBgImage(f); if(scene.bgImage){ b.fit=scene.bgImage.fit; b.dim=scene.bgImage.dim; b.blur=scene.bgImage.blur; } scene.bgImage=b; scene.bgType='image'; scene.bgId='__image'; renderStageBackground(); renderPanel(); renderSceneTrack(); renderObjectTimeline(); }
+    catch(_){ alert($t('Dieses Bild konnte nicht gelesen werden. Bitte JPG oder PNG verwenden.','This image could not be read. Please use JPG or PNG.')); }
+  });
+  up.addEventListener('click',()=>fi.click()); container.appendChild(up); container.appendChild(fi);
+  if(scene.bgType==='image' && scene.bgImage){
+    const b=scene.bgImage, box=document.createElement('div'); box.className='bgimg-box';
+    const mkRow=(lab,el)=>{ const r=document.createElement('label'); r.className='bgimg-row'; const sp=document.createElement('span'); sp.textContent=lab; r.appendChild(sp); r.appendChild(el); box.appendChild(r); };
+    const fit=document.createElement('select'); fit.className='bgimg-fit';
+    [['cover',$t('Füllen (zuschneiden)','Fill (crop)')],['contain',$t('Einpassen (mit unscharfem Rand)','Fit (with blurred edges)')]].forEach(([v,l])=>{ const o=document.createElement('option'); o.value=v; o.textContent=l; fit.appendChild(o); }); fit.value=b.fit;
+    fit.addEventListener('change',()=>{ b.fit=fit.value; renderStageBackground(); });
+    mkRow($t('Darstellung','Display'),fit);
+    const dim=document.createElement('input'); dim.type='range'; dim.min=0; dim.max=70; dim.value=b.dim||0; dim.className='bgimg-dim'; dim.title=$t('Bild abdunkeln, damit Figuren und Text besser lesbar sind','Darken the image so figures and text stand out');
+    dim.addEventListener('input',()=>{ b.dim=+dim.value; renderStageBackground(); });
+    mkRow($t('Abdunkeln','Darken'),dim);
+    const bl=document.createElement('input'); bl.type='range'; bl.min=0; bl.max=12; bl.value=b.blur||0; bl.className='bgimg-blur'; bl.title=$t('Hintergrund weichzeichnen (Tiefenwirkung)','Blur the background (depth effect)');
+    bl.addEventListener('input',()=>{ b.blur=+bl.value; renderStageBackground(); });
+    mkRow($t('Weichzeichnen','Blur'),bl);
+    const rm=document.createElement('button'); rm.type='button'; rm.className='ctrl-btn ctrl-btn-sm bgimg-remove'; rm.textContent='✕ '+$t('Bild entfernen','Remove image');
+    rm.addEventListener('click',()=>{ scene.bgImage=null; scene.bgType='plain'; scene.bgId='studio-light'; renderStageBackground(); renderPanel(); renderSceneTrack(); renderObjectTimeline(); });
+    box.appendChild(rm);
+    const nm=document.createElement('div'); nm.className='anim-hint'; nm.textContent=b.name+' · '+b.w+'×'+b.h+' px'; box.appendChild(nm);
+    container.appendChild(box);
+  }
+}
+function loadBgImage(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader(); fr.onerror=()=>rej(new Error('read'));
+    fr.onload=()=>{
+      const img=new Image(); img.onerror=()=>rej(new Error('img'));
+      img.onload=()=>{
+        const M=1920, k=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)), c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(img.naturalWidth*k)); c.height=Math.max(1,Math.round(img.naturalHeight*k));
+        const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(img,0,0,c.width,c.height);
+        let url; try{ url=c.toDataURL('image/jpeg',.88); }catch(_){ url=fr.result; }
+        res({name:file.name,url,w:img.naturalWidth,h:img.naturalHeight,fit:'cover',dim:0,blur:0});
+      };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
 }
 
 function renderObjTab(container){
@@ -1594,7 +1679,13 @@ if(sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', ()=>document.body.
 function renderStageBackground(){
   const scene=getCurrentScene();
   const el=document.getElementById('stageBackground');
-  if(scene.bgType==='scene'){
+  el.style.filter='';
+  if(scene.bgType==='image' && scene.bgImage){
+    const b=scene.bgImage; el.style.background='#101218'; el.innerHTML='';
+    if(b.fit==='contain'){ const bk=document.createElement('img'); bk.className='bgimg-back'; bk.alt=''; bk.src=b.url; el.appendChild(bk); }
+    const im=document.createElement('img'); im.className='bgimg'; im.alt=''; im.src=b.url; im.style.objectFit=b.fit==='contain'?'contain':'cover'; el.appendChild(im);
+    el.style.filter='brightness('+(1-(b.dim||0)/100).toFixed(2)+') blur('+(b.blur||0)+'px)';
+  } else if(scene.bgType==='scene'){
     const sc=scenes.find(s=>s.id===scene.bgId);
     el.style.background='none';
     el.innerHTML=sc?sc.svg:'';
@@ -1885,7 +1976,7 @@ function selectScene(idx){
 }
 function addScene(){
   const cur=getCurrentScene();
-  const scene=makeScene({label:'Szene '+(scenesTimeline.length+1), bgType:cur.bgType, bgId:cur.bgId});
+  const scene=makeScene({label:'Szene '+(scenesTimeline.length+1), bgType:cur.bgType, bgId:cur.bgId, bgImage:cur.bgImage?Object.assign({},cur.bgImage):null});
   scenesTimeline.push(scene);
   selectScene(scenesTimeline.length-1);
 }
@@ -1914,7 +2005,8 @@ function renderSceneTrack(){
     card.className='filmstrip-card'+(idx===currentSceneIndex?' active':'');
     card.draggable=true;
     const thumb=document.createElement('div'); thumb.className='filmstrip-thumb';
-    if(scene.bgType==='scene'){ const sc=scenes.find(s=>s.id===scene.bgId); thumb.innerHTML=sc?sc.svg:''; }
+    if(scene.bgType==='image' && scene.bgImage){ thumb.style.background='#101218 center/cover no-repeat url("'+scene.bgImage.url+'")'; }
+    else if(scene.bgType==='scene'){ const sc=scenes.find(s=>s.id===scene.bgId); thumb.innerHTML=sc?sc.svg:''; }
     else { const bg=plainBackgrounds.find(b=>b.id===scene.bgId)||plainBackgrounds[0]; thumb.style.background=bg.css; }
     card.appendChild(thumb);
     const label=document.createElement('div'); label.className='filmstrip-label';
@@ -2016,7 +2108,7 @@ function makeTimelineRow(labelText, bars, sceneDur, opts){
     const widthPct=Math.min(100,Math.max(TL_MIN_PCT, durS/sceneDur*100));
     const leftPct=Math.max(0,Math.min(b.start/sceneDur*100, 100-widthPct));
     const bar=document.createElement('div');
-    bar.className='timeline-bar'+(b.move?' draggable-bar':'')+(b.className?' '+b.className:'')+(b.warn?' warn':'');
+    bar.className='timeline-bar'+(b.extra?' has-extra':'')+(b.move?' draggable-bar':'')+(b.className?' '+b.className:'')+(b.warn?' warn':'');
     bar.style.left=leftPct+'%'; bar.style.width=widthPct+'%';
     bar.style.background=b.color||'var(--panel-border)';
     if(b.title) bar.title=b.title;
@@ -2030,6 +2122,12 @@ function makeTimelineRow(labelText, bars, sceneDur, opts){
     } else if(b.text){
       const span=document.createElement('span'); span.textContent=b.text; bar.appendChild(span);
     }
+    if(b.extra){
+      const eb=document.createElement('button'); eb.type='button'; eb.className='bar-btn'+(b.extra.set?' set':'')+(b.extra.cls?' '+b.extra.cls:'');
+      eb.textContent=b.extra.text; eb.title=b.extra.title||'';
+      eb.addEventListener('pointerdown',e=>e.stopPropagation()); eb.addEventListener('click',e=>{ e.stopPropagation(); b.extra.onClick(); });
+      bar.appendChild(eb);
+    }
     attachBarDrag(bar, track, sceneDur, b);
     track.appendChild(bar);
   });
@@ -2037,6 +2135,78 @@ function makeTimelineRow(labelText, bars, sceneDur, opts){
   row.appendChild(track);
   return row;
 }
+const Pick={active:null};
+function pickBannerText(inst,clip){ return clip.pose==='walk'
+  ? $t('👣 Wohin soll '+$d((characters.find(c=>c.id===inst.charId)||{}).name)+' gehen? Tippe auf die Bühne (Esc = Abbruch)','👣 Where should '+$d((characters.find(c=>c.id===inst.charId)||{}).name)+' walk? Tap the stage (Esc = cancel)')
+  : $t('👉 Worauf soll gezeigt werden? Tippe auf die Bühne oder auf ein Objekt (Esc = Abbruch)','👉 What should be pointed at? Tap the stage or an object (Esc = cancel)'); }
+function startPick(inst,clip){
+  Player.stop(false);
+  Pick.active={inst,clip}; document.body.classList.add('picking');
+  document.getElementById('pickBanner').textContent=pickBannerText(inst,clip);
+  const stg=document.getElementById('stage'); stg.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function endPick(){ Pick.active=null; document.body.classList.remove('picking'); }
+function stagePoint(ev){ const r=document.getElementById('stage').getBoundingClientRect(); return {x:(ev.clientX-r.left)/STAGE_K, y:(ev.clientY-r.top)/STAGE_K}; }
+function finishPick(ev){
+  const {inst,clip}=Pick.active, pt=stagePoint(ev), scene=getCurrentScene();
+  if(clip.pose==='walk'){
+    clip.to={x:Math.round(Math.max(0,Math.min(STAGE_W,pt.x))), y:Math.round(Math.max(inst.h*0.45,Math.min(STAGE_H+8,pt.y)))};
+    const o=clipOrigin(inst,clip), dist=Math.hypot(clip.to.x-o.x, clip.to.y-o.y);
+    clip.dur=Math.max(1,Math.min(Math.max(1,scene.duration-clip.start), Math.round(dist/(inst.w*0.95)*10)/10));
+  } else {
+    const objEl=ev.target&&ev.target.closest&&ev.target.closest('.stage-object');
+    if(objEl && objEl.dataset.objId) clip.at={kind:'obj',id:objEl.dataset.objId};
+    else clip.at={kind:'pt',x:Math.round(pt.x),y:Math.round(pt.y)};
+  }
+  endPick(); renderObjectTimeline(); renderStageMarkers();
+}
+(function initPick(){
+  const stg=document.getElementById('stage');
+  ['pointerdown','mousedown','touchstart'].forEach(t=>stg.addEventListener(t,e=>{ if(Pick.active){ e.stopPropagation(); if(t==='pointerdown'){ e.preventDefault(); finishPick(e); } } },true));
+  stg.addEventListener('click',e=>{ if(Pick.active) e.stopPropagation(); },true);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && Pick.active) endPick(); });
+})();
+function markerSvg(){
+  const sc=getCurrentScene(); let lines='';
+  sc.characters.forEach(inst=>{ (inst.clips||[]).forEach(c=>{
+    const o=clipOrigin(inst,c);
+    if(c.pose==='walk'&&c.to) lines+=`<path class="mk-walk" d="M${o.x} ${o.y-4} L${c.to.x} ${c.to.y-4}" marker-end="url(#mkA)"/>`;
+    if(c.pose==='point'&&c.at){ const tp=targetPoint(sc,c.at); if(tp) lines+=`<path class="mk-point" d="M${o.x} ${o.y-inst.h*0.68} L${tp.x} ${tp.y}"/>`; }
+  }); });
+  return `<svg class="mk-svg" viewBox="0 0 960 540" width="960" height="540"><defs><marker id="mkA" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#17c3b2"/></marker></defs>${lines}</svg>`;
+}
+function renderStageMarkers(){
+  const host=document.getElementById('stageMarkers'); if(!host) return;
+  host.innerHTML=''; if(Player.running) return;
+  const sc=getCurrentScene(); host.innerHTML=markerSvg();
+  sc.characters.forEach(inst=>{
+    const nm=$d((characters.find(c=>c.id===inst.charId)||{name:''}).name).split(' ').slice(-1)[0];
+    (inst.clips||[]).forEach(c=>{
+      const walk=c.pose==='walk'&&c.to, pt=c.pose==='point'&&c.at&&targetPoint(sc,c.at);
+      if(!walk&&!pt) return;
+      const pos=walk?c.to:pt, pin=document.createElement('div');
+      pin.className='mk-pin '+(walk?'walk':'point'); pin.dataset.instId=inst.id; pin.dataset.clipId=c.id;
+      pin.style.left=pos.x+'px'; pin.style.top=pos.y+'px';
+      pin.innerHTML=(walk?'👣 ':'👉 ')+nm+'<b class="mk-x" title="'+$t('Ziel entfernen','Remove target')+'">✕</b>';
+      pin.title=walk?$t('Ziel zum Gehen – ziehen zum Verschieben','Walking target – drag to move'):$t('Zeigeziel – ziehen zum Verschieben','Pointing target – drag to move');
+      pin.querySelector('.mk-x').addEventListener('pointerdown',e=>{ e.stopPropagation(); e.preventDefault(); if(walk) c.to=null; else c.at=null; renderObjectTimeline(); renderStageMarkers(); });
+      const movable=walk||c.at.kind==='pt';
+      pin.addEventListener('pointerdown',e=>{
+        if(!movable||e.target.classList.contains('mk-x')) return; e.preventDefault(); e.stopPropagation();
+        try{ pin.setPointerCapture(e.pointerId); }catch(_){}
+        pin.classList.add('dragging');
+        const mv=ev=>{ const q=stagePoint(ev);
+          if(walk){ c.to={x:Math.round(Math.max(0,Math.min(STAGE_W,q.x))), y:Math.round(Math.max(inst.h*0.45,Math.min(STAGE_H+8,q.y)))}; pin.style.left=c.to.x+'px'; pin.style.top=c.to.y+'px'; }
+          else { c.at={kind:'pt',x:Math.round(Math.max(0,Math.min(STAGE_W,q.x))), y:Math.round(Math.max(0,Math.min(STAGE_H,q.y)))}; pin.style.left=c.at.x+'px'; pin.style.top=c.at.y+'px'; }
+          const sv=host.querySelector('.mk-svg'); if(sv) sv.outerHTML=markerSvg(); };
+        const up=()=>{ pin.removeEventListener('pointermove',mv); pin.removeEventListener('pointerup',up); pin.removeEventListener('pointercancel',up); pin.classList.remove('dragging'); renderStageMarkers(); };
+        pin.addEventListener('pointermove',mv); pin.addEventListener('pointerup',up); pin.addEventListener('pointercancel',up);
+      });
+      host.appendChild(pin);
+    });
+  });
+}
+document.addEventListener('pointerup',()=>{ if(!Player.running) setTimeout(renderStageMarkers,30); });
 function addPoseClip(inst){
   const D=getCurrentScene().duration;
   inst.clips=inst.clips||[];
@@ -2073,10 +2243,18 @@ function renderObjectTimeline(){
   rows.innerHTML='';
 
   // Sprachspannen (geschätzt) und Überschneidungen
-  const spans=scene.characters.filter(c=>(c.script||'').trim()).map(c=>({inst:c,s:c.speechStart||0,e:(c.speechStart||0)+estimateSpeechDuration(c)}));
+  const spans=scene.characters.concat(scene.narrator?[scene.narrator]:[]).filter(c=>(c.script||'').trim()).map(c=>({inst:c,s:c.speechStart||0,e:(c.speechStart||0)+estimateSpeechDuration(c)}));
   let anyOverlap=false, maxEnd=0;
   spans.forEach(sp=>{ sp.overlap=spans.some(o=>o!==sp && o.s<sp.e-0.05 && sp.s<o.e-0.05); if(sp.overlap) anyOverlap=true; maxEnd=Math.max(maxEnd,sp.e); });
 
+  if(scene.narrator){
+    const n=scene.narrator, nsp=spans.find(x=>x.inst===n), nl='🎙 '+$t('Erzähler','Narrator')+' · '+$t('Sprache','Speech');
+    if(nsp) rows.appendChild(makeTimelineRow(nl,[{
+      start:nsp.s, dur:nsp.e-nsp.s, color:'var(--accent-teal)', text:'“'+n.script.trim()+'”', warn:nsp.overlap||nsp.e>D+0.05,
+      title:$t('Erzähler: ','Narrator: ')+nsp.s.toFixed(1)+' s – '+nsp.e.toFixed(1)+' s', move:(v)=>{ n.speechStart=v; }, done:()=>{ renderObjectTimeline(); renderSpeakerTracks(); }, onClick:()=>focusSpeakerLine('narrator')
+    }], D));
+    else rows.appendChild(makeTimelineRow(nl,[{start:0,dur:null,color:'transparent',className:'ghost',text:$t('kein Erzähler-Text – unten in der Sprecherspur eintragen','no narrator text – enter it in the speaker track below')}], D));
+  }
   scene.characters.forEach(inst=>{
     const def=characters.find(c=>c.id===inst.charId); if(!def) return;
     const text=(inst.script||'').trim();
@@ -2101,7 +2279,11 @@ function renderObjectTimeline(){
       options:poseOptions.concat([['__del',$t('✕ Entfernen','✕ Remove')]]), selectValue:c.pose,
       title:$t('Pose-Clip: ','Pose clip: ')+c.start.toFixed(1)+' s, '+c.dur.toFixed(1)+' s',
       onSelect:(v)=>{ if(v==='__del') inst.clips=inst.clips.filter(x=>x!==c); else c.pose=v; renderObjectTimeline(); },
-      move:(v)=>{ c.start=v; }, resize:(d)=>{ c.dur=d; }, done:()=>{ inst.clips.sort((a,b)=>a.start-b.start); renderObjectTimeline(); }
+      move:(v)=>{ c.start=v; }, resize:(d)=>{ c.dur=d; }, done:()=>{ inst.clips.sort((a,b)=>a.start-b.start); renderObjectTimeline(); },
+      extra:(c.pose==='walk'||c.pose==='point')?{
+        text:c.pose==='walk'?(c.to?'👣✓':'👣 '+$t('Ziel','Target')):(c.at?'👉✓':'👉 '+$t('Ziel','Target')), set:!!(c.pose==='walk'?c.to:c.at), cls:'clip-target',
+        title:c.pose==='walk'?$t('Ziel auf der Bühne festlegen: Die Figur läuft dorthin','Set a walking target on the stage: the figure walks there'):$t('Ziel auf der Bühne festlegen: Die Figur zeigt mit der Hand dorthin','Set a pointing target on the stage: the figure points there with her hand'),
+        onClick:()=>startPick(inst,c)}:null
     }));
     if(!poseBars.length) poseBars.push({start:0,dur:null,color:'transparent',className:'ghost',text:$t('Grundpose: ','Base pose: ')+$d((poseOptions.find(p=>p[0]===(inst.action||'idle'))||[])[1]||'Stehen')+$t(' — „＋“ für zeitlich begrenzte Pose',' — “＋” for a time-limited pose')});
     rows.appendChild(makeTimelineRow($d(def.name)+' · '+$t('Pose','Pose'), poseBars, D, {add:{text:'＋',title:$t('Pose-Clip hinzufügen','Add pose clip'),onClick:()=>addPoseClip(inst)}}));
@@ -2143,9 +2325,10 @@ function renderObjectTimeline(){
 
   // --- Hintergrund & Musik ---
   let bgLabel='Hintergrund';
-  if(scene.bgType==='scene'){ const sc=scenes.find(s=>s.id===scene.bgId); bgLabel=sc?sc.name:bgLabel; }
+  if(scene.bgType==='image' && scene.bgImage){ bgLabel=$t('Eigenes Bild: ','Own image: ')+scene.bgImage.name; }
+  else if(scene.bgType==='scene'){ const sc=scenes.find(s=>s.id===scene.bgId); bgLabel=sc?sc.name:bgLabel; }
   else { const bg=plainBackgrounds.find(b=>b.id===scene.bgId); bgLabel=bg?bg.name:bgLabel; }
-  bgLabel=$d(bgLabel);
+  bgLabel=scene.bgType==='image'?bgLabel:$d(bgLabel);
   rows.appendChild(makeTimelineRow($d('Hintergrund'),[{
     start:0,dur:null,color:'#C9A227',text:bgLabel,
     onClick:()=>{
@@ -2190,6 +2373,7 @@ function renderObjectTimeline(){
   } else if(anyOverlap){
     hint.textContent=$t('Sprecher überschneiden sich – Stimmen werden nacheinander gesprochen (immer nur eine Stimme gleichzeitig).','Speakers overlap – voices are spoken one after the other (only one voice at a time).');
   }
+  renderStageMarkers();
 }
 function updateCursors(pct){
   document.querySelectorAll('.tl-cursor').forEach(c=>{ c.style.display='block'; c.style.left=pct+'%'; });
@@ -2279,10 +2463,88 @@ function refreshVoiceSelects(){
     populateVoiceSelect(sel, inst?inst.voiceName:'', instLang(inst));
   });
 }
-function setInstLang(inst, lang){
-  inst.lang=lang==='en'?'en':'de';
+/* Jede Sprechzeile hält Text, Stimme und Aufnahme getrennt für Deutsch und Englisch (inst.tx); die Felder script/voiceName/clip gelten für die aktive Sprache */
+function langStash(inst){ const L=instLang(inst); inst.tx=inst.tx||{}; inst.tx[L]={script:inst.script||'',voiceName:inst.voiceName||'',clip:inst.clip||null}; }
+function setInstLang(inst, lang, noRender){
+  lang=lang==='en'?'en':'de'; const old=instLang(inst);
+  if(lang!==old){
+    langStash(inst); inst.lang=lang; inst.todo=inst.todo||{};
+    const t=inst.tx[lang];
+    if(t){ inst.script=t.script; inst.voiceName=t.voiceName; inst.clip=t.clip; }
+    else { inst.voiceName=''; inst.clip=null; inst.todo[lang]=!!(inst.script||'').trim(); }   // Text bleibt als Vorlage zum Übersetzen stehen
+  } else inst.lang=lang;
   // gewählte Stimme passt nicht mehr zur Sprache → automatische Wahl
   if(inst.voiceName && inst.voiceName!=='__remote'){ const v=Speech.voices.find(v=>v.name===inst.voiceName); if(!v||!isLangVoice(v,inst.lang)) inst.voiceName=''; }
+  if(!noRender){ renderSpeakerTracks(); renderObjectTimeline(); }
+}
+function langInfo(inst,L){
+  const d=instLang(inst)===L?{script:inst.script,clip:inst.clip}:((inst.tx&&inst.tx[L])||null);
+  const text=!!(d&&(d.script||'').trim());
+  return {text, clip:!!(d&&d.clip), todo:!!(text&&inst.todo&&inst.todo[L])};
+}
+const NARR_DEF={id:'__narrator', name:'Erzähler', tag:'Off-Sprecher'};
+function makeNarrator(){
+  return {id:'narrator', charId:'__narrator', narrator:true, script:'', voiceName:'', rate:1, pitch:1, audio:true, bubble:true, speechStart:0, lang:LANG, clip:null, gesture:false, clips:[], x:0,y:0,w:0,h:0, reaction:'none', reactionAuto:false,
+    bs:Object.assign({},BB_DEFAULT,BB_PRESETS.find(p=>p[0]==='subtitle')[3])};
+}
+function addNarrator(){ const sc=getCurrentScene(); if(sc.narrator) return sc.narrator; sc.narrator=makeNarrator(); renderSpeakerTracks(); renderObjectTimeline(); return sc.narrator; }
+function removeNarrator(){ const sc=getCurrentScene(); if(sc.narrator){ [sc.narrator.clip].concat(Object.values(sc.narrator.tx||{}).map(t=>t&&t.clip)).forEach(c=>{ if(c&&c.url&&c.url.indexOf('blob:')===0){ try{ URL.revokeObjectURL(c.url); }catch(_){} } }); } sc.narrator=null; renderSpeakerTracks(); renderObjectTimeline(); }
+function setAllLang(lang){
+  scenesTimeline.forEach(sc=>{ sc.characters.concat(sc.narrator?[sc.narrator]:[]).forEach(i=>setInstLang(i,lang,true)); });
+  renderSpeakerTracks(); renderObjectTimeline(); if(currentTab==='animation') renderPanel();
+}
+
+/* ---- Aufnehmen (Mikrofon) und Diktieren (Transkript) ---- */
+const SRClass=window.SpeechRecognition||window.webkitSpeechRecognition;
+const Rec={
+  cur:null,
+  supported(){ return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder); },
+  startSR(inst,onText){
+    if(!SRClass) return null;
+    try{
+      const r=new SRClass(); r.lang=instLang(inst)==='en'?'en-US':'de-DE'; r.continuous=true; r.interimResults=true;
+      const h={rec:r, fin:'', int:'', stopping:false, get text(){ return (this.fin+' '+this.int).replace(/\s+/g,' ').trim(); }};
+      r.onresult=e=>{ let f='', i=''; for(let k=0;k<e.results.length;k++){ const x=e.results[k]; if(x.isFinal) f+=x[0].transcript+' '; else i+=x[0].transcript; } h.fin=f; h.int=i; if(onText) onText(h.text); };
+      r.onerror=()=>{};
+      r.onend=()=>{ if(!h.stopping){ try{ r.start(); }catch(_){} } };
+      r.start(); return h;
+    }catch(_){ return null; }
+  },
+  stopSR(h){ if(!h) return ''; h.stopping=true; try{ h.rec.stop(); }catch(_){} return h.text; },
+  async start(inst,onText){
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const types=['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'];
+    const mime=types.find(t=>window.MediaRecorder.isTypeSupported&&window.MediaRecorder.isTypeSupported(t))||'';
+    const mr=new MediaRecorder(stream, mime?{mimeType:mime}:undefined), chunks=[];
+    mr.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
+    const sr=this.startSR(inst,onText);
+    this.cur={inst,mr,stream,chunks,sr,t0:performance.now(),mime:mr.mimeType||mime,hasSR:!!sr};
+    mr.start(); return this.cur;
+  },
+  stop(){
+    return new Promise(res=>{
+      const c=this.cur; if(!c) return res(null);
+      const text=this.stopSR(c.sr);
+      c.mr.onstop=()=>{ c.stream.getTracks().forEach(t=>t.stop()); const blob=new Blob(c.chunks,{type:c.mr.mimeType||c.mime||'audio/webm'}); this.cur=null; res({blob,elapsed:(performance.now()-c.t0)/1000,text}); };
+      try{ c.mr.state!=='inactive' ? c.mr.stop() : c.mr.onstop(); }catch(_){ this.cur=null; res(null); }
+    });
+  },
+  dict:null
+};
+async function finishRecording(){
+  const c=Rec.cur; if(!c) return;
+  const inst=c.inst, r=await Rec.stop(); if(!r||!r.blob.size){ renderSpeakerTracks(); return; }
+  const url=URL.createObjectURL(r.blob); let dur=0;
+  try{ dur=await audioDuration(url); }catch(_){}
+  if(!(dur>0 && isFinite(dur))) dur=r.elapsed;
+  if(inst.clip && inst.clip.url && inst.clip.recorded) URL.revokeObjectURL(inst.clip.url);
+  const ext=/mp4|m4a|aac/.test(r.blob.type)?'m4a':(/ogg/.test(r.blob.type)?'ogg':'webm');
+  inst.clip={name:$t('Aufnahme ','Recording ')+instLang(inst).toUpperCase()+'.'+ext,url,dur,recorded:true,type:r.blob.type};
+  const txt=(r.text||'').trim();
+  if(txt){
+    if(!(inst.script||'').trim()){ inst.script=txt; if(inst.todo) delete inst.todo[instLang(inst)]; inst.pendingTranscript=null; }
+    else if(txt!==(inst.script||'').trim()) inst.pendingTranscript=txt;
+  }
   renderSpeakerTracks(); renderObjectTimeline();
 }
 
@@ -2291,18 +2553,25 @@ function renderSpeakerTracks(){
   document.getElementById('speakerSceneLabel').textContent=$d(scene.label);
   const host=document.getElementById('speakerTracks');
   host.innerHTML='';
-  if(scene.characters.length===0){
+  const bar=document.createElement('div'); bar.className='speaker-bar';
+  const bl=document.createElement('span'); bl.textContent=$t('Alle Sprecher auf:','Set all speakers to:'); bar.appendChild(bl);
+  ['de','en'].forEach(L=>{ const b=document.createElement('button'); b.type='button'; b.className='ctrl-btn ctrl-btn-sm all-lang-btn'; b.dataset.lang=L; b.textContent=L==='de'?'Deutsch':'English'; b.title=$t('Schaltet alle Figuren und den Erzähler in allen Szenen auf diese Sprache (Texte, Stimmen und Aufnahmen je Sprache bleiben erhalten)','Switches all figures and the narrator in all scenes to this language (texts, voices and recordings are kept per language)'); b.addEventListener('click',()=>setAllLang(L)); bar.appendChild(b); });
+  if(!scene.narrator){ const nb=document.createElement('button'); nb.type='button'; nb.className='ctrl-btn ctrl-btn-sm add-narrator'; nb.textContent='🎙 '+$t('＋ Erzähler (Off-Sprecher)','＋ Narrator (voice-over)'); nb.title=$t('Zusätzliche Sprecherspur ohne Figur: eigene Stimme, optional als Untertitel-Balken','Extra speaker track without a figure: own voice, optionally shown as a subtitle bar'); nb.addEventListener('click',addNarrator); bar.appendChild(nb); }
+  host.appendChild(bar);
+  if(scene.characters.length===0 && !scene.narrator){
     const hint=document.createElement('div'); hint.className='speaker-empty-hint';
     hint.textContent=$t('Noch keine Figur in dieser Szene platziert – füge über den Tab „Charaktere“ eine hinzu.','No figure placed in this scene yet – add one via the “Characters” tab.');
     host.appendChild(hint);
     return;
   }
-  scene.characters.forEach(inst=>{
-    const def=characters.find(c=>c.id===inst.charId); if(!def) return;
-    const row=document.createElement('div'); row.className='speaker-track'; row.dataset.instId=inst.id;
+  scene.characters.concat(scene.narrator?[scene.narrator]:[]).forEach(inst=>{
+    const isN=!!inst.narrator;
+    const def=isN?NARR_DEF:characters.find(c=>c.id===inst.charId); if(!def) return;
+    const row=document.createElement('div'); row.className='speaker-track'+(isN?' is-narrator':''); row.dataset.instId=inst.id;
 
     const avatar=document.createElement('div'); avatar.className='speaker-avatar';
-    avatar.innerHTML=characterSVG(def,'sp-'+inst.id,'front',{avatar:true,look:inst.look});
+    if(isN){ avatar.textContent='🎙'; avatar.style.cssText='display:flex;align-items:center;justify-content:center;font-size:26px;'; }
+    else avatar.innerHTML=characterSVG(def,'sp-'+inst.id,'front',{avatar:true,look:inst.look});
     row.appendChild(avatar);
     const name=document.createElement('div'); name.className='speaker-name'; name.textContent=$d(def.name); name.title=$d(def.name)+' – '+$d(def.tag);
     row.appendChild(name);
@@ -2310,7 +2579,7 @@ function renderSpeakerTracks(){
     const line=document.createElement('input'); line.type='text'; line.className='speaker-line'; line.dataset.instId=inst.id;
     line.placeholder=inst.clip?$t('Transkript für Sprechblase & Lippen – '+$d(def.name)+' …','Transcript for bubble & lips – '+$d(def.name)+' …'):$t('Sprechertext für '+$d(def.name)+' …','Speaker text for '+$d(def.name)+' …');
     line.value=inst.script||'';
-    line.addEventListener('input', ()=>{ inst.script=line.value; renderObjectTimeline(); if(currentTab==='animation') renderPanel(); });
+    line.addEventListener('input', ()=>{ inst.script=line.value; if(inst.todo) delete inst.todo[instLang(inst)]; renderObjectTimeline(); if(currentTab==='animation') renderPanel(); chipsRefresh(); });
     line.lang=instLang(inst); line.spellcheck=true;
     row.appendChild(line);
 
@@ -2328,6 +2597,19 @@ function renderSpeakerTracks(){
     startInput.value=(inst.speechStart||0).toFixed(1);
     startInput.addEventListener('input', ()=>{ inst.speechStart=Math.max(0,parseFloat(startInput.value)||0); renderObjectTimeline(); });
     const sw=mk('opt-start',$t('Start (s)','Start (s)'),startInput); sw.title=$t('Startzeit innerhalb der Szene – auch per Balken in der Timeline verschiebbar','Start time within the scene – can also be moved with the bar in the timeline');
+
+    // Übersicht: Text/Aufnahme je Sprache (Klick = Sprache wechseln)
+    const chips=document.createElement('div'); chips.className='speaker-langchips';
+    const chipsRefresh=()=>{
+      chips.innerHTML='';
+      ['de','en'].forEach(L=>{
+        const i=langInfo(inst,L), b=document.createElement('button'); b.type='button'; b.className='lang-chip'+(instLang(inst)===L?' active':'')+(i.todo?' todo':'')+(i.text?' has':''); b.dataset.lang=L;
+        b.textContent=L.toUpperCase()+' '+(i.todo?'⚠':(i.text?'✓':'–'))+(i.clip?' 🎵':'');
+        b.title=(L==='de'?$t('Deutsch','German'):$t('Englisch','English'))+': '+(i.todo?$t('Text noch nicht übersetzt (noch die Kopie der anderen Sprache)','text not yet translated (still a copy of the other language)'):(i.text?$t('Text vorhanden','text present'):$t('noch kein Text','no text yet')))+(i.clip?$t(' · eigene Aufnahme/Audiodatei',' · own recording/audio file'):'');
+        b.addEventListener('click',()=>setInstLang(inst,L)); chips.appendChild(b);
+      });
+    };
+    chipsRefresh(); opts.appendChild(chips);
 
     const langSel=document.createElement('select'); langSel.className='speaker-lang'; langSel.dataset.instId=inst.id;
     [['de','Deutsch'],['en','English']].forEach(([v,l])=>{ const o=document.createElement('option'); o.value=v; o.textContent=l; langSel.appendChild(o); });
@@ -2360,10 +2642,10 @@ function renderSpeakerTracks(){
     const bbtn=document.createElement('button'); bbtn.type='button'; bbtn.className='ctrl-btn ctrl-btn-sm speaker-bstyle';
     bbtn.textContent='🎨 '+$t('Blase gestalten …','Style bubble …'); bbtn.title=$t('Form, Schrift, Farben und Textanzeige der Sprechblase dieser Figur','Shape, font, colours and text reveal of this figure’s speech bubble');
     bbtn.addEventListener('click',()=>openBubbleDlg(inst)); mk('opt-bstyle',$t('Blasenstil','Bubble style'),bbtn);
-    const lk=document.createElement('select'); lk.className='speaker-look'; lk.dataset.instId=inst.id;
+    if(!isN){ const lk=document.createElement('select'); lk.className='speaker-look'; lk.dataset.instId=inst.id;
     LOOK_LABELS.forEach(([v,d,e])=>{ const o=document.createElement('option'); o.value=v; o.textContent=$t(d,e); lk.appendChild(o); }); lk.value=inst.look||'std';
     lk.addEventListener('change',()=>{ inst.look=lk.value; renderCharacters(); avatar.innerHTML=characterSVG(def,'sp-'+inst.id,'front',{avatar:true,look:inst.look}); });
-    mk('opt-look',$t('Figurenstil','Figure style'),lk).title=$t('Standard, Kontur, Cartoon (Kontur + größerer Kopf) oder Chibi (Riesenkopf)','Standard, outlined, cartoon (outline + bigger head) or chibi (huge head)');
+    mk('opt-look',$t('Figurenstil','Figure style'),lk).title=$t('Standard, Kontur, Cartoon (Kontur + größerer Kopf) oder Chibi (Riesenkopf)','Standard, outlined, cartoon (outline + bigger head) or chibi (huge head)'); }
 
     // Eigene Audiodatei (z. B. aus einem hochwertigen TTS-Dienst oder selbst aufgenommen) – Lippen/Blase laufen im Takt der Datei
     const clipBox=document.createElement('div'); clipBox.className='speaker-opt opt-clip';
@@ -2385,7 +2667,40 @@ function renderSpeakerTracks(){
       x.addEventListener('click', ()=>{ URL.revokeObjectURL(inst.clip.url); inst.clip=null; renderSpeakerTracks(); renderObjectTimeline(); });
       clipBox.appendChild(x);
     }
+    // Aufnehmen (iPhone: Mikrofon im Browser) – Sprache = aktive Sprache der Zeile
+    const recBtn=document.createElement('button'); recBtn.type='button'; recBtn.className='ctrl-btn ctrl-btn-sm speaker-rec';
+    const L0=instLang(inst).toUpperCase();
+    const recLabel=()=>{ const c=Rec.cur&&Rec.cur.inst===inst?Rec.cur:null; if(!c){ recBtn.textContent='🎙 '+$t('Aufnehmen '+L0,'Record '+L0); recBtn.classList.remove('recording'); return; } recBtn.classList.add('recording'); recBtn.textContent='⏹ '+$t('Stopp','Stop')+' · '+Math.floor((performance.now()-c.t0)/1000)+' s'; };
+    recBtn.title=$t('Direkt im Browser einsprechen ('+L0+'). Der gesprochene Text wird – wenn dein Browser das kann – als Transkript in die Sprechblase übernommen und lässt sich dort bearbeiten.','Record directly in the browser ('+L0+'). If your browser supports it, the spoken text is transcribed into the speech bubble and can be edited there.');
+    recBtn.addEventListener('click',async()=>{
+      if(Rec.cur){ await finishRecording(); return; }
+      if(!Rec.supported()){ alert($t('Aufnehmen wird von diesem Browser nicht unterstützt. Nimm stattdessen mit der Sprachmemos-App auf und lade die Datei hoch („Audiodatei“).','Recording is not supported by this browser. Record with the Voice Memos app instead and upload the file (“Audio file”).')); return; }
+      Player.stop(false);
+      try{ await Rec.start(inst,t=>{ line.placeholder='🎙 '+t; }); }
+      catch(e){ alert($t('Kein Zugriff auf das Mikrofon. Bitte den Zugriff in den Browser-Einstellungen erlauben (Seite muss über https geöffnet sein).','No access to the microphone. Please allow access in the browser settings (the page must be opened via https).')); return; }
+      recLabel(); const iv=setInterval(()=>{ if(!Rec.cur||Rec.cur.inst!==inst){ clearInterval(iv); return; } recLabel(); },500);
+    });
+    recLabel(); if(Rec.cur&&Rec.cur.inst===inst){ const iv=setInterval(()=>{ if(!Rec.cur||Rec.cur.inst!==inst||!recBtn.isConnected){ clearInterval(iv); return; } recLabel(); },500); }
+    clipBox.insertBefore(recBtn, clipBox.children[1]||null);
+    // Nur diktieren: Text direkt in die Sprechblase sprechen (ohne Audio zu speichern)
+    if(SRClass){
+      const dBtn=document.createElement('button'); dBtn.type='button'; dBtn.className='ctrl-btn ctrl-btn-sm speaker-dictate';
+      const dl=()=>{ dBtn.textContent=Rec.dict&&Rec.dict.inst===inst?'⏹ '+$t('Fertig','Done'):'📝 '+$t('Diktieren','Dictate'); };
+      dBtn.title=$t('Text einsprechen und als Sprechtext/Sprechblase eintragen – danach bearbeiten','Speak the text and enter it as speech text/bubble – edit afterwards');
+      dBtn.addEventListener('click',()=>{
+        if(Rec.dict){ const t=Rec.stopSR(Rec.dict.h); const d=Rec.dict; Rec.dict=null; if(t){ d.inst.script=t; if(d.inst.todo) delete d.inst.todo[instLang(d.inst)]; } renderSpeakerTracks(); renderObjectTimeline(); return; }
+        const h=Rec.startSR(inst,t=>{ line.value=t; inst.script=t; renderObjectTimeline(); }); if(!h) return; Rec.dict={inst,h}; dl();
+      });
+      dl(); clipBox.appendChild(dBtn);
+    }
+    if(inst.pendingTranscript){
+      const tb=document.createElement('button'); tb.type='button'; tb.className='ctrl-btn ctrl-btn-sm speaker-transcript';
+      tb.textContent='📝 '+$t('Transkript übernehmen','Use transcript'); tb.title=inst.pendingTranscript;
+      tb.addEventListener('click',()=>{ inst.script=inst.pendingTranscript; inst.pendingTranscript=null; if(inst.todo) delete inst.todo[instLang(inst)]; renderSpeakerTracks(); renderObjectTimeline(); });
+      clipBox.appendChild(tb);
+    }
     opts.appendChild(clipBox);
+    if(isN){ const dn=document.createElement('button'); dn.type='button'; dn.className='ctrl-btn ctrl-btn-sm speaker-narr-del'; dn.textContent='✕ '+$t('Erzähler entfernen','Remove narrator'); dn.addEventListener('click',removeNarrator); opts.appendChild(dn); }
 
     row.appendChild(opts);
     host.appendChild(row);
@@ -2823,6 +3138,7 @@ function buildBubbleEl(st, text, words, opts){
   let pop=BB_POPS.some(x=>x[0]===st.pop)?st.pop:'soft';
   if(opts.mood && st.auto && (opts.mood==='anger'||opts.mood==='surprise')){ shape='burst'; pop='shake'; }
   let tail=st.tail||'auto';
+  if(opts.narrator) tail='none';
   if(tail==='auto') tail = shape==='cloud'?'dots':(shape==='note'||shape==='bar'||shape==='caption')?'none':'point';
   const b=document.createElement('div');
   b.className='bubble bs-'+shape+' tl-'+tail+' po-'+pop+(st.wp?' wp':'')+' rv-'+(st.reveal||'hl')+(st.bold?' b-bold':'')+(st.italic?' b-ital':'')+(opts.static?' static':'');
@@ -2851,7 +3167,7 @@ const Bubble={
   show(inst,job){
     this.hide(inst,true);
     const st=bbStyle(inst), rs=rigState(inst), def=characters.find(c=>c.id===inst.charId);
-    const b=buildBubbleEl(st, job.text, job.plan.words, {mood:rs.mood, name:def?$d(def.name):'', });
+    const b=buildBubbleEl(st, job.text, job.plan.words, {mood:rs.mood, name:inst.narrator?$t('Erzähler','Narrator'):(def?$d(def.name):''), narrator:!!inst.narrator});
     b.dataset.instId=inst.id;
     this.layer().appendChild(b);
     this.items[inst.id]={el:b, spans:Array.prototype.slice.call(b.querySelectorAll('.w')), cur:-2, shape:b._shape};
@@ -2865,9 +3181,10 @@ const Bubble={
   },
   finish(inst){ const it=this.items[inst.id]; if(it){ it.spans.forEach(s=>{ s.classList.add('done'); s.classList.remove('cur'); }); } },
   place(inst){
-    const it=this.items[inst.id], el=charEl(inst.id); if(!it||!el) return;
-    const st=document.getElementById('stage').getBoundingClientRect(), r=el.getBoundingClientRect(), b=it.el, K=STAGE_K;
-    const bw=b.offsetWidth, bh=b.offsetHeight;
+    const it=this.items[inst.id], el=charEl(inst.id); if(!it||(!el&&!inst.narrator)) return;
+    const b=it.el, K=STAGE_K, bw=b.offsetWidth, bh=b.offsetHeight;
+    if(inst.narrator){ b.style.left=Math.max(6,(STAGE_W-bw)/2)+'px'; b.style.top=(STAGE_H-bh-24)+'px'; return; }
+    const st=document.getElementById('stage').getBoundingClientRect(), r=el.getBoundingClientRect();
     if(it.shape==='bar'){ b.style.left=Math.max(6,(STAGE_W-bw)/2)+'px'; b.style.top=(STAGE_H-bh-26)+'px'; return; }
     const cx=(r.left-st.left+r.width/2)/K;
     const left=Math.max(10,Math.min(STAGE_W-bw-10, cx-bw/2));
@@ -2948,7 +3265,7 @@ function openBubbleDlg(inst){
 }
 
 /* ================= Wiedergabe: ein einziger Ablauf für Einzelzeile, Szene und Gesamtfilm ================= */
-function findInst(id){ return getCurrentScene().characters.find(c=>c.id===id); }
+function findInst(id){ const sc=getCurrentScene(); return id==='narrator'?(sc.narrator||null):sc.characters.find(c=>c.id===id); }
 const REACTION_CLASSES=['reaction-joy','reaction-anger','reaction-surprise','reaction-news','reaction-listening'];
 const OBJ_EFFECT_CLASSES=['obj-effect-fade-in','obj-effect-rise-up','obj-effect-slide-in-left','obj-effect-zoom-in','obj-effect-pop'];
 function fmt(sec){ const m=Math.floor(sec/60); const s=(sec%60).toFixed(1).padStart(4,'0'); return String(m).padStart(2,'0')+':'+s; }
@@ -2964,11 +3281,72 @@ function hideObject(objId){ const el=objEl(objId); if(el){ el.classList.remove(.
 function hideObjectsForPlayback(scene){
   scene.objects.forEach(o=>{ const el=objEl(o.id); if(el){ el.style.transition=''; el.style.opacity='0'; el.classList.remove(...OBJ_EFFECT_CLASSES); } });
 }
-function freezeMove(el){ if(el.style.transition){ el.style.left=getComputedStyle(el).left; el.style.transition=''; void el.offsetWidth; } }
-function setPose(inst,pose,dur){
+function freezeMove(el){ if(el.style.transition){ const cs=getComputedStyle(el); el.style.left=cs.left; el.style.top=cs.top; el.style.transition=''; void el.offsetWidth; } }
+
+/* ================= Ziele: „Gehen nach …“ und „Zeigen auf …“ ================= */
+function feetOf(inst){ return {x:inst.x+inst.w/2, y:inst.y+inst.h}; }
+function clipOrigin(inst, clip){ let p=feetOf(inst); for(const c of (inst.clips||[])){ if(c===clip) break; if(c.pose==='walk' && c.to) p={x:c.to.x,y:c.to.y}; } return p; }
+function targetPoint(scene, at){
+  if(!at) return null;
+  if(at.kind==='obj'){ const o=scene.objects.find(o=>o.id===at.id); return o?{x:o.x+o.w/2, y:o.y+o.h/2}:null; }
+  return {x:at.x, y:at.y};
+}
+function setFacingRT(inst, facing, flipped){
+  const el=charEl(inst.id), def=characters.find(c=>c.id===inst.charId); if(!el||!def) return;
+  const inner=el.querySelector('.stage-character-inner'); if(!inner) return;
+  if(!el.dataset.f0) el.dataset.f0=(inst.facing||'front')+'|'+(inst.flipped?1:0);
+  inner.innerHTML=characterSVG(def, inst.id, facing, {look:inst.look}); inner.style.transform=flipped?'scaleX(-1)':'none';
+  el.dataset.curFace=facing+'|'+(flipped?1:0);
+}
+function restoreFacing(inst){
+  const el=charEl(inst.id); if(!el||!el.dataset.f0) return;
+  const [f,fl]=el.dataset.f0.split('|'); delete el.dataset.f0; delete el.dataset.curFace;
+  const def=characters.find(c=>c.id===inst.charId), inner=el.querySelector('.stage-character-inner');
+  inner.innerHTML=characterSVG(def, inst.id, f, {look:inst.look}); inner.style.transform=fl==='1'?'scaleX(-1)':'none';
+}
+function clearAim(el){ el.classList.remove('aim-main','aim-off'); el.style.removeProperty('--aim'); }
+function shoulderStage(inst, el, view, useMain, flipped){
+  const def=characters.find(c=>c.id===inst.charId)||{}, b=buildOf(def), L=LOOKS[inst.look]||LOOKS.std;
+  let sx, sy=107;
+  if(view==='side') sx=102;
+  else if(view==='threeq') sx=104+.88*((100+b.sw-5)-100);
+  else sx=useMain?100+b.sw-5:100-b.sw+5;
+  if(L.b!==1){ sx=100+(sx-100)*L.b; sy=332-(332-107)*L.b; }
+  const k=inst.w/200, lx=sx*k, ly=sy*k;
+  return {x: flipped? el.offsetLeft+inst.w-lx : el.offsetLeft+lx, y: el.offsetTop+ly};
+}
+function aimAt(inst, at){
+  const el=charEl(inst.id); if(!el) return;
+  const tp=targetPoint(getCurrentScene(), at); if(!tp) return;
+  const f0=inst.facing||'front'; if(f0==='back') return;
+  const cx=el.offsetLeft+inst.w/2, dx0=tp.x-cx;
+  let view=f0, flipped=!!inst.flipped;
+  if(f0==='side'||f0==='threeq') flipped=dx0<0;
+  else if(Math.abs(dx0)>inst.w*0.45){ view='threeq'; flipped=dx0<0; }
+  const cur=el.dataset.curFace||((inst.facing||'front')+'|'+(inst.flipped?1:0));
+  if(cur!==view+'|'+(flipped?1:0)) setFacingRT(inst,view,flipped);
+  const useMain = view==='front' ? ((dx0>=0)!==flipped) : true;
+  const S=shoulderStage(inst,el,view,useMain,flipped);
+  const dx=tp.x-S.x, dy=tp.y-S.y, dxl=flipped?-dx:dx;
+  el.style.setProperty('--aim', (Math.atan2(-dxl,dy)*180/Math.PI).toFixed(1)+'deg');
+  el.classList.add(useMain?'aim-main':'aim-off'); el.classList.remove(useMain?'aim-off':'aim-main');
+}
+function walkTo(inst, to, dur){
+  const el=charEl(inst.id); if(!el) return;
+  const tx=Math.round(to.x-inst.w/2), ty=Math.round(to.y-inst.h), dx=tx-el.offsetLeft;
+  if(Math.abs(dx)>8) setFacingRT(inst,'side',dx<0);
+  const ease='cubic-bezier(.45,.05,.4,1)';
+  el.style.transition='left '+dur+'s '+ease+',top '+dur+'s '+ease; el.style.left=tx+'px'; el.style.top=ty+'px';
+}
+function setPose(inst,pose,dur,clip){
   const s=rigState(inst); s.pose=pose; applyRig(inst);
   const el=charEl(inst.id); if(!el) return;
   freezeMove(el);
+  const goWalk=pose==='walk' && clip && clip.to && dur>0, goPoint=pose==='point' && clip && clip.at;
+  if(!goWalk && !goPoint) restoreFacing(inst);
+  if(!goPoint) clearAim(el);
+  if(goWalk){ walkTo(inst, clip.to, dur); return; }
+  if(goPoint){ aimAt(inst, clip.at); return; }
   if(pose==='walk' && inst.walkMove!==false && dur>0){
     const f=inst.facing||'front';
     if(f==='side'||f==='threeq'){
@@ -2990,7 +3368,7 @@ function buildSceneEvents(scene){
   });
   scene.characters.forEach(c=>{
     (c.clips||[]).forEach(cl=>{
-      ev.push({t:cl.start,pri:1,type:'pose',id:c.id,pose:cl.pose,dur:cl.dur});
+      ev.push({t:cl.start,pri:1,type:'pose',id:c.id,pose:cl.pose,dur:cl.dur,clip:cl});
       ev.push({t:cl.start+cl.dur,pri:0,type:'pose',id:c.id,pose:c.action||'idle',dur:0,revert:true});
     });
     const hasText=!!(c.script||'').trim();
@@ -3000,6 +3378,7 @@ function buildSceneEvents(scene){
     }
     if(hasText) ev.push({t:c.speechStart||0,pri:2,type:'speak',id:c.id});
   });
+  if(scene.narrator && (scene.narrator.script||'').trim()) ev.push({t:scene.narrator.speechStart||0,pri:2,type:'speak',id:'narrator'});
   ev.sort((a,b)=>a.t-b.t||a.pri-b.pri);
   return ev;
 }
@@ -3039,7 +3418,7 @@ const Player={
     this.events=buildSceneEvents(scene); this.ei=0;
     this.sceneT0=performance.now();
     Music.setOpts(scene); Music.play(scene.bgMusic||'none');
-    scene.characters.forEach(c=>{ if(c.voiceName==='__remote' && !c.clip && Remote.on() && (c.script||'').trim()) Remote.get(c.script.trim(),instLang(c)).catch(()=>{}); });
+    scene.characters.concat(scene.narrator?[scene.narrator]:[]).forEach(c=>{ if(c.voiceName==='__remote' && !c.clip && Remote.on() && (c.script||'').trim()) Remote.get(c.script.trim(),instLang(c)).catch(()=>{}); });
   },
   exec(ev,t){
     const inst=ev.id&&(ev.type==='pose'||ev.type==='mood'||ev.type==='speak')?findInst(ev.id):null;
@@ -3049,7 +3428,7 @@ const Player={
       case 'pose':
         if(!inst) break;
         if(ev.revert && (inst.clips||[]).some(c=>t>=c.start-0.001 && t<c.start+c.dur-0.001)) break;
-        setPose(inst,ev.pose,ev.dur); break;
+        setPose(inst,ev.pose,ev.dur,ev.clip); break;
       case 'mood': if(inst){ const s=rigState(inst); s.mood=ev.mood; applyRig(inst); if(ev.mood!=='none') pulseChar(inst); } break;
       case 'speak': if(inst) Speech.enqueue(Speech.makeJob(inst)); break;
     }
@@ -3106,7 +3485,7 @@ const Player={
     document.getElementById('playhead').style.left='0%'; document.getElementById('timeCode').textContent='00:00.0 / 00:00.0';
     if(restore!==false){
       if(this.kind==='all' && currentSceneIndex!==this.origIdx) selectScene(this.origIdx);
-      else { renderCharacters(); renderObjects(); }
+      else { renderCharacters(); renderObjects(); renderStageMarkers(); }
       resetMasterUI();
       if(Speech.calibDirty){ Speech.calibDirty=false; renderObjectTimeline(); }
     }
@@ -3141,7 +3520,7 @@ function showScene(idx, transitionType){
   currentSceneIndex=idx; selectedEntity=null;
   renderStageBackground(); renderCharacters(); renderObjects();
   if(!Player.running) renderPanel();
-  renderSceneTrack(); renderSpeakerTracks(); renderObjectTimeline();
+  renderSceneTrack(); renderSpeakerTracks(); renderObjectTimeline(); renderStageMarkers();
   const stageEl=document.getElementById('stage');
   stageEl.classList.remove('transition-fade','transition-slide-left','transition-slide-up','transition-wipe','transition-zoom');
   void stageEl.offsetWidth;
@@ -3179,7 +3558,7 @@ function setLang(l){
   // unveränderten Demo-Dialog mit umschalten
   scenesTimeline.forEach(sc=>{
     const cs=sc.characters.filter(c=>c.demoIdx!==undefined);
-    cs.forEach(c=>{ if(c.script===DEMO[old][c.demoIdx]){ c.script=DEMO[l][c.demoIdx]; c.lang=l; if(c.voiceName&&c.voiceName!=='__remote') c.voiceName=''; } });
+    cs.forEach(c=>{ if(c.script===DEMO[old][c.demoIdx]){ setInstLang(c,l,true); if(c.script!==DEMO[l][c.demoIdx]) c.script=DEMO[l][c.demoIdx]; } });
     const a=cs.find(c=>c.demoIdx===0), b=cs.find(c=>c.demoIdx===1);
     if(a&&b&&b.script===DEMO[l][1]) b.speechStart=Math.round((a.speechStart+estimateSpeechDuration(a)+0.5)*10)/10;
   });
@@ -3226,6 +3605,7 @@ renderStageBackground();
   a.lang=LANG; b.lang=LANG; a.demoIdx=0; b.demoIdx=1;
   a.script=DEMO[LANG][0];
   b.script=DEMO[LANG][1];
+  { const O=LANG==='de'?'en':'de'; a.tx={[O]:{script:DEMO[O][0],voiceName:'',clip:null}}; b.tx={[O]:{script:DEMO[O][1],voiceName:'',clip:null}}; }
   a.speechStart=0.6; a.reaction='joy';
   b.reaction='listening'; b.reactionAuto=false; b.reactionStart=0.6; b.reactionDur=4.6;
   a.clips.push({id:'cl'+(clipCounter++),start:0.2,dur:1.8,pose:'wave'});
